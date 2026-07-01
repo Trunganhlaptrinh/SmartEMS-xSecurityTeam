@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<!-- view/leave.html — trang nghỉ phép với calendar picker -->
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Nghỉ phép — SmartEMS</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="icon" type="image/png" href="image/logo_E.png" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    .cal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+    .cal-title {
+      font-weight: 700;
+      font-size: 0.95rem;
+    }
+    .cal-nav {
+      background: none;
+      border: 1.5px solid var(--border);
+      border-radius: 6px;
+      width: 30px;
+      height: 30px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background .15s;
+    }
+    .cal-nav:hover { background: var(--bg); }
+
+    .cal-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 3px;
+    }
+    .cal-dow {
+      text-align: center;
+      font-size: .65rem;
+      font-weight: 700;
+      color: var(--muted);
+      text-transform: uppercase;
+      padding: 3px 0 6px;
+    }
+    .cal-day {
+      aspect-ratio: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 6px;
+      font-size: .82rem;
+      cursor: pointer;
+      transition: background .12s, color .12s;
+      user-select: none;
+      position: relative;
+      min-width: 28px;
+      min-height: 28px;
+    }
+    .cal-day:hover:not(.empty-day):not(.past-day):not(.has-leave) {
+      background: #eef0ff;
+      color: var(--accent);
+    }
+    .cal-day.empty-day { cursor: default; }
+    .cal-day.past-day { color: #d1d5db; cursor: not-allowed; }
+    .cal-day.has-leave {
+      background: #fde8e8;
+      color: #b91c1c;
+      cursor: not-allowed;
+      position: relative;
+    }
+    .cal-day.has-leave::after {
+      content: '✕';
+      position: absolute;
+      top: -4px;
+      right: -4px;
+      font-size: 0.5rem;
+      color: #b91c1c;
+    }
+
+    .cal-day.selected {
+      background: var(--accent);
+      color: #fff;
+      font-weight: 700;
+    }
+    .cal-day.in-range {
+      background: #dde1ff;
+      color: var(--accent);
+      border-radius: 0;
+    }
+    .cal-day.range-start {
+      border-radius: 6px 0 0 6px;
+    }
+    .cal-day.range-end {
+      border-radius: 0 6px 6px 0;
+    }
+    .cal-day.range-start.range-end {
+      border-radius: 6px;
+    }
+
+    .cal-info {
+      margin-top: 12px;
+      padding: 10px 14px;
+      background: var(--bg);
+      border-radius: 8px;
+      font-size: .85rem;
+      color: var(--muted);
+      min-height: 36px;
+      text-align: center;
+    }
+    .cal-info strong { color: var(--text); }
+
+    .range-summary {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .range-badge {
+      background: #eef0ff;
+      color: var(--accent);
+      border-radius: 20px;
+      padding: 3px 14px;
+      font-weight: 600;
+      font-size: .82rem;
+    }
+
+    .modal-leave {
+      max-width: 700px;
+      padding: 24px 28px;
+    }
+    .modal-leave .modal-body {
+      display: flex;
+      gap: 28px;
+      margin-top: 4px;
+    }
+    .modal-leave .modal-left {
+      flex: 0 0 340px;
+    }
+    .modal-leave .modal-right {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      min-width: 0;
+    }
+    .modal-leave .modal-right .form-group {
+      margin-bottom: 0;
+    }
+    .modal-leave .modal-right textarea {
+      resize: vertical;
+      min-height: 80px;
+      width: 100%;
+      padding: 8px 12px;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      font-family: var(--font);
+      font-size: .88rem;
+      color: var(--text);
+      background: var(--white);
+      transition: border-color .15s;
+      outline: none;
+    }
+    .modal-leave .modal-right textarea:focus {
+      border-color: var(--accent);
+    }
+    .modal-leave .modal-footer {
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid var(--border);
+    }
+    .modal-leave .modal-footer .btn {
+      padding: 8px 20px;
+      font-size: .88rem;
+    }
+
+    @media (max-width: 620px) {
+      .modal-leave .modal-body {
+        flex-direction: column;
+        gap: 16px;
+      }
+      .modal-leave .modal-left {
+        flex: unset;
+        width: 100%;
+      }
+      .modal-leave {
+        max-width: 400px;
+        padding: 18px 16px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div class="page-wrap">
+  <nav class="sidebar" id="sidebar"></nav>
+
+  <main class="main">
+    <div class="page-header">
+      <h1>Nghỉ phép</h1>
+      <p>Gửi và quản lý đơn xin nghỉ phép</p>
+    </div>
+
+    <!-- Chỉ hiển thị cho nhân viên, admin không cần xin nghỉ -->
+    <div class="card" id="request-leave-card" style="display:none;align-items:center;justify-content:space-between;padding:18px 24px;">
+      <div>
+        <h2 style="margin-bottom:4px;font-size:1.1rem;">Xin nghỉ phép</h2>
+        <p style="color:var(--muted);font-size:.85rem;" id="selected-summary">Chưa chọn ngày nào</p>
+      </div>
+      <button class="btn btn-primary" onclick="openCalModal()">
+        Chọn ngày nghỉ
+      </button>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <h2>Danh sách đơn nghỉ phép</h2>
+        <div style="display:flex;gap:8px;">
+          <select id="filter-status" style="padding:6px 10px;border:1.5px solid #e4e7ec;border-radius:8px;font-family:inherit;font-size:.82rem;">
+            <option value="">Tất cả</option>
+            <option value="pending">Chờ duyệt</option>
+            <option value="approved">Đã duyệt</option>
+            <option value="rejected">Từ chối</option>
+          </select>
+          <button class="btn btn-ghost btn-sm" onclick="loadLeaves()">Lọc</button>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th id="col-name" style="display:none;">Họ tên</th>
+              <th>Từ ngày</th>
+              <th>Đến ngày</th>
+              <th>Số ngày</th>
+              <th>Lý do</th>
+              <th>Trạng thái</th>
+              <th id="admin-actions-col" style="display:none;">Thao tác</th>
+            </tr>
+          </thead>
+          <tbody id="leave-body">
+            <tr><td colspan="7" class="empty">Đang tải...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- MODAL XIN NGHỈ -->
+<div class="modal-overlay" id="cal-modal">
+  <div class="modal modal-leave">
+    <div class="modal-header">
+      <h2 style="font-size:1.1rem;">Chọn ngày nghỉ phép</h2>
+      <button class="modal-close" onclick="closeCalModal()">✕</button>
+    </div>
+
+    <div class="modal-body">
+      <div class="modal-left">
+        <div class="cal-header">
+          <button class="cal-nav" onclick="prevMonth()">‹</button>
+          <span class="cal-title" id="cal-title"></span>
+          <button class="cal-nav" onclick="nextMonth()">›</button>
+        </div>
+        <div class="cal-grid" id="cal-grid"></div>
+        <div class="cal-info" id="cal-info">Chọn ngày bắt đầu nghỉ</div>
+      </div>
+
+      <div class="modal-right">
+        <div class="form-group">
+          <label style="font-weight:600;font-size:.88rem;">Lý do xin nghỉ</label>
+          <textarea id="reason" rows="3" placeholder="Nhập lý do..."></textarea>
+        </div>
+
+        <div class="modal-footer">
+          <button class="btn btn-ghost" onclick="closeCalModal()">Hủy</button>
+          <button class="btn btn-primary" id="confirm-btn" onclick="confirmLeave()" disabled
+            style="opacity:.5;cursor:not-allowed;">
+            Xác nhận gửi đơn
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+<script src="main.js"></script>
+<script>
+  let currentUser = null;
+  let allLeaves = [];
+  let isAdmin = false;
+
+  let calYear, calMonth;
+  let rangeStart = null;
+  let rangeEnd   = null;
+
+  async function init() {
+    currentUser = await requireLogin();
+    if (!currentUser) return;
+    
+    isAdmin = currentUser.role === "admin";
+    renderSidebar("leave", currentUser);
+
+    if (isAdmin) {
+      // Admin: hiện cột Họ tên + cột thao tác, ẩn card xin nghỉ
+      document.getElementById("col-name").style.display = "";
+      document.getElementById("admin-actions-col").style.display = "";
+      // card "Xin nghỉ phép" giữ display:none
+    } else {
+      // User: hiện card xin nghỉ, hiện cột tên của chính mình, ẩn cột thao tác admin
+      document.getElementById("request-leave-card").style.display = "flex";
+      document.getElementById("col-name").style.display = "";
+      // cột thao tác admin vẫn ẩn
+    }
+
+    const now = new Date();
+    calYear  = now.getFullYear();
+    calMonth = now.getMonth();
+
+    await loadLeaves();
+  }
+
+  function renderCalendar() {
+    const months = ["Tháng 1","Tháng 2","Tháng 3","Tháng 4","Tháng 5","Tháng 6",
+                    "Tháng 7","Tháng 8","Tháng 9","Tháng 10","Tháng 11","Tháng 12"];
+    document.getElementById("cal-title").textContent = `${months[calMonth]} ${calYear}`;
+
+    const grid  = document.getElementById("cal-grid");
+    const today = new Date(); today.setHours(0,0,0,0);
+
+    const dows = ["T2","T3","T4","T5","T6","T7","CN"];
+    let html = dows.map(d => `<div class="cal-dow">${d}</div>`).join("");
+
+    const firstDay = new Date(calYear, calMonth, 1).getDay();
+    const offset = (firstDay === 0) ? 6 : firstDay - 1;
+    const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
+
+    const leaveDates = new Set();
+    allLeaves.forEach(lv => {
+      const from = new Date(lv.from_date);
+      const to = new Date(lv.to_date);
+      for (let d = new Date(from); d <= to; d.setDate(d.getDate() + 1)) {
+        const dateStr = d.toISOString().split('T')[0];
+        leaveDates.add(dateStr);
+      }
+    });
+
+    for (let i = 0; i < offset; i++) {
+      html += `<div class="cal-day empty-day"></div>`;
+    }
+
+    for (let d = 1; d <= daysInMonth; d++) {
+      const dateStr = `${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+      const thisDate = new Date(calYear, calMonth, d);
+
+      const isPast = thisDate < today;
+      const hasLeave = leaveDates.has(dateStr);
+
+      let cls = "cal-day";
+      if (isPast) {
+        cls += " past-day";
+      } else if (hasLeave) {
+        cls += " has-leave";
+      } else if (rangeStart && rangeEnd) {
+        if (dateStr === rangeStart && dateStr === rangeEnd) cls += " selected range-start range-end";
+        else if (dateStr === rangeStart) cls += " selected in-range range-start";
+        else if (dateStr === rangeEnd)   cls += " selected in-range range-end";
+        else if (dateStr > rangeStart && dateStr < rangeEnd) cls += " in-range";
+      } else if (rangeStart && dateStr === rangeStart) {
+        cls += " selected range-start range-end";
+      }
+
+      let clickFn = "";
+      if (!isPast && !hasLeave) {
+        clickFn = `onclick="selectDay('${dateStr}')"`;
+      }
+
+      html += `<div class="${cls}" ${clickFn}>${d}</div>`;
+    }
+
+    grid.innerHTML = html;
+    updateCalInfo();
+    updateConfirmBtn();
+  }
+
+  function selectDay(dateStr) {
+    if (!rangeStart || (rangeStart && rangeEnd)) {
+      rangeStart = dateStr;
+      rangeEnd   = null;
+    } else {
+      if (dateStr < rangeStart) {
+        rangeEnd   = rangeStart;
+        rangeStart = dateStr;
+      } else {
+        rangeEnd = dateStr;
+      }
+    }
+    renderCalendar();
+  }
+
+  function updateCalInfo() {
+    const info = document.getElementById("cal-info");
+    if (!rangeStart) {
+      info.innerHTML = "Chọn ngày bắt đầu nghỉ";
+      return;
+    }
+    if (!rangeEnd) {
+      info.innerHTML = `<div class="range-summary">
+        <span>Bắt đầu: <strong>${formatDate(rangeStart)}</strong></span>
+        <span style="color:var(--muted)">→ Chọn ngày kết thúc</span>
+      </div>`;
+      return;
+    }
+    const d1 = new Date(rangeStart);
+    const d2 = new Date(rangeEnd);
+    const days = Math.round((d2 - d1) / 86400000) + 1;
+    info.innerHTML = `<div class="range-summary">
+      <span class="range-badge">${formatDate(rangeStart)} → ${formatDate(rangeEnd)}</span>
+      <span style="color:var(--muted)"><strong>${days}</strong> ngày nghỉ</span>
+    </div>`;
+  }
+
+  function updateConfirmBtn() {
+    const btn = document.getElementById("confirm-btn");
+    const ok  = rangeStart && rangeEnd;
+    btn.disabled = !ok;
+    btn.style.opacity = ok ? "1" : ".5";
+    btn.style.cursor  = ok ? "pointer" : "not-allowed";
+  }
+
+  function prevMonth() {
+    calMonth--;
+    if (calMonth < 0) { calMonth = 11; calYear--; }
+    renderCalendar();
+  }
+
+  function nextMonth() {
+    calMonth++;
+    if (calMonth > 11) { calMonth = 0; calYear++; }
+    renderCalendar();
+  }
+
+  function openCalModal() {
+    rangeStart = null; rangeEnd = null;
+    document.getElementById("reason").value = "";
+    renderCalendar();
+    openModal("cal-modal");
+  }
+
+  function closeCalModal() {
+    closeModal("cal-modal");
+  }
+
+  function isOverlapping(fromDate, toDate) {
+    const from = new Date(fromDate);
+    const to = new Date(toDate);
+    
+    for (const lv of allLeaves) {
+      if (lv.status === 'rejected') continue;
+      
+      const lvFrom = new Date(lv.from_date);
+      const lvTo = new Date(lv.to_date);
+      
+      if (from <= lvTo && to >= lvFrom) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  async function confirmLeave() {
+    if (!rangeStart || !rangeEnd) return;
+
+    const reason = document.getElementById("reason").value.trim();
+    if (!reason) {
+      showToast("Vui lòng nhập lý do nghỉ!", "error");
+      return;
+    }
+
+    if (isOverlapping(rangeStart, rangeEnd)) {
+      showToast("❌ Khoảng thời gian này đã có đơn nghỉ (đang chờ duyệt hoặc đã duyệt)!", "error");
+      return;
+    }
+
+    const res = await API.post("/leave", {
+      from_date: rangeStart,
+      to_date:   rangeEnd,
+      reason
+    });
+
+    showToast(res.message, res.success ? "success" : "error");
+    if (res.success) {
+      const d1 = new Date(rangeStart);
+      const d2 = new Date(rangeEnd);
+      const days = Math.round((d2-d1)/86400000)+1;
+      document.getElementById("selected-summary").textContent =
+        `Đã gửi đơn: ${formatDate(rangeStart)} → ${formatDate(rangeEnd)} (${days} ngày)`;
+
+      closeCalModal();
+      await loadLeaves();
+    }
+  }
+
+  async function loadLeaves() {
+    const status  = document.getElementById("filter-status").value;
+    const url     = "/leave" + (status ? `?status=${status}` : "");
+    const res     = await API.get(url);
+    const tbody   = document.getElementById("leave-body");
+
+    if (!res.success) {
+      tbody.innerHTML = `<tr><td colspan="7" class="empty">Lỗi tải dữ liệu</td></tr>`;
+      return;
+    }
+
+    allLeaves = res.data;
+
+    if (res.data.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="7" class="empty">Không có đơn nghỉ phép nào</td></tr>`;
+      return;
+    }
+
+    const sorted = res.data.slice().reverse();
+    tbody.innerHTML = sorted.map(lv => {
+      const d1   = new Date(lv.from_date);
+      const d2   = new Date(lv.to_date);
+      const days = Math.round((d2-d1)/86400000)+1;
+
+      // tên nhân viên (backend đã gắn sẵn employee_name)
+      const nameCell = `<td style="font-weight:500;">${lv.employee_name || "—"}</td>`;
+
+      let actions = "";
+      // CHỈ ADMIN MỚI CÓ QUYỀN DUYỆT/TỪ CHỐI
+      if (isAdmin) {
+        if (lv.status === "pending") {
+          actions = `
+            <button class="btn btn-success btn-sm" onclick="updateLeave(${lv.id},'approved')">Duyệt</button>
+            <button class="btn btn-danger btn-sm"  onclick="updateLeave(${lv.id},'rejected')">Từ chối</button>
+          `;
+        } else {
+          actions = `<button class="btn btn-danger btn-sm" onclick="deleteLeave(${lv.id})">Xóa</button>`;
+        }
+      } else {
+        // User: chỉ hủy được đơn đang chờ duyệt
+        if (lv.status === "pending") {
+          actions = `<button class="btn btn-danger btn-sm" onclick="deleteLeave(${lv.id})">Hủy</button>`;
+        } else {
+          actions = "—";
+        }
+      }
+
+      return `
+        <tr>
+          ${nameCell}
+          <td>${formatDate(lv.from_date)}</td>
+          <td>${formatDate(lv.to_date)}</td>
+          <td><span class="badge badge-blue">${days} ngày</span></td>
+          <td style="color:#6b7280;max-width:180px;">${lv.reason}</td>
+          <td>${badgeStatus(lv.status)}</td>
+          <td style="display:flex;gap:6px;flex-wrap:wrap;">${actions}</td>
+        </tr>
+      `;
+    }).join("");
+  }
+
+  async function updateLeave(id, status) {
+    if (!isAdmin) {
+      showToast("Bạn không có quyền thực hiện!", "error");
+      return;
+    }
+    const res = await API.put(`/leave/${id}`, { status });
+    showToast(res.message, res.success ? "success" : "error");
+    if (res.success) await loadLeaves();
+  }
+
+  async function deleteLeave(id) {
+    if (!confirm('Bạn có chắc muốn hủy/xóa đơn nghỉ này?')) return;
+    
+    const res = await API.delete(`/leave/${id}`);
+    showToast(res.message, res.success ? "success" : "error");
+    if (res.success) await loadLeaves();
+  }
+
+  init();
+</script>
+</body>
+</html>

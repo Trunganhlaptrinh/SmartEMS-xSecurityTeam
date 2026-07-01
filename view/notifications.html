@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<!-- view/notifications.html — Quản lý thông báo -->
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Thông báo — SmartEMS</title>
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="icon" type="image/png" href="image/logo_E.png" />
+  <style>
+    .noti-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    .noti-header .filter-group {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .noti-header .filter-group select,
+    .noti-header .filter-group input {
+      padding: 6px 12px;
+      border: 1.5px solid var(--border);
+      border-radius: 6px;
+      font-family: var(--font);
+      font-size: .82rem;
+      background: var(--white);
+      outline: none;
+    }
+    .noti-header .filter-group select:focus,
+    .noti-header .filter-group input:focus {
+      border-color: #4255ff;
+    }
+
+    .noti-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .noti-item {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 16px 20px;
+      cursor: pointer;
+      transition: all .2s;
+      border-left: 4px solid transparent;
+    }
+    .noti-item:hover {
+      transform: translateX(4px);
+      box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+    }
+    .noti-item .noti-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .noti-item .noti-title {
+      font-weight: 600;
+      font-size: 1rem;
+    }
+    .noti-item .noti-meta {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      flex-wrap: wrap;
+      font-size: .78rem;
+      color: var(--muted);
+    }
+    .noti-item .noti-meta .author {
+      font-weight: 500;
+      color: var(--text);
+    }
+    .noti-item .noti-meta .type-badge {
+      padding: 2px 10px;
+      border-radius: 12px;
+      font-size: .68rem;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+    .noti-item .noti-meta .type-badge.general {
+      background: #eef0ff;
+      color: #4255ff;
+    }
+    .noti-item .noti-meta .type-badge.meeting {
+      background: #fef3c7;
+      color: #92400e;
+    }
+    .noti-item .noti-meta .type-badge.holiday {
+      background: #dcf5ea;
+      color: #1a7a4a;
+    }
+    .noti-item .noti-meta .type-badge.urgent {
+      background: #fde8e8;
+      color: #b91c1c;
+    }
+    .noti-item .noti-meta .priority-high {
+      color: #b91c1c;
+      font-weight: 700;
+    }
+    .noti-item .noti-content {
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: .88rem;
+      line-height: 1.6;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    .noti-item .noti-content.expanded {
+      -webkit-line-clamp: unset;
+      overflow: visible;
+    }
+    .noti-item .noti-expand-btn {
+      background: none;
+      border: none;
+      color: var(--accent);
+      font-size: .78rem;
+      cursor: pointer;
+      padding: 4px 0;
+      font-weight: 500;
+    }
+    .noti-item .noti-expand-btn:hover {
+      text-decoration: underline;
+    }
+    .noti-item.priority-urgent {
+      border-left-color: #b91c1c;
+      background: #fff5f5;
+    }
+    .noti-item.priority-high {
+      border-left-color: #f59e0b;
+    }
+    .noti-item.priority-normal {
+      border-left-color: #4255ff;
+    }
+
+    .noti-item .noti-actions {
+      display: flex;
+      gap: 6px;
+      margin-top: 10px;
+    }
+    .noti-item .noti-actions button {
+      padding: 4px 14px;
+      border: none;
+      border-radius: 4px;
+      font-family: var(--font);
+      font-size: .72rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background .15s;
+    }
+    .noti-item .noti-actions .edit-btn {
+      background: #eef0ff;
+      color: var(--accent);
+    }
+    .noti-item .noti-actions .edit-btn:hover {
+      background: var(--accent);
+      color: #fff;
+    }
+    .noti-item .noti-actions .del-btn {
+      background: #fde8e8;
+      color: var(--red);
+    }
+    .noti-item .noti-actions .del-btn:hover {
+      background: var(--red);
+      color: #fff;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 40px 20px;
+      color: var(--muted);
+    }
+    .empty-state .icon {
+      font-size: 3rem;
+      display: block;
+      margin-bottom: 12px;
+    }
+
+    .modal-noti {
+      max-width: 560px;
+    }
+    .modal-noti .form-group {
+      margin-bottom: 14px;
+    }
+    .modal-noti .form-group label {
+      font-weight: 500;
+      font-size: .85rem;
+      display: block;
+      margin-bottom: 3px;
+    }
+    .modal-noti .form-group input,
+    .modal-noti .form-group select,
+    .modal-noti .form-group textarea {
+      width: 100%;
+      padding: 8px 12px;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      font-family: var(--font);
+      font-size: .85rem;
+      outline: none;
+      transition: border-color .15s;
+      background: var(--white);
+    }
+    .modal-noti .form-group input:focus,
+    .modal-noti .form-group select:focus,
+    .modal-noti .form-group textarea:focus {
+      border-color: #4255ff;
+    }
+    .modal-noti .form-group textarea {
+      resize: vertical;
+      min-height: 120px;
+    }
+    .modal-noti .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .modal-detail .detail-title {
+      font-size: 1.2rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    .modal-detail .detail-meta {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      font-size: .82rem;
+      color: var(--muted);
+      margin-bottom: 12px;
+    }
+    .modal-detail .detail-content {
+      font-size: .95rem;
+      line-height: 1.8;
+      color: var(--text);
+      white-space: pre-wrap;
+      word-wrap: break-word;
+      max-height: 400px;
+      overflow-y: auto;
+      padding: 12px 0;
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+    }
+    .modal-detail .detail-footer {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: 12px;
+    }
+
+    @media (max-width: 600px) {
+      .noti-header {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      .modal-noti .form-row {
+        grid-template-columns: 1fr;
+      }
+      .noti-item .noti-top {
+        flex-direction: column;
+        align-items: stretch;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div class="page-wrap">
+  <nav class="sidebar" id="sidebar"></nav>
+
+  <main class="main">
+    <div class="page-header">
+      <h1>Thông báo</h1>
+      <p>Cập nhật tin tức mới nhất từ công ty</p>
+    </div>
+
+    <div class="noti-header">
+      <div class="filter-group">
+        <select id="filter-type" onchange="loadNotifications()">
+          <option value="">Tất cả loại</option>
+          <option value="general">Chung</option>
+          <option value="meeting">Cuộc họp</option>
+          <option value="holiday">Nghỉ lễ</option>
+          <option value="urgent">Khẩn cấp</option>
+        </select>
+        <select id="filter-priority" onchange="loadNotifications()">
+          <option value="">Tất cả mức độ</option>
+          <option value="normal">Bình thường</option>
+          <option value="high">Quan trọng</option>
+          <option value="urgent">Khẩn cấp</option>
+        </select>
+        <input type="text" id="search-noti" placeholder="Tìm kiếm..." oninput="loadNotifications()" />
+      </div>
+      <div id="admin-actions" style="display:none;">
+        <button class="btn btn-primary" onclick="openAddNotiModal()">+ Viết thông báo</button>
+      </div>
+    </div>
+
+    <div class="noti-list" id="noti-list">
+      <div class="empty-state">
+        <span class="icon">📭</span>
+        <p>Đang tải thông báo...</p>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- MODAL XEM CHI TIẾT THÔNG BÁO -->
+<div class="modal-overlay" id="detail-modal">
+  <div class="modal modal-noti modal-detail">
+    <div class="modal-header">
+      <h2 id="detail-modal-title">Chi tiết thông báo</h2>
+      <button class="modal-close" onclick="closeModal('detail-modal')">✕</button>
+    </div>
+    <div id="detail-content">
+      <div class="detail-title" id="detail-title">Tiêu đề</div>
+      <div class="detail-meta">
+        <span id="detail-author">Tác giả</span>
+        <span id="detail-time">Thời gian</span>
+        <span id="detail-type" class="type-badge general">Chung</span>
+        <span id="detail-priority">Mức độ</span>
+      </div>
+      <div class="detail-content" id="detail-body">Nội dung chi tiết</div>
+      <div class="detail-footer">
+        <button class="btn btn-ghost" onclick="closeModal('detail-modal')">Đóng</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL TẠO/SỬA THÔNG BÁO (Admin) -->
+<div class="modal-overlay" id="noti-modal">
+  <div class="modal modal-noti">
+    <div class="modal-header">
+      <h2 id="noti-modal-title">Viết thông báo</h2>
+      <button class="modal-close" onclick="closeModal('noti-modal')">✕</button>
+    </div>
+    <input type="hidden" id="edit-noti-id" value="" />
+    
+    <div class="form-group">
+      <label>Tiêu đề *</label>
+      <input type="text" id="noti-title" placeholder="Nhập tiêu đề thông báo..." />
+    </div>
+    <div class="form-group">
+      <label>Nội dung *</label>
+      <textarea id="noti-content" placeholder="Nhập nội dung chi tiết..."></textarea>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Loại thông báo</label>
+        <select id="noti-type">
+          <option value="general">Chung</option>
+          <option value="meeting">Cuộc họp</option>
+          <option value="holiday">Nghỉ lễ</option>
+          <option value="urgent">Khẩn cấp</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Mức độ ưu tiên</label>
+        <select id="noti-priority">
+          <option value="normal">Bình thường</option>
+          <option value="high">Quan trọng</option>
+          <option value="urgent">Khẩn cấp</option>
+        </select>
+      </div>
+    </div>
+    
+    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:8px;">
+      <button class="btn btn-ghost" onclick="closeModal('noti-modal')">Hủy</button>
+      <button class="btn btn-primary" onclick="saveNotification()">Đăng thông báo</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+<script src="main.js"></script>
+<script>
+  let currentUser = null;
+  let isAdmin = false;
+  let notifications = [];
+
+  async function init() {
+    currentUser = await requireLogin();
+    if (!currentUser) return;
+
+    isAdmin = currentUser.role === "admin";
+    renderSidebar("notifications", currentUser);
+
+    if (isAdmin) {
+      document.getElementById("admin-actions").style.display = "block";
+    }
+
+    await loadNotifications();
+  }
+
+  async function loadNotifications() {
+    const type = document.getElementById("filter-type").value;
+    const priority = document.getElementById("filter-priority").value;
+    const search = document.getElementById("search-noti")?.value?.trim() || "";
+
+    let url = "/notifications";
+    const params = [];
+    if (type) params.push(`type=${type}`);
+    if (priority) params.push(`priority=${priority}`);
+    if (params.length) url += "?" + params.join("&");
+
+    const res = await API.get(url);
+
+    const list = document.getElementById("noti-list");
+
+    if (!res.success) {
+      list.innerHTML = `<div class="empty-state"><span class="icon">❌</span><p>${res.message || 'Không tải được thông báo'}</p></div>`;
+      return;
+    }
+
+    let data = res.data || [];
+    
+    if (search) {
+      const keyword = search.toLowerCase();
+      data = data.filter(n => 
+        n.title.toLowerCase().includes(keyword) ||
+        n.content.toLowerCase().includes(keyword) ||
+        n.author_name.toLowerCase().includes(keyword)
+      );
+    }
+
+    notifications = data;
+
+    if (data.length === 0) {
+      list.innerHTML = `<div class="empty-state"><span class="icon">📭</span><p>Chưa có thông báo nào</p></div>`;
+      return;
+    }
+
+    const typeMap = {
+      'general': 'Chung',
+      'meeting': 'Cuộc họp',
+      'holiday': 'Nghỉ lễ',
+      'urgent': 'Khẩn cấp'
+    };
+
+    const typeClassMap = {
+      'general': 'general',
+      'meeting': 'meeting',
+      'holiday': 'holiday',
+      'urgent': 'urgent'
+    };
+
+    const priorityMap = {
+      'normal': 'Bình thường',
+      'high': 'Quan trọng',
+      'urgent': 'Khẩn cấp'
+    };
+
+    list.innerHTML = data.map(noti => {
+      const priorityClass = noti.priority || 'normal';
+
+      let actions = '';
+      if (isAdmin) {
+        actions = `
+          <div class="noti-actions">
+            <button class="edit-btn" onclick="openEditNoti(${noti.id})">Sửa</button>
+            <button class="del-btn" onclick="deleteNoti(${noti.id})">Xóa</button>
+          </div>
+        `;
+      }
+
+      const contentId = `noti-content-${noti.id}`;
+      const isLong = noti.content.length > 150;
+      const shortContent = isLong ? noti.content.substring(0, 150) + '...' : noti.content;
+
+      return `
+        <div class="noti-item priority-${priorityClass}" onclick="openDetailModal(${noti.id})">
+          <div class="noti-top">
+            <div>
+              <div class="noti-title">${noti.title}</div>
+              <div class="noti-meta">
+                <span class="author">${noti.author_name}</span>
+                <span>${noti.created_at || ''}</span>
+                <span class="type-badge ${typeClassMap[noti.notification_type] || 'general'}">${typeMap[noti.notification_type] || 'Chung'}</span>
+                ${noti.priority === 'urgent' ? '<span class="priority-high">Khẩn cấp</span>' : ''}
+                ${noti.priority === 'high' ? '<span class="priority-high">Quan trọng</span>' : ''}
+              </div>
+            </div>
+          </div>
+          <div class="noti-content" id="${contentId}">
+            ${shortContent}
+          </div>
+          ${isLong ? `
+            <button class="noti-expand-btn" onclick="event.stopPropagation();toggleContent('${contentId}', this)">
+              Đọc thêm ▼
+            </button>
+          ` : ''}
+          ${actions}
+        </div>
+      `;
+    }).join('');
+  }
+
+  function toggleContent(contentId, btn) {
+    const el = document.getElementById(contentId);
+    if (el.classList.contains('expanded')) {
+      el.classList.remove('expanded');
+      btn.textContent = 'Đọc thêm ▼';
+    } else {
+      el.classList.add('expanded');
+      btn.textContent = 'Thu gọn ▲';
+    }
+  }
+
+  function openDetailModal(notiId) {
+    const noti = notifications.find(n => n.id === notiId);
+    if (!noti) {
+      showToast("Không tìm thấy thông báo", "error");
+      return;
+    }
+
+    const typeMap = {
+      'general': 'Chung',
+      'meeting': 'Cuộc họp',
+      'holiday': 'Nghỉ lễ',
+      'urgent': 'Khẩn cấp'
+    };
+
+    const typeClassMap = {
+      'general': 'general',
+      'meeting': 'meeting',
+      'holiday': 'holiday',
+      'urgent': 'urgent'
+    };
+
+    const priorityMap = {
+      'normal': 'Bình thường',
+      'high': 'Quan trọng',
+      'urgent': 'Khẩn cấp'
+    };
+
+    document.getElementById("detail-title").textContent = noti.title;
+    document.getElementById("detail-author").textContent = `Tác giả: ${noti.author_name}`;
+    document.getElementById("detail-time").textContent = `Thời gian: ${noti.created_at || ''}`;
+    document.getElementById("detail-type").textContent = typeMap[noti.notification_type] || 'Chung';
+    document.getElementById("detail-type").className = `type-badge ${typeClassMap[noti.notification_type] || 'general'}`;
+    
+    const priorityText = priorityMap[noti.priority] || 'Bình thường';
+    document.getElementById("detail-priority").textContent = `Mức độ: ${priorityText}`;
+    document.getElementById("detail-priority").style.color = noti.priority === 'urgent' ? '#b91c1c' : noti.priority === 'high' ? '#f59e0b' : 'var(--muted)';
+    
+    document.getElementById("detail-body").textContent = noti.content;
+
+    document.getElementById("detail-modal-title").textContent = noti.title;
+    openModal("detail-modal");
+  }
+
+  function openAddNotiModal() {
+    document.getElementById("noti-modal-title").textContent = "Viết thông báo";
+    document.getElementById("edit-noti-id").value = "";
+    document.getElementById("noti-title").value = "";
+    document.getElementById("noti-content").value = "";
+    document.getElementById("noti-type").value = "general";
+    document.getElementById("noti-priority").value = "normal";
+    openModal("noti-modal");
+  }
+
+  function openEditNoti(notiId) {
+    event.stopPropagation();
+    const noti = notifications.find(n => n.id === notiId);
+    if (!noti) {
+      showToast("Không tìm thấy thông báo", "error");
+      return;
+    }
+
+    document.getElementById("noti-modal-title").textContent = "Sửa thông báo";
+    document.getElementById("edit-noti-id").value = noti.id;
+    document.getElementById("noti-title").value = noti.title;
+    document.getElementById("noti-content").value = noti.content;
+    document.getElementById("noti-type").value = noti.notification_type || "general";
+    document.getElementById("noti-priority").value = noti.priority || "normal";
+    openModal("noti-modal");
+  }
+
+  async function saveNotification() {
+    const id = document.getElementById("edit-noti-id").value;
+    const title = document.getElementById("noti-title").value.trim();
+    const content = document.getElementById("noti-content").value.trim();
+    const notification_type = document.getElementById("noti-type").value;
+    const priority = document.getElementById("noti-priority").value;
+
+    if (!title) {
+      showToast("Vui lòng nhập tiêu đề", "error");
+      return;
+    }
+    if (!content) {
+      showToast("Vui lòng nhập nội dung", "error");
+      return;
+    }
+
+    const data = { title, content, notification_type, priority };
+    let res;
+
+    try {
+      if (id) {
+        res = await API.put(`/notifications/${id}`, data);
+      } else {
+        res = await API.post("/notifications", data);
+      }
+    } catch (err) {
+      console.error("Error:", err);
+      showToast("Lỗi kết nối server: " + err.message, "error");
+      return;
+    }
+
+    showToast(res.message, res.success ? "success" : "error");
+
+    if (res.success) {
+      closeModal("noti-modal");
+      await loadNotifications();
+    }
+  }
+
+  async function deleteNoti(notiId) {
+    event.stopPropagation();
+    const noti = notifications.find(n => n.id === notiId);
+    if (!confirm(`Xóa thông báo "${noti?.title}"?`)) return;
+
+    const res = await API.delete(`/notifications/${notiId}`);
+    showToast(res.message, res.success ? "success" : "error");
+    if (res.success) await loadNotifications();
+  }
+
+  init();
+</script>
+</body>
+</html>

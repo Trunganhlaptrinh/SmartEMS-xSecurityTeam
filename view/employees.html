@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<!-- view/employees.html — trang quản lý nhân viên (chỉ admin) -->
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Nhân viên — SmartEMS</title>
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="icon" type="image/png" href="image/logo_E.png" />
+  <style>
+    .avatar-circle {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid #e4e7ec;
+      background: #f1f2f4;
+      display: block;
+    }
+    .avatar-circle.admin-avatar {
+      border-color: #4255ff;
+    }
+    .avatar-circle.employee-avatar {
+      border-color: #23b26d;
+    }
+    .emp-table td {
+      vertical-align: middle;
+      padding: 8px 10px;
+    }
+    .emp-table .avatar-cell {
+      width: 44px;
+      text-align: center;
+    }
+    .emp-table .actions-cell {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+    .emp-table .actions-cell .btn-sm {
+      padding: 4px 12px;
+      font-size: .75rem;
+      border-radius: 6px;
+    }
+    .badge {
+      display: inline-block;
+      padding: 2px 10px;
+      border-radius: 20px;
+      font-size: .72rem;
+      font-weight: 600;
+    }
+    .badge-blue {
+      background: #eef0ff;
+      color: #4255ff;
+    }
+    .badge-gray {
+      background: #f1f2f4;
+      color: #6b7280;
+    }
+    .btn-secondary {
+      background: #eef0ff;
+      color: #4255ff;
+    }
+    .btn-secondary:hover {
+      background: #4255ff;
+      color: #fff;
+    }
+    .btn-danger {
+      background: #fde8e8;
+      color: #b91c1c;
+    }
+    .btn-danger:hover {
+      background: #b91c1c;
+      color: #fff;
+    }
+  </style>
+</head>
+<body>
+
+<div class="page-wrap">
+  <nav class="sidebar" id="sidebar"></nav>
+
+  <main class="main">
+    <div class="page-header">
+      <h1>Quản lý và tạo tài khoản cho nhân viên</h1>
+      <p>Thêm, sửa, xóa và tìm kiếm tài khoản nhân viên</p>
+    </div>
+
+    <!-- FORM THÊM NHÂN VIÊN -->
+    <div class="card">
+      <div class="card-header">
+        <h2>Thêm nhân viên mới</h2>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Họ tên *</label>
+          <input type="text" id="emp-name" placeholder="Nguyễn Văn A" />
+        </div>
+        <div class="form-group">
+          <label>Tên đăng nhập *</label>
+          <input type="text" id="emp-username" placeholder="nguyenvana" />
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Mật khẩu *</label>
+          <input type="password" id="emp-password" placeholder="Tối thiểu 6 ký tự" />
+        </div>
+        <div class="form-group">
+          <label>Phòng ban</label>
+          <input type="text" id="emp-dept" placeholder="Kỹ thuật, Marketing..." />
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Vai trò</label>
+          <select id="emp-role">
+            <option value="employee">Nhân viên</option>
+            <option value="admin">Admin</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Lương cơ bản (VND)</label>
+          <input type="number" id="emp-salary" placeholder="10000000" min="0" />
+        </div>
+      </div>
+      <button class="btn btn-primary" onclick="addEmployee()">
+        Thêm nhân viên
+      </button>
+    </div>
+
+    <!-- DANH SÁCH NHÂN VIÊN + TÌM KIẾM -->
+    <div class="card">
+      <div class="card-header">
+        <h2>Danh sách nhân viên</h2>
+        <div style="display:flex;gap:10px;align-items:center;">
+          <input type="text" id="search-employee" 
+                 placeholder="Tìm kiếm..." 
+                 style="padding:6px 12px;border:1.5px solid #e4e7ec;border-radius:8px;font-family:inherit;font-size:.9rem;"
+                 oninput="loadEmployees()" />
+          <span id="emp-count" style="color:#6b7280;font-size:.88rem;"></span>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table class="emp-table">
+          <thead>
+            <tr>
+              <th style="width:44px;">Ảnh</th>
+              <th>ID</th>
+              <th>Họ tên</th>
+              <th>Tên đăng nhập</th>
+              <th>Phòng ban</th>
+              <th>Vai trò</th>
+              <th>Lương CB</th>
+              <th>Thao tác</th>
+            </tr>
+          </thead>
+          <tbody id="emp-body">
+            <tr><td colspan="8" class="empty">Đang tải...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- MODAL SỬA NHÂN VIÊN -->
+<div class="modal-overlay" id="edit-employee-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <h2>Sửa nhân viên</h2>
+      <button class="modal-close" onclick="closeModal('edit-employee-modal')">✕</button>
+    </div>
+    <input type="hidden" id="edit-emp-id" />
+    
+    <div class="form-group">
+      <label>Họ tên *</label>
+      <input type="text" id="edit-emp-name" />
+    </div>
+    
+    <div class="form-group">
+      <label>Phòng ban</label>
+      <input type="text" id="edit-emp-dept" />
+    </div>
+    
+    <div class="form-row">
+      <div class="form-group">
+        <label>Vai trò</label>
+        <select id="edit-emp-role">
+          <option value="employee">Nhân viên</option>
+          <option value="admin">Admin</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Lương cơ bản (VND)</label>
+        <input type="number" id="edit-emp-salary" min="0" />
+      </div>
+    </div>
+    
+    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:8px;">
+      <button class="btn btn-ghost" onclick="closeModal('edit-employee-modal')">Hủy</button>
+      <button class="btn btn-primary" onclick="saveEditEmployee()">Lưu</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+<script src="main.js"></script>
+<script>
+  let currentUser = null;
+
+  async function init() {
+    currentUser = await requireLogin();
+    if (!currentUser) return;
+
+    // chỉ admin mới được vào trang này
+    if (currentUser.role !== "admin") {
+      window.location.href = "dashboard.html";
+      return;
+    }
+
+    renderSidebar("employees", currentUser);
+    await loadEmployees();
+  }
+
+  // === THÊM NHÂN VIÊN ===
+  async function addEmployee() {
+    const name        = document.getElementById("emp-name").value.trim();
+    const username    = document.getElementById("emp-username").value.trim();
+    const password    = document.getElementById("emp-password").value;
+    const department  = document.getElementById("emp-dept").value.trim();
+    const role        = document.getElementById("emp-role").value;
+    const base_salary = parseFloat(document.getElementById("emp-salary").value) || 0;
+
+    // Validate
+    if (!name) return showToast("Vui lòng nhập họ tên", "error");
+    if (!username || username.length < 3) return showToast("Tên đăng nhập ít nhất 3 ký tự", "error");
+    if (!password || password.length < 6) return showToast("Mật khẩu ít nhất 6 ký tự", "error");
+
+    const res = await API.post("/auth/employees", {
+      name, username, password, department, role, base_salary
+    });
+
+    showToast(res.message, res.success ? "success" : "error");
+    if (res.success) {
+      ["emp-name","emp-username","emp-password","emp-dept","emp-salary"]
+        .forEach(id => document.getElementById(id).value = "");
+      await loadEmployees();
+    }
+  }
+
+  // === TẢI DANH SÁCH NHÂN VIÊN + TÌM KIẾM ===
+  async function loadEmployees() {
+    const search = document.getElementById("search-employee")?.value?.trim() || "";
+    const res = await API.get("/auth/employees");
+    const tbody = document.getElementById("emp-body");
+
+    if (!res.success) {
+      tbody.innerHTML = `<tr><td colspan="8" class="empty">Không tải được danh sách</td></tr>`;
+      return;
+    }
+
+    // Lọc theo từ khóa tìm kiếm
+    let filtered = res.data;
+    if (search) {
+      const keyword = search.toLowerCase();
+      filtered = res.data.filter(e => 
+        e.name.toLowerCase().includes(keyword) ||
+        e.username.toLowerCase().includes(keyword) ||
+        (e.department && e.department.toLowerCase().includes(keyword))
+      );
+    }
+
+    document.getElementById("emp-count").textContent = filtered.length + " nhân viên";
+
+    if (filtered.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="8" class="empty">Không tìm thấy nhân viên nào</td></tr>`;
+      return;
+    }
+
+    tbody.innerHTML = filtered.map(e => {
+      const isSelf = e.id === currentUser.employee_id;
+      const avatarUrl = e.avatar || "image/logo_profile_co_ban.png";
+      const isAdmin = e.role === "admin";
+      
+      return `
+        <tr>
+          <td class="avatar-cell">
+            <img src="${avatarUrl}" 
+                 class="avatar-circle ${isAdmin ? 'admin-avatar' : 'employee-avatar'}" 
+                 alt="${e.name}" 
+                 onerror="this.src='image/logo_profile_co_ban.png'" />
+          </td>
+          <td style="color:#9ca3af;font-weight:500;">#${e.id}</td>
+          <td style="font-weight:600;">${e.name}</td>
+          <td style="color:#6b7280;">${e.username}</td>
+          <td>${e.department || "—"}</td>
+          <td>${isAdmin
+                ? '<span class="badge badge-blue">Admin</span>'
+                : '<span class="badge badge-gray">Nhân viên</span>'}</td>
+          <td style="font-weight:600;color:var(--text);">${formatMoney(e.base_salary)}</td>
+          <td class="actions-cell">
+            ${isSelf 
+              ? '<span style="color:#9ca3af;font-size:.82rem;font-weight:500;">Bạn</span>'
+              : `
+                <button class="btn btn-secondary btn-sm" onclick="openEditEmployee(${e.id})">Sửa</button>
+                <button class="btn btn-danger btn-sm" onclick="removeEmployee(${e.id},'${e.name}')">Xóa</button>
+                `
+            }
+          </td>
+        </tr>
+      `;
+    }).join("");
+  }
+
+  // === MỞ MODAL SỬA NHÂN VIÊN ===
+  async function openEditEmployee(id) {
+    const res = await API.get("/auth/employees");
+    if (!res.success) return;
+    
+    const emp = res.data.find(e => e.id === id);
+    if (!emp) return showToast("Không tìm thấy nhân viên", "error");
+
+    document.getElementById("edit-emp-id").value      = emp.id;
+    document.getElementById("edit-emp-name").value    = emp.name;
+    document.getElementById("edit-emp-dept").value    = emp.department || "";
+    document.getElementById("edit-emp-role").value    = emp.role;
+    document.getElementById("edit-emp-salary").value  = emp.base_salary;
+
+    openModal("edit-employee-modal");
+  }
+
+  // === LƯU SỬA NHÂN VIÊN ===
+  async function saveEditEmployee() {
+    const id          = document.getElementById("edit-emp-id").value;
+    const name        = document.getElementById("edit-emp-name").value.trim();
+    const department  = document.getElementById("edit-emp-dept").value.trim();
+    const role        = document.getElementById("edit-emp-role").value;
+    const base_salary = parseFloat(document.getElementById("edit-emp-salary").value) || 0;
+
+    if (!name) return showToast("Họ tên không được để trống", "error");
+
+    const res = await API.put(`/auth/employees/${id}`, {
+      name, department, role, base_salary
+    });
+
+    showToast(res.message, res.success ? "success" : "error");
+    if (res.success) {
+      closeModal("edit-employee-modal");
+      await loadEmployees();
+    }
+  }
+
+  // === XÓA NHÂN VIÊN ===
+  async function removeEmployee(id, name) {
+    if (!confirm(`Xóa nhân viên "${name}"? Hành động này không thể hoàn tác.`)) return;
+    const res = await API.delete(`/auth/employees/${id}`);
+    showToast(res.message, res.success ? "success" : "error");
+    if (res.success) await loadEmployees();
+  }
+
+  init();
+</script>
+</body>
+</html>

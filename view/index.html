@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<!-- view/index.html — trang đăng nhập -->
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Đăng nhập — Quản lý Nhân viên</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="icon" type="image/png" href="image/logo_E.png" />
+</head>
+<body>
+
+<div class="login-wrap">
+  <div class="login-box">
+    <!-- logo -->
+    <h1><img src="image/logo_E.png" style="height:36px;vertical-align:middle;margin-right:8px;" />SmartEMS</h1>
+    
+
+    <!-- form đăng nhập -->
+    <div class="form-group">
+      <label for="username">Tên đăng nhập</label>
+      <input type="text" id="username" placeholder="Nhập username" autocomplete="username" />
+    </div>
+
+    <div class="form-group">
+      <label for="password">Mật khẩu</label>
+      <input type="password" id="password" placeholder="Nhập mật khẩu" autocomplete="current-password" />
+    </div>
+
+    <p id="err-msg" style="color:#e53935;font-size:.85rem;margin-bottom:12px;display:none;"></p>
+
+    <button class="btn btn-primary" style="width:100%;justify-content:center;" onclick="doLogin()">
+      Đăng nhập
+    </button>
+
+    <!-- <p style="margin-top:16px;font-size:.8rem;color:#9ca3af;text-align:center;">
+      Tài khoản mặc định: <strong>admin</strong> / <strong>admin123</strong>
+    </p> -->
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script src="main.js"></script>
+<script>
+  // nếu đã đăng nhập thì chuyển thẳng vào dashboard
+  API.get("/auth/me").then(res => {
+    if (res.success) window.location.href = "dashboard.html";
+  });
+
+  // xử lý đăng nhập
+  async function doLogin() {
+    const username = document.getElementById("username").value.trim();
+    const password = document.getElementById("password").value;
+    const errMsg   = document.getElementById("err-msg");
+
+    errMsg.style.display = "none";
+
+    const res = await API.post("/auth/login", { username, password });
+    if (res.success) {
+      showToast("Đăng nhập thành công!", "success");
+      setTimeout(() => window.location.href = "dashboard.html", 600);
+    } else {
+      errMsg.textContent    = res.message || "Đăng nhập thất bại";
+      errMsg.style.display  = "block";
+    }
+  }
+
+  // cho phép nhấn Enter để đăng nhập
+  document.getElementById("password").addEventListener("keydown", e => {
+    if (e.key === "Enter") doLogin();
+  });
+</script>
+</body>
+</html>
