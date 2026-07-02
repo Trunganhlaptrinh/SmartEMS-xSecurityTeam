@@ -1,0 +1,62 @@
+[
+  {
+    "id": 2,
+    "project_id": 2,
+    "employee_id": 1,
+    "employee_name": "Admin TrungAnh",
+    "message": "test đầu",
+    "files": [
+      "Lab11&Crackme11_Nguyen_Trung_Anh_HE190843_IA2001.docx"
+    ],
+    "status": "approved",
+    "created_at": "2026-06-29 00:55:21",
+    "updated_at": "2026-06-29 00:55:36",
+    "approved_by": 1,
+    "approved_at": "2026-06-29 00:55:36"
+  },
+  {
+    "id": 3,
+    "project_id": 2,
+    "employee_id": 1,
+    "employee_name": "Admin TrungAnh",
+    "message": "test 2",
+    "files": [
+      "Topic 1. Intro.pptx"
+    ],
+    "status": "approved",
+    "created_at": "2026-06-29 00:56:33",
+    "updated_at": "2026-06-29 00:56:43",
+    "approved_by": 1,
+    "approved_at": "2026-06-29 00:56:43"
+  },
+  {
+    "id": 4,
+    "project_id": 2,
+    "employee_id": 6,
+    "employee_name": "Trung Anh",
+    "message": "test commit user",
+    "files": [
+      "Lect01.pptx"
+    ],
+    "status": "approved",
+    "created_at": "2026-06-29 01:14:27",
+    "updated_at": "2026-06-29 01:16:03",
+    "approved_by": 11,
+    "approved_at": "2026-06-29 01:16:03"
+  },
+  {
+    "id": 5,
+    "project_id": 2,
+    "employee_id": 6,
+    "employee_name": "Trung Anh",
+    "message": "test chờ duyệt",
+    "files": [
+      "Email_Report_Trung_Anh.docx"
+    ],
+    "status": "approved",
+    "created_at": "2026-06-29 01:17:51",
+    "updated_at": "2026-06-29 01:18:16",
+    "approved_by": 1,
+    "approved_at": "2026-06-29 01:18:16"
+  }
+]
