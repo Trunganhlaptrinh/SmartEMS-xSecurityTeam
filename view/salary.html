@@ -1,0 +1,943 @@
+<!DOCTYPE html>
+<!-- view/salary.html — trang lương thưởng -->
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lương thưởng — SmartEMS</title>
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="icon" type="image/png" href="image/logo_E.png" />
+  <style>
+    .salary-actions {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+    .salary-actions .btn {
+      padding: 9px 20px;
+      font-size: .88rem;
+      border-radius: 8px;
+      background: #4255ff;
+      color: #fff;
+      border: none;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background .15s;
+      font-family: var(--font);
+    }
+    .salary-actions .btn:hover {
+      background: #3345e8;
+    }
+
+    .salary-filter {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+    }
+    .salary-filter label {
+      font-weight: 500;
+      font-size: .82rem;
+      color: var(--muted);
+    }
+    .salary-filter input,
+    .salary-filter select {
+      padding: 5px 10px;
+      border: 1.5px solid #e4e7ec;
+      border-radius: 6px;
+      font-family: inherit;
+      font-size: .82rem;
+      outline: none;
+      background: var(--white);
+    }
+    .salary-filter input:focus,
+    .salary-filter select:focus {
+      border-color: #4255ff;
+    }
+
+    .block-view {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px 16px;
+      max-height: 500px;
+      overflow-y: auto;
+      margin-bottom: 16px;
+    }
+    .block-dept {
+      background: var(--bg);
+      border-radius: 8px;
+      padding: 10px 14px;
+      margin-bottom: 8px;
+    }
+    .block-dept:last-child {
+      margin-bottom: 0;
+    }
+    .block-dept-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-weight: 600;
+      font-size: .9rem;
+      padding-bottom: 6px;
+      border-bottom: 1.5px solid var(--border);
+      margin-bottom: 6px;
+    }
+    .block-dept-header .dept-name {
+      color: var(--text);
+    }
+    .block-dept-header .dept-name.paid {
+      color: var(--green);
+    }
+    .block-dept-header .dept-count {
+      font-weight: 400;
+      font-size: .75rem;
+      color: var(--muted);
+    }
+
+    .block-emps {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    .block-emp {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      padding: 4px 10px 4px 8px;
+      border-radius: 6px;
+      font-size: .8rem;
+      background: var(--white);
+      border: 1px solid var(--border);
+      transition: all .15s;
+      cursor: default;
+    }
+    .block-emp.paid {
+      border-color: var(--green);
+      background: #f0fdf4;
+    }
+    .block-emp.unpaid {
+      border-color: #e5e7eb;
+      background: #f9fafb;
+    }
+    .block-emp .emp-name {
+      font-weight: 500;
+    }
+    .block-emp .emp-name.paid {
+      color: var(--green);
+    }
+    .block-emp .emp-salary {
+      font-size: .7rem;
+      color: var(--muted);
+      margin-left: 2px;
+    }
+    .block-emp .emp-dot {
+      font-size: .5rem;
+      margin-left: 2px;
+    }
+    .block-emp .emp-dot.paid {
+      color: var(--green);
+    }
+    .block-emp .emp-dot.unpaid {
+      color: #d1d5db;
+    }
+
+    .statement-card {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 16px;
+    }
+    .statement-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .statement-header h3 {
+      font-size: .95rem;
+      font-weight: 600;
+      margin: 0;
+    }
+    .statement-header .actions {
+      display: flex;
+      gap: 6px;
+    }
+    .statement-header .actions .btn-sm {
+      padding: 4px 12px;
+      font-size: .72rem;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: var(--white);
+      color: var(--text);
+      cursor: pointer;
+      transition: background .15s;
+      font-family: var(--font);
+    }
+    .statement-header .actions .btn-sm:hover {
+      background: var(--bg);
+    }
+
+    .statement-list {
+      max-height: 300px;
+      overflow-y: auto;
+    }
+    .statement-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 6px 8px;
+      border-bottom: 1px solid var(--border);
+      font-size: .82rem;
+      gap: 8px;
+    }
+    .statement-item:last-child {
+      border-bottom: none;
+    }
+    .statement-item .stemp-info {
+      flex: 1;
+      min-width: 0;
+    }
+    .statement-item .stemp-name {
+      font-weight: 500;
+    }
+    .statement-item .stemp-detail {
+      color: var(--muted);
+      font-size: .72rem;
+      display: block;
+    }
+    .statement-item .stemp-amount {
+      font-weight: 600;
+      white-space: nowrap;
+    }
+    .statement-item .stemp-amount.positive {
+      color: var(--green);
+    }
+    .statement-item .stemp-actions {
+      display: flex;
+      gap: 4px;
+    }
+    .statement-item .stemp-actions button {
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: .72rem;
+      padding: 2px 10px;
+      border-radius: 4px;
+      transition: background .15s;
+      font-family: var(--font);
+      font-weight: 500;
+    }
+    .statement-item .stemp-actions .export-btn {
+      background: #f0fdf4;
+      color: #16a34a;
+      border: 1px solid #bbf7d0;
+    }
+    .statement-item .stemp-actions .export-btn:hover {
+      background: #16a34a;
+      color: #fff;
+    }
+    .statement-item .stemp-actions .edit-btn {
+      background: #eef0ff;
+      color: var(--accent);
+    }
+    .statement-item .stemp-actions .edit-btn:hover {
+      background: #4255ff;
+      color: #fff;
+    }
+    .statement-item .stemp-actions .del-btn {
+      background: #fde8e8;
+      color: var(--red);
+    }
+    .statement-item .stemp-actions .del-btn:hover {
+      background: var(--red);
+      color: #fff;
+    }
+
+    .statement-total {
+      border-top: 2px solid var(--border);
+      padding-top: 8px;
+      margin-top: 4px;
+      display: flex;
+      justify-content: space-between;
+      font-weight: 700;
+      font-size: .9rem;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 30px 20px;
+      color: var(--muted);
+    }
+    .empty-state p {
+      font-size: .85rem;
+      margin: 0;
+    }
+
+    .modal-salary {
+      max-width: 460px;
+    }
+    .modal-salary .form-group {
+      margin-bottom: 14px;
+    }
+    .modal-salary .form-group label {
+      font-weight: 500;
+      font-size: .85rem;
+      display: block;
+      margin-bottom: 3px;
+    }
+    .modal-salary .form-group select,
+    .modal-salary .form-group input {
+      width: 100%;
+      padding: 8px 12px;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      font-family: var(--font);
+      font-size: .85rem;
+      outline: none;
+      transition: border-color .15s;
+      background: var(--white);
+    }
+    .modal-salary .form-group select:focus,
+    .modal-salary .form-group input:focus {
+      border-color: #4255ff;
+    }
+
+    .modal-salary .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    @media (max-width: 600px) {
+      .modal-salary .form-row {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div class="page-wrap">
+  <nav class="sidebar" id="sidebar"></nav>
+
+  <main class="main">
+    <div class="page-header">
+      <h1>Lương thưởng</h1>
+      <p>Quản lý lương cho nhân viên</p>
+    </div>
+
+    <!-- Admin: Nút chức năng -->
+    <div class="salary-actions" id="admin-actions" style="display:none;">
+      <button class="btn" onclick="openSalaryModal()">Trả lương tháng</button>
+      <button class="btn" onclick="openBonusModal()"> Thưởng thêm</button>
+      <button class="btn" onclick="openEditBaseModal()">Chỉnh sửa</button>
+      
+    </div>
+
+    <div class="salary-filter">
+      <label>Tháng:</label>
+      <input type="month" id="filter-month" />
+      <button class="btn btn-ghost btn-sm" onclick="loadData()">Lọc</button>
+    </div>
+
+    <!-- Bảng lương / Trạng thái trả lương -->
+    <div class="block-view" id="block-view">
+      <div class="empty-state"><p>Đang tải dữ liệu...</p></div>
+    </div>
+
+    <!-- Sao kê -->
+    <div class="statement-card">
+      <div class="statement-header">
+        <h3>Sao kê</h3>
+        <div class="actions">
+          <button class="btn-sm" onclick="exportExcel()">Xuất Excel</button>
+        </div>
+      </div>
+      <div class="statement-list" id="statement-list">
+        <div class="empty-state"><p>Chưa có giao dịch</p></div>
+      </div>
+      <div class="statement-total" id="statement-total" style="display:none;">
+        <span>Tổng cộng</span>
+        <span id="total-amount">0 ₫</span>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- MODAL TRẢ LƯƠNG (chỉ admin) -->
+<div class="modal-overlay" id="salary-modal">
+  <div class="modal modal-salary">
+    <div class="modal-header">
+      <h2>Trả lương tháng</h2>
+      <button class="modal-close" onclick="closeModal('salary-modal')">✕</button>
+    </div>
+    <div class="form-group">
+      <label>Phòng ban</label>
+      <select id="salary-dept" onchange="filterEmpByDept()">
+        <option value="">Chọn phòng ban...</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Nhân viên</label>
+      <select id="salary-emp-id">
+        <option value="">Chọn nhân viên...</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Tháng</label>
+      <input type="month" id="salary-month" />
+    </div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:8px;">
+      <button class="btn btn-ghost" onclick="closeModal('salary-modal')">Hủy</button>
+      <button class="btn" style="background:#4255ff;color:#fff;" onclick="submitSalary()">Xác nhận</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL CHỈNH SỬA NHÂN VIÊN (admin) -->
+<div class="modal-overlay" id="edit-base-modal">
+  <div class="modal modal-salary">
+    <div class="modal-header">
+      <h2>Chỉnh sửa nhân viên</h2>
+      <button class="modal-close" onclick="closeModal('edit-base-modal')">✕</button>
+    </div>
+    <div class="form-group">
+      <label>Nhân viên</label>
+      <select id="editbase-emp-id" onchange="loadEmpInfo()">
+        <option value="">Chọn nhân viên...</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Lương cơ bản (₫)</label>
+      <input type="number" id="editbase-amount" placeholder="10000000" min="0" />
+    </div>
+    <div class="form-group">
+      <label>Phòng ban</label>
+      <input type="text" id="editbase-dept" placeholder="Kỹ thuật, Marketing..." />
+    </div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:8px;">
+      <button class="btn btn-ghost" onclick="closeModal('edit-base-modal')">Hủy</button>
+      <button class="btn" style="background:#4255ff;color:#fff;" onclick="submitEditEmployee()">Cập nhật</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL SỬA GIAO DỊCH (admin) -->
+<div class="modal-overlay" id="edit-trans-modal">
+  <div class="modal modal-salary">
+    <div class="modal-header">
+      <h2>Sửa giao dịch</h2>
+      <button class="modal-close" onclick="closeModal('edit-trans-modal')">✕</button>
+    </div>
+    <input type="hidden" id="edit-trans-id" />
+    <div class="form-group">
+      <label>Số tiền (₫)</label>
+      <input type="number" id="edit-trans-amount" min="0" />
+    </div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:8px;">
+      <button class="btn btn-ghost" onclick="closeModal('edit-trans-modal')">Hủy</button>
+      <button class="btn" style="background:#4255ff;color:#fff;" onclick="submitEditTrans()">Lưu</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL THƯỞNG THÊM (admin) -->
+<div class="modal-overlay" id="bonus-modal">
+  <div class="modal modal-salary">
+    <div class="modal-header">
+      <h2>Thưởng thêm</h2>
+      <button class="modal-close" onclick="closeModal('bonus-modal')">✕</button>
+    </div>
+    <div class="form-group">
+      <label>Nhân viên</label>
+      <select id="bonus-emp-id">
+        <option value="">Chọn nhân viên...</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Tháng</label>
+      <input type="month" id="bonus-month" />
+    </div>
+    <div class="form-group">
+      <label>Số tiền thưởng thêm (₫)</label>
+      <input type="number" id="bonus-amount" min="1" placeholder="Ví dụ: 500000" />
+    </div>
+    <div class="form-group">
+      <label>Lý do thưởng</label>
+      <input type="text" id="bonus-reason" placeholder="Ví dụ: Hoàn thành dự án xuất sắc" />
+    </div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:8px;">
+      <button class="btn btn-ghost" onclick="closeModal('bonus-modal')">Hủy</button>
+      <button class="btn" style="background:#4255ff;color:#fff;" onclick="submitBonus()">Xác nhận thưởng</button>
+
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+<script src="main.js"></script>
+<script>
+  let currentUser = null;
+  let allEmployees = [];
+  let statementData = [];
+  let allSalaryRecords = [];
+
+  function formatMonthDisplay(monthStr) {
+    if (!monthStr) return '';
+    const parts = monthStr.split('-');
+    return `${parts[1]}-${parts[0]}`;
+  }
+
+  async function init() {
+    currentUser = await requireLogin();
+    if (!currentUser) return;
+
+    renderSidebar("salary", currentUser);
+
+    const thisMonth = new Date().toISOString().slice(0, 7);
+    document.getElementById("filter-month").value = thisMonth;
+
+    if (currentUser.role === "admin") {
+      document.getElementById("admin-actions").style.display = "flex";
+    }
+
+    await loadData();
+  }
+
+  async function loadData() {
+    const month = document.getElementById("filter-month").value;
+    const isAdmin = currentUser.role === "admin";
+
+    let employees = [];
+    if (isAdmin) {
+      const res = await API.get("/auth/employees");
+      if (res.success) employees = res.data;
+    } else {
+      const res = await API.get("/auth/profile");
+      if (res.success) {
+        employees = [{ 
+          id: res.data.id, 
+          name: res.data.name, 
+          department: res.data.department, 
+          base_salary: res.data.base_salary 
+        }];
+      }
+    }
+    allEmployees = employees;
+
+    const res = await API.get(`/salary?month=${month}`);
+    allSalaryRecords = res.success ? res.data : [];
+
+    const empMap = {};
+    allSalaryRecords.forEach(s => {
+      if (!empMap[s.employee_id]) {
+        empMap[s.employee_id] = { paid: false, total: 0, base: 0 };
+      }
+      empMap[s.employee_id].paid = true;
+      empMap[s.employee_id].base = s.base;
+      empMap[s.employee_id].total = s.total;
+    });
+
+    statementData = [];
+    allSalaryRecords.forEach(s => {
+      const emp = employees.find(e => e.id === s.employee_id);
+      const name = emp ? emp.name : 'ID ' + s.employee_id;
+      
+      statementData.push({
+        id: s.id,
+        employee_id: s.employee_id,
+        name: name,
+        amount: s.total,
+        reason: `Lương tháng ${formatMonthDisplay(s.month)}`,
+        date: s.month,
+        base: s.base
+      });
+    });
+
+    renderBlocks(employees, empMap);
+    renderStatement();
+  }
+
+  function renderBlocks(employees, empMap) {
+    const container = document.getElementById('block-view');
+
+    if (!employees || employees.length === 0) {
+      container.innerHTML = `<div class="empty-state"><p>Không có nhân viên</p></div>`;
+      return;
+    }
+
+    const groups = {};
+    employees.forEach(emp => {
+      const key = emp.department || 'Chưa phân loại';
+      if (!groups[key]) groups[key] = [];
+      groups[key].push(emp);
+    });
+
+    let html = '';
+    for (const [dept, emps] of Object.entries(groups)) {
+      const allPaid = emps.every(e => empMap[e.id] && empMap[e.id].paid);
+      const paidCount = emps.filter(e => empMap[e.id] && empMap[e.id].paid).length;
+      const deptStatus = allPaid ? 'paid' : 'unpaid';
+
+      html += `<div class="block-dept">
+        <div class="block-dept-header">
+          <span class="dept-name ${deptStatus}">${dept}</span>
+          <span class="dept-count">${paidCount}/${emps.length}</span>
+        </div>
+        <div class="block-emps">`;
+
+      emps.forEach(emp => {
+        const data = empMap[emp.id] || { paid: false, total: 0 };
+        const isPaid = data.paid;
+        const salaryDisplay = isPaid ? formatMoney(data.total) : formatMoney(emp.base_salary || 0);
+        const empStatus = isPaid ? 'paid' : 'unpaid';
+
+        html += `
+          <div class="block-emp ${empStatus}">
+            <span class="emp-name ${empStatus}">${emp.name}</span>
+            <span class="emp-salary">${salaryDisplay}</span>
+            <span class="emp-dot ${empStatus}">●</span>
+          </div>
+        `;
+      });
+
+      html += `</div></div>`;
+    }
+
+    container.innerHTML = html;
+  }
+
+  function renderStatement() {
+    const list = document.getElementById('statement-list');
+    const totalEl = document.getElementById('statement-total');
+    const totalAmount = document.getElementById('total-amount');
+    const isAdmin = currentUser.role === 'admin';
+
+    if (statementData.length === 0) {
+      list.innerHTML = `<div class="empty-state"><p>Chưa có giao dịch</p></div>`;
+      totalEl.style.display = 'none';
+      return;
+    }
+
+    const sorted = [...statementData].reverse();
+
+    list.innerHTML = sorted.map((item) => {
+      const amountClass = item.amount >= 0 ? 'positive' : 'negative';
+
+      let actions = '';
+      if (isAdmin) {
+        actions = `
+          <div class="stemp-actions">
+            <button class="export-btn" onclick="exportPayslip(${item.id}, '${item.name}', '${item.date}')">Phiếu lương</button>
+            <button class="edit-btn" onclick="openEditTrans(${item.id}, ${item.amount})">Sửa</button>
+            <button class="del-btn" onclick="deleteTrans(${item.id})">Xóa</button>
+          </div>
+        `;
+      } else {
+        // User cũng xuất phiếu của mình được
+        actions = `
+          <div class="stemp-actions">
+            <button class="export-btn" onclick="exportPayslip(${item.id}, '${item.name}', '${item.date}')">Phiếu lương</button>
+          </div>
+        `;
+      }
+
+      return `
+        <div class="statement-item">
+          <div class="stemp-info">
+            <span class="stemp-name">${item.name}</span>
+            <span class="stemp-detail">Lương — ${item.reason}</span>
+          </div>
+          <span class="stemp-amount ${amountClass}">${formatMoney(item.amount)}</span>
+          ${actions}
+        </div>
+      `;
+    }).join('');
+
+    const total = statementData.reduce((sum, i) => sum + i.amount, 0);
+    totalAmount.textContent = formatMoney(total);
+    totalEl.style.display = 'flex';
+  }
+
+  function filterEmpByDept() {
+    const deptSelect = document.getElementById('salary-dept');
+    const empSelect = document.getElementById('salary-emp-id');
+    const selectedDept = deptSelect.value;
+
+    empSelect.innerHTML = '<option value="">Chọn nhân viên...</option>';
+
+    if (selectedDept) {
+      const filtered = allEmployees.filter(e => e.department === selectedDept);
+      filtered.forEach(emp => {
+        empSelect.innerHTML += `<option value="${emp.id}">${emp.name}</option>`;
+      });
+    }
+  }
+
+  async function loadEmployeeOptions() {
+    const res = await API.get("/auth/employees");
+    if (!res.success) return;
+    allEmployees = res.data;
+
+    const depts = [...new Set(allEmployees.map(e => e.department).filter(Boolean))];
+
+    // Load dropdown cho modal trả lương
+    const deptSelect = document.getElementById('salary-dept');
+    if (deptSelect) {
+      deptSelect.innerHTML = '<option value="">Chọn phòng ban...</option>';
+      depts.forEach(dept => {
+        deptSelect.innerHTML += `<option value="${dept}">${dept}</option>`;
+      });
+    }
+
+    // Load dropdown cho modal chỉnh sửa
+    const editSelect = document.getElementById('editbase-emp-id');
+    if (editSelect) {
+      editSelect.innerHTML = '<option value="">Chọn nhân viên...</option>';
+      allEmployees.forEach(emp => {
+        editSelect.innerHTML += `<option value="${emp.id}" data-dept="${emp.department}" data-salary="${emp.base_salary}">${emp.name} (${emp.department})</option>`;
+      });
+    }
+
+    document.getElementById("salary-month").value = new Date().toISOString().slice(0, 7);
+  }
+
+  function loadEmpInfo() {
+    const sel = document.getElementById('editbase-emp-id');
+    const selected = sel.options[sel.selectedIndex];
+    if (selected && selected.value) {
+      document.getElementById('editbase-amount').value = selected.dataset.salary || '';
+      document.getElementById('editbase-dept').value = selected.dataset.dept || '';
+    } else {
+      document.getElementById('editbase-amount').value = '';
+      document.getElementById('editbase-dept').value = '';
+    }
+  }
+
+  // ===== TRẢ LƯƠNG =====
+  async function submitSalary() {
+    const employee_id = parseInt(document.getElementById("salary-emp-id").value);
+    const month = document.getElementById("salary-month").value;
+
+    if (!employee_id) {
+      showToast("Vui lòng chọn nhân viên", "error");
+      return;
+    }
+
+    const check = await API.get(`/salary?month=${month}`);
+    if (check.success) {
+      const existing = check.data.find(s => s.employee_id === employee_id);
+      if (existing) {
+        showToast("Nhân viên này đã được trả lương tháng này!", "error");
+        return;
+      }
+    }
+
+    const emp = allEmployees.find(e => e.id === employee_id);
+    if (!emp) {
+      showToast("Không tìm thấy nhân viên", "error");
+      return;
+    }
+
+    const res = await API.post("/salary", {
+      employee_id,
+      month,
+      bonus: 0,
+      deduction: 0,
+      note: `Lương tháng ${formatMonthDisplay(month)}`
+    });
+
+    showToast(res.message, res.success ? "success" : "error");
+    if (res.success) {
+      closeModal('salary-modal');
+      document.getElementById("salary-dept").value = '';
+      document.getElementById("salary-emp-id").value = '';
+      await loadData();
+    }
+  }
+
+  // ===== CHỈNH SỬA NHÂN VIÊN =====
+  async function submitEditEmployee() {
+    const employee_id = parseInt(document.getElementById("editbase-emp-id").value);
+    const base_salary = parseFloat(document.getElementById("editbase-amount").value) || 0;
+    const department = document.getElementById("editbase-dept").value.trim();
+
+    if (!employee_id) {
+      showToast("Vui lòng chọn nhân viên", "error");
+      return;
+    }
+
+    const updateData = { employee_id };
+    if (base_salary > 0) updateData.base_salary = base_salary;
+    if (department) updateData.department = department;
+
+    if (Object.keys(updateData).length === 1) {
+      showToast("Vui lòng nhập thông tin cần cập nhật", "error");
+      return;
+    }
+
+    const res = await API.put("/auth/profile/admin-update", updateData);
+
+    showToast(res.message, res.success ? "success" : "error");
+    if (res.success) {
+      closeModal('edit-base-modal');
+      document.getElementById("editbase-emp-id").value = '';
+      document.getElementById("editbase-amount").value = '';
+      document.getElementById("editbase-dept").value = '';
+      await loadData();
+    }
+  }
+
+  // ===== SỬA GIAO DỊCH =====
+  function openEditTrans(id, amount) {
+    document.getElementById("edit-trans-id").value = id;
+    document.getElementById("edit-trans-amount").value = amount;
+    openModal('edit-trans-modal');
+  }
+
+  async function submitEditTrans() {
+    const id = parseInt(document.getElementById("edit-trans-id").value);
+    const amount = parseFloat(document.getElementById("edit-trans-amount").value) || 0;
+
+    if (amount < 0) {
+      showToast("Số tiền không được âm", "error");
+      return;
+    }
+
+    const res = await API.put(`/salary/${id}`, {
+      bonus: 0,
+      deduction: 0,
+      note: 'Cập nhật lương'
+    });
+
+    showToast(res.message, res.success ? "success" : "error");
+    if (res.success) {
+      closeModal('edit-trans-modal');
+      await loadData();
+    }
+  }
+
+  // ===== XÓA GIAO DỊCH =====
+  async function deleteTrans(id) {
+    if (!confirm("Bạn có chắc muốn xóa giao dịch này?")) return;
+
+    const res = await API.delete(`/salary/${id}`);
+    showToast(res.message, res.success ? "success" : "error");
+    if (res.success) await loadData();
+  }
+
+  // ===== MỞ MODAL =====
+  function openSalaryModal() {
+    loadEmployeeOptions();
+    document.getElementById("salary-dept").value = '';
+    document.getElementById("salary-emp-id").value = '';
+    openModal('salary-modal');
+  }
+
+  function openEditBaseModal() {
+    loadEmployeeOptions();
+    document.getElementById("editbase-emp-id").value = '';
+    document.getElementById("editbase-amount").value = '';
+    document.getElementById("editbase-dept").value = '';
+    openModal('edit-base-modal');
+  }
+
+  // ===== EXPORT EXCEL =====
+  function exportExcel() {
+    if (statementData.length === 0) {
+      showToast("Không có dữ liệu để xuất", "error");
+      return;
+    }
+
+    let csv = "STT,Tên nhân viên,Lý do,Số tiền,Ngày\n";
+    statementData.forEach((item, index) => {
+      const monthDisplay = formatMonthDisplay(item.date);
+      csv += `${index + 1},${item.name},${item.reason},${item.amount},${monthDisplay}\n`;
+    });
+
+    const total = statementData.reduce((sum, i) => sum + i.amount, 0);
+    csv += `\nTổng cộng,,,${total},`;
+
+    const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `sao_ke_luong_${document.getElementById("filter-month").value}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+    showToast("Xuất file thành công!", "success");
+  }
+
+  document.addEventListener('DOMContentLoaded', function() {
+    document.getElementById("filter-month").addEventListener('change', loadData);
+  });
+
+  // ===== THƯỞNG THÊM =====
+  function openBonusModal() {
+    const sel = document.getElementById("bonus-emp-id");
+    sel.innerHTML = '<option value="">Chọn nhân viên...</option>';
+    allEmployees.forEach(emp => {
+      sel.innerHTML += `<option value="${emp.id}">${emp.name} (${emp.department || '—'})</option>`;
+    });
+    document.getElementById("bonus-month").value  = document.getElementById("filter-month").value;
+    document.getElementById("bonus-amount").value = "";
+    document.getElementById("bonus-reason").value = "";
+    openModal("bonus-modal");
+  }
+
+  async function submitBonus() {
+    const employee_id = parseInt(document.getElementById("bonus-emp-id").value);
+    const month       = document.getElementById("bonus-month").value;
+    const amount      = parseFloat(document.getElementById("bonus-amount").value) || 0;
+    const reason      = document.getElementById("bonus-reason").value.trim();
+
+    if (!employee_id) { showToast("Vui lòng chọn nhân viên", "error"); return; }
+    if (!month)       { showToast("Vui lòng chọn tháng", "error"); return; }
+    if (amount <= 0)  { showToast("Số tiền thưởng phải lớn hơn 0", "error"); return; }
+    if (!reason)      { showToast("Vui lòng nhập lý do thưởng", "error"); return; }
+
+    const res = await API.post("/salary/bonus", { employee_id, month, amount, reason });
+    showToast(res.message, res.success ? "success" : "error");
+    if (res.success) {
+      closeModal("bonus-modal");
+      await loadData();
+    }
+  }
+
+  // ===== XUẤT PHIẾU LƯƠNG DOCX =====
+  async function exportPayslip(salaryId, empName, month) {
+    showToast("Đang tạo phiếu lương...", "default");
+    try {
+      const res = await fetch(`/api/salary/export?salary_id=${salaryId}`, {
+        credentials: "include"
+      });
+      if (!res.ok) {
+        const err = await res.json();
+        showToast(err.message || "Lỗi xuất phiếu lương", "error");
+        return;
+      }
+      // tải file về
+      const blob = await res.blob();
+      const url  = URL.createObjectURL(blob);
+      const a    = document.createElement("a");
+      const safeName = empName.replace(/\s+/g, "_");
+      a.href     = url;
+      a.download = `phieu_luong_${safeName}_${month}.docx`;
+      a.click();
+      URL.revokeObjectURL(url);
+      showToast("Xuất phiếu lương thành công!", "success");
+    } catch (err) {
+      showToast("Lỗi kết nối khi xuất phiếu", "error");
+    }
+  }
+
+  init();
+</script>
+</body>
+</html>

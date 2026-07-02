@@ -1,0 +1,871 @@
+<!DOCTYPE html>
+<!-- view/shop.html — Cửa hàng vật phẩm -->
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cửa hàng — SmartEMS</title>
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="icon" type="image/png" href="image/logo_E.png" />
+  <style>
+    .shop-balance {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 16px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+    .shop-balance .balance-info {
+      display: flex;
+      gap: 24px;
+      flex-wrap: wrap;
+    }
+    .shop-balance .balance-item {
+      text-align: center;
+    }
+    .shop-balance .balance-item .label {
+      font-size: .72rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .04em;
+    }
+    .shop-balance .balance-item .value {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+    .shop-balance .balance-item .value.positive {
+      color: var(--green);
+    }
+    .shop-balance .balance-item .value.negative {
+      color: var(--red);
+    }
+    .shop-balance .balance-actions {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+    .btn-outline {
+      background: transparent;
+      border: 1.5px solid var(--border);
+      color: var(--muted);
+      padding: 6px 14px;
+      border-radius: 6px;
+      font-family: var(--font);
+      font-size: .78rem;
+      cursor: pointer;
+      transition: all .15s;
+    }
+    .btn-outline:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .salary-detail-table {
+      width: 100%;
+      font-size: .82rem;
+      border-collapse: collapse;
+    }
+    .salary-detail-table th {
+      text-align: left;
+      padding: 4px 8px;
+      color: var(--muted);
+      font-weight: 600;
+      font-size: .7rem;
+      text-transform: uppercase;
+      border-bottom: 1px solid var(--border);
+    }
+    .salary-detail-table td {
+      padding: 4px 8px;
+      border-bottom: 1px solid var(--border);
+    }
+    .salary-detail-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .shop-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+    .shop-card {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 16px;
+      text-align: center;
+      transition: all .2s;
+    }
+    .shop-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+    }
+    .shop-card .item-image-wrapper {
+      width: 100%;
+      height: 120px;
+      border-radius: 8px;
+      background: var(--bg);
+      margin: 0 auto 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      position: relative;
+    }
+    .shop-card .item-image-wrapper img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      border-radius: 8px;
+    }
+    .shop-card .item-image-wrapper .item-emoji {
+      font-size: 3.5rem;
+      line-height: 1;
+    }
+    .shop-card .item-name {
+      font-weight: 600;
+      font-size: .95rem;
+      margin-bottom: 4px;
+    }
+    .shop-card .item-desc {
+      font-size: .78rem;
+      color: var(--muted);
+      margin-bottom: 8px;
+      min-height: 36px;
+    }
+    .shop-card .item-price {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--accent);
+      margin-bottom: 8px;
+    }
+    .shop-card .item-stock {
+      font-size: .72rem;
+      color: var(--muted);
+      margin-bottom: 10px;
+    }
+    .shop-card .item-stock.out-of-stock {
+      color: var(--red);
+      font-weight: 600;
+    }
+    .shop-card .btn-buy {
+      padding: 6px 20px;
+      border-radius: 6px;
+      border: none;
+      font-family: var(--font);
+      font-weight: 600;
+      cursor: pointer;
+      transition: background .15s;
+    }
+    .shop-card .btn-buy.buy {
+      background: var(--accent);
+      color: #fff;
+    }
+    .shop-card .btn-buy.buy:hover {
+      background: var(--accent-h);
+    }
+    .shop-card .btn-buy.buy:disabled {
+      opacity: .5;
+      cursor: not-allowed;
+    }
+    .shop-card .btn-buy.edit {
+      background: #eef0ff;
+      color: var(--accent);
+    }
+    .shop-card .btn-buy.edit:hover {
+      background: var(--accent);
+      color: #fff;
+    }
+    .shop-card .btn-buy.delete {
+      background: #fde8e8;
+      color: var(--red);
+    }
+    .shop-card .btn-buy.delete:hover {
+      background: var(--red);
+      color: #fff;
+    }
+    .shop-card .admin-actions {
+      display: flex;
+      gap: 6px;
+      justify-content: center;
+      margin-top: 8px;
+    }
+
+    .shop-transactions {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 16px;
+    }
+    .shop-transactions .trans-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .shop-transactions .trans-header h3 {
+      font-size: .95rem;
+      font-weight: 600;
+      margin: 0;
+    }
+    .shop-transactions .trans-list {
+      max-height: 250px;
+      overflow-y: auto;
+    }
+    .shop-transactions .trans-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 6px 8px;
+      border-bottom: 1px solid var(--border);
+      font-size: .82rem;
+      gap: 8px;
+    }
+    .shop-transactions .trans-item:last-child {
+      border-bottom: none;
+    }
+    .shop-transactions .trans-item .trans-info {
+      flex: 1;
+    }
+    .shop-transactions .trans-item .trans-name {
+      font-weight: 500;
+    }
+    .shop-transactions .trans-item .trans-detail {
+      color: var(--muted);
+      font-size: .72rem;
+    }
+    .shop-transactions .trans-item .trans-amount {
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .modal-shop {
+      max-width: 480px;
+    }
+    .modal-shop .form-group {
+      margin-bottom: 14px;
+    }
+    .modal-shop .form-group label {
+      font-weight: 500;
+      font-size: .85rem;
+      display: block;
+      margin-bottom: 3px;
+    }
+    .modal-shop .form-group input,
+    .modal-shop .form-group select,
+    .modal-shop .form-group textarea {
+      width: 100%;
+      padding: 8px 12px;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      font-family: var(--font);
+      font-size: .85rem;
+      outline: none;
+      transition: border-color .15s;
+      background: var(--white);
+    }
+    .modal-shop .form-group input:focus,
+    .modal-shop .form-group select:focus,
+    .modal-shop .form-group textarea:focus {
+      border-color: #4255ff;
+    }
+    .modal-shop .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    .modal-shop .form-group textarea {
+      resize: vertical;
+      min-height: 60px;
+    }
+
+    .image-upload-area {
+      border: 2px dashed var(--border);
+      border-radius: 8px;
+      padding: 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: all .2s;
+      background: var(--bg);
+      min-height: 120px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .image-upload-area:hover {
+      border-color: var(--accent);
+      background: #eef0ff;
+    }
+    .image-upload-area .preview-image {
+      max-width: 100%;
+      max-height: 150px;
+      border-radius: 6px;
+      object-fit: contain;
+    }
+    .image-upload-area .upload-hint {
+      font-size: .78rem;
+      color: var(--muted);
+    }
+    .image-upload-area .upload-hint .icon {
+      font-size: 2rem;
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    .btn-primary {
+      background: #4255ff;
+      color: #fff;
+    }
+    .btn-primary:hover {
+      background: #3345e8;
+    }
+
+    .buy-item-image {
+      width: 100px;
+      height: 100px;
+      margin: 0 auto 8px;
+      border-radius: 8px;
+      background: var(--bg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+    .buy-item-image img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+    .buy-item-image .buy-emoji {
+      font-size: 3.5rem;
+    }
+
+    @media (max-width: 600px) {
+      .shop-balance {
+        flex-direction: column;
+        align-items: stretch;
+        text-align: center;
+      }
+      .shop-balance .balance-info {
+        justify-content: center;
+      }
+      .modal-shop .form-row {
+        grid-template-columns: 1fr;
+      }
+      .shop-grid {
+        grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      }
+      .shop-card .item-image-wrapper {
+        height: 100px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div class="page-wrap">
+  <nav class="sidebar" id="sidebar"></nav>
+
+  <main class="main">
+    <div class="page-header">
+      <h1>Cửa hàng vật phẩm</h1>
+      <p>Mua sắm bằng tiền lương của bạn</p>
+    </div>
+
+    <!-- Số dư -->
+    <div class="shop-balance" id="shop-balance">
+      <div class="balance-info">
+        <div class="balance-item">
+          <div class="label">Tổng lương đã nhận</div>
+          <div class="value" id="total-salary">0 ₫</div>
+        </div>
+        <div class="balance-item">
+          <div class="label">Đã chi tiêu</div>
+          <div class="value negative" id="total-spent">0 ₫</div>
+        </div>
+        <div class="balance-item">
+          <div class="label">Số dư hiện tại</div>
+          <div class="value positive" id="balance">0 ₫</div>
+        </div>
+      </div>
+      <div class="balance-actions">
+        <button class="btn-outline" onclick="toggleSalaryDetail()">Chi tiết lương</button>
+        <button class="btn btn-primary" onclick="loadBalance()" style="padding:8px 16px;font-size:.82rem;">⟳ Cập nhật</button>
+      </div>
+    </div>
+
+    <!-- Chi tiết lương -->
+    <div class="shop-balance" id="salary-detail" style="display:none;background:var(--bg);border-color:var(--border);padding:12px 20px;">
+      <div style="width:100%;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+          <span style="font-weight:600;font-size:.9rem;">Chi tiết lương theo tháng</span>
+          <button onclick="toggleSalaryDetail()" style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:1.1rem;">✕</button>
+        </div>
+        <div id="salary-detail-list" style="max-height:180px;overflow-y:auto;font-size:.82rem;">
+          <div style="color:var(--muted);text-align:center;padding:12px;">Đang tải...</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Admin: Nút thêm vật phẩm -->
+    <div id="admin-actions" style="display:none;margin-bottom:16px;">
+      <button class="btn btn-primary" onclick="openAddItemModal()">+ Thêm vật phẩm</button>
+    </div>
+
+    <!-- Danh sách vật phẩm -->
+    <div class="shop-grid" id="shop-grid">
+      <div class="empty-state" style="grid-column:1/-1;"><p>Đang tải...</p></div>
+    </div>
+
+    <!-- Lịch sử giao dịch -->
+    <div class="shop-transactions">
+      <div class="trans-header">
+        <h3>Lịch sử mua hàng</h3>
+        <span style="font-size:.78rem;color:var(--muted);" id="trans-count">0 giao dịch</span>
+      </div>
+      <div class="trans-list" id="trans-list">
+        <div class="empty-state"><p>Chưa có giao dịch</p></div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- MODAL THÊM/SỬA VẬT PHẨM (Admin) -->
+<div class="modal-overlay" id="item-modal">
+  <div class="modal modal-shop">
+    <div class="modal-header">
+      <h2 id="item-modal-title">Thêm vật phẩm</h2>
+      <button class="modal-close" onclick="closeModal('item-modal')">✕</button>
+    </div>
+    <input type="hidden" id="edit-item-id" value="" />
+    
+    <div class="form-group">
+      <label>Tên vật phẩm *</label>
+      <input type="text" id="item-name" placeholder="Ví dụ: Áo thun SmartEMS" />
+    </div>
+    <div class="form-group">
+      <label>Mô tả</label>
+      <textarea id="item-desc" placeholder="Mô tả chi tiết về vật phẩm"></textarea>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Giá (₫) *</label>
+        <input type="number" id="item-price" placeholder="100000" min="0" />
+      </div>
+      <div class="form-group">
+        <label>Số lượng tồn kho *</label>
+        <input type="number" id="item-stock" placeholder="10" min="0" />
+      </div>
+    </div>
+    
+    <div class="form-group">
+      <label>Hình ảnh sản phẩm</label>
+      <div class="image-upload-area" id="image-upload-area" onclick="document.getElementById('image-input').click()">
+        <div id="image-preview">
+          <span class="upload-hint">
+            <span class="icon">📸</span>
+            Nhấp để chọn ảnh từ máy tính<br>
+            <span style="font-size:.7rem;">(Hỗ trợ JPG, PNG, GIF - tối đa 2MB)</span>
+          </span>
+        </div>
+        <input type="file" id="image-input" accept="image/*" style="display:none;" />
+      </div>
+    </div>
+    
+    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:8px;">
+      <button class="btn btn-ghost" onclick="closeModal('item-modal')">Hủy</button>
+      <button class="btn btn-primary" onclick="saveItem()">Lưu</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL XÁC NHẬN MUA HÀNG -->
+<div class="modal-overlay" id="buy-modal">
+  <div class="modal modal-shop" style="max-width:400px;">
+    <div class="modal-header">
+      <h2>Xác nhận mua hàng</h2>
+      <button class="modal-close" onclick="closeModal('buy-modal')">✕</button>
+    </div>
+    <div style="text-align:center;padding:10px 0;">
+      <div class="buy-item-image" id="buy-item-image">
+        <span class="buy-emoji">📦</span>
+      </div>
+      <div style="font-weight:600;font-size:1.1rem;" id="buy-item-name">Tên vật phẩm</div>
+      <div style="color:var(--muted);font-size:.85rem;margin:4px 0;" id="buy-item-desc">Mô tả</div>
+      <div style="font-size:1.3rem;font-weight:700;color:var(--accent);margin:8px 0;" id="buy-item-price">100,000 ₫</div>
+      <div style="color:var(--muted);font-size:.82rem;">Số dư sau khi mua: <strong id="buy-balance-after">0 ₫</strong></div>
+    </div>
+    <div style="display:flex;gap:10px;justify-content:center;margin-top:8px;">
+      <button class="btn btn-ghost" onclick="closeModal('buy-modal')">Hủy</button>
+      <button class="btn btn-primary" onclick="confirmPurchase()">Xác nhận mua</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+<script src="main.js"></script>
+<script>
+  let currentUser = null;
+  let shopItems = [];
+  let transactions = [];
+  let balanceData = {};
+  let isAdmin = false;
+  let selectedItemId = null;
+  let uploadedImage = null;
+  let showSalaryDetail = false;
+
+  async function init() {
+    currentUser = await requireLogin();
+    if (!currentUser) return;
+
+    isAdmin = currentUser.role === "admin";
+    renderSidebar("shop", currentUser);
+
+    if (isAdmin) {
+      document.getElementById("admin-actions").style.display = "block";
+    }
+
+    document.getElementById("image-input").addEventListener('change', function(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      
+      if (file.size > 2 * 1024 * 1024) {
+        showToast("Ảnh quá lớn! Vui lòng chọn ảnh dưới 2MB", "error");
+        this.value = '';
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = async function(e) {
+        const imageData = e.target.result;
+        const res = await API.post("/shop/upload-image", { image: imageData });
+        if (res.success) {
+          uploadedImage = res.image;
+          const preview = document.getElementById("image-preview");
+          preview.innerHTML = `<img src="${res.image}" class="preview-image" alt="Preview" />`;
+          showToast("Tải ảnh thành công!", "success");
+        } else {
+          showToast(res.message || "Lỗi tải ảnh", "error");
+        }
+      };
+      reader.readAsDataURL(file);
+    });
+
+    await loadAll();
+  }
+
+  async function loadAll() {
+    await Promise.all([
+      loadItems(),
+      loadBalance(),
+      loadTransactions()
+    ]);
+  }
+
+  async function loadItems() {
+    const res = await API.get("/shop/items");
+    if (!res.success) {
+      document.getElementById("shop-grid").innerHTML = 
+        `<div class="empty-state" style="grid-column:1/-1;"><p>Không tải được danh sách</p></div>`;
+      return;
+    }
+    shopItems = res.data;
+    renderItems();
+  }
+
+  function renderItems() {
+    const grid = document.getElementById("shop-grid");
+    
+    if (shopItems.length === 0) {
+      grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1;"><p>Chưa có vật phẩm nào</p></div>`;
+      return;
+    }
+
+    grid.innerHTML = shopItems.map(item => {
+      const isActive = item.status === "active";
+      const stock = item.stock || 0;
+      const isOutOfStock = stock <= 0 || !isActive;
+      
+      let actions = '';
+      if (isAdmin) {
+        actions = `
+          <div class="admin-actions">
+            <button class="btn-buy edit" onclick="openEditItem(${item.id})">Sửa</button>
+            <button class="btn-buy delete" onclick="deleteItem(${item.id})">Xóa</button>
+          </div>
+        `;
+      }
+
+      const buyButton = !isAdmin && isActive && stock > 0 ? 
+        `<button class="btn-buy buy" onclick="openBuyModal(${item.id})">Mua ngay</button>` :
+        `<button class="btn-buy buy" disabled>${isOutOfStock ? 'Hết hàng' : 'Ngừng bán'}</button>`;
+
+      let imageHtml = '';
+      if (item.image && item.image.startsWith('data:image')) {
+        imageHtml = `<img src="${item.image}" alt="${item.name}" />`;
+      } else if (item.image && !item.image.startsWith('data:image')) {
+        imageHtml = `<span class="item-emoji">${item.image}</span>`;
+      } else {
+        imageHtml = `<span class="item-emoji">📦</span>`;
+      }
+
+      return `
+        <div class="shop-card">
+          <div class="item-image-wrapper">${imageHtml}</div>
+          <div class="item-name">${item.name}</div>
+          <div class="item-desc">${item.description || 'Không có mô tả'}</div>
+          <div class="item-price">${formatMoney(item.price)}</div>
+          <div class="item-stock ${isOutOfStock ? 'out-of-stock' : ''}">
+            ${isActive ? `Còn ${stock} sản phẩm` : 'Ngừng bán'}
+          </div>
+          ${buyButton}
+          ${actions}
+        </div>
+      `;
+    }).join('');
+  }
+
+  async function loadBalance() {
+    const res = await API.get("/shop/balance");
+    if (!res.success) return;
+    
+    balanceData = res.data;
+    document.getElementById("total-salary").textContent = formatMoney(balanceData.total_salary || 0);
+    document.getElementById("total-spent").textContent = formatMoney(balanceData.total_spent || 0);
+    document.getElementById("balance").textContent = formatMoney(balanceData.balance || 0);
+    
+    const balanceEl = document.getElementById("balance");
+    balanceEl.className = "value " + ((balanceData.balance || 0) >= 0 ? "positive" : "negative");
+    
+    renderSalaryDetail();
+  }
+
+  function renderSalaryDetail() {
+    const list = document.getElementById("salary-detail-list");
+    if (!balanceData.salary_details || balanceData.salary_details.length === 0) {
+      list.innerHTML = '<div style="color:var(--muted);text-align:center;padding:12px;">Chưa có dữ liệu lương</div>';
+      return;
+    }
+    
+    const sorted = [...balanceData.salary_details].reverse();
+    
+    list.innerHTML = `
+      <table class="salary-detail-table">
+        <thead>
+          <tr>
+            <th>Tháng</th>
+            <th>Lương CB</th>
+            <th>Thưởng</th>
+            <th>Khấu trừ</th>
+            <th>Thực nhận</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${sorted.map(s => {
+            const monthDisplay = s.month ? s.month.replace('-', '/') : 'N/A';
+            return `
+              <tr>
+                <td><strong>${monthDisplay}</strong></td>
+                <td>${formatMoney(s.base || 0)}</td>
+                <td style="color:var(--green);">${formatMoney(s.bonus || 0)}</td>
+                <td style="color:var(--red);">${formatMoney(s.deduction || 0)}</td>
+                <td style="font-weight:600;">${formatMoney(s.total || 0)}</td>
+              </tr>
+            `;
+          }).join('')}
+        </tbody>
+      </table>
+    `;
+  }
+
+  function toggleSalaryDetail() {
+    const el = document.getElementById("salary-detail");
+    showSalaryDetail = !showSalaryDetail;
+    el.style.display = showSalaryDetail ? 'block' : 'none';
+    if (showSalaryDetail) {
+      renderSalaryDetail();
+    }
+  }
+
+  async function loadTransactions() {
+    const res = await API.get("/shop/transactions");
+    if (!res.success) {
+      document.getElementById("trans-list").innerHTML = 
+        `<div class="empty-state"><p>Không tải được lịch sử</p></div>`;
+      return;
+    }
+    
+    transactions = res.data;
+    document.getElementById("trans-count").textContent = transactions.length + " giao dịch";
+
+    const list = document.getElementById("trans-list");
+    if (transactions.length === 0) {
+      list.innerHTML = `<div class="empty-state"><p>Chưa có giao dịch nào</p></div>`;
+      return;
+    }
+
+    list.innerHTML = transactions.slice(0, 20).map(t => {
+      const name = t.employee_name || `ID ${t.employee_id}`;
+      return `
+        <div class="trans-item">
+          <div class="trans-info">
+            <span class="trans-name">${name}</span>
+            <span class="trans-detail">${t.quantity}x ${t.item_name} — ${t.transaction_date || ''}</span>
+          </div>
+          <span class="trans-amount" style="color:var(--red);">-${formatMoney(t.total)}</span>
+        </div>
+      `;
+    }).join('');
+  }
+
+  function openBuyModal(itemId) {
+    selectedItemId = itemId;
+    const item = shopItems.find(i => i.id === itemId);
+    if (!item) return;
+
+    const imageContainer = document.getElementById("buy-item-image");
+    if (item.image && item.image.startsWith('data:image')) {
+      imageContainer.innerHTML = `<img src="${item.image}" alt="${item.name}" />`;
+    } else if (item.image && !item.image.startsWith('data:image')) {
+      imageContainer.innerHTML = `<span class="buy-emoji">${item.image}</span>`;
+    } else {
+      imageContainer.innerHTML = `<span class="buy-emoji">📦</span>`;
+    }
+
+    document.getElementById("buy-item-name").textContent = item.name;
+    document.getElementById("buy-item-desc").textContent = item.description || '';
+    document.getElementById("buy-item-price").textContent = formatMoney(item.price);
+    
+    const balanceAfter = (balanceData.balance || 0) - item.price;
+    document.getElementById("buy-balance-after").textContent = formatMoney(balanceAfter);
+    
+    openModal("buy-modal");
+  }
+
+  async function confirmPurchase() {
+    if (!selectedItemId) return;
+
+    const res = await API.post("/shop/purchase", {
+      item_id: selectedItemId,
+      quantity: 1
+    });
+
+    showToast(res.message, res.success ? "success" : "error");
+    if (res.success) {
+      closeModal("buy-modal");
+      await loadAll();
+    }
+  }
+
+  function openAddItemModal() {
+    document.getElementById("item-modal-title").textContent = "Thêm vật phẩm";
+    document.getElementById("edit-item-id").value = "";
+    document.getElementById("item-name").value = "";
+    document.getElementById("item-desc").value = "";
+    document.getElementById("item-price").value = "";
+    document.getElementById("item-stock").value = "";
+    uploadedImage = null;
+    document.getElementById("image-preview").innerHTML = `
+      <span class="upload-hint">
+        <span class="icon">📸</span>
+        Nhấp để chọn ảnh từ máy tính<br>
+        <span style="font-size:.7rem;">(Hỗ trợ JPG, PNG, GIF - tối đa 2MB)</span>
+      </span>
+    `;
+    document.getElementById("image-input").value = '';
+    openModal("item-modal");
+  }
+
+  function openEditItem(itemId) {
+    const item = shopItems.find(i => i.id === itemId);
+    if (!item) {
+      showToast("Không tìm thấy vật phẩm", "error");
+      return;
+    }
+
+    document.getElementById("item-modal-title").textContent = "Sửa vật phẩm";
+    document.getElementById("edit-item-id").value = item.id;
+    document.getElementById("item-name").value = item.name;
+    document.getElementById("item-desc").value = item.description || "";
+    document.getElementById("item-price").value = item.price;
+    document.getElementById("item-stock").value = item.stock;
+    
+    uploadedImage = item.image || null;
+    if (uploadedImage && uploadedImage.startsWith('data:image')) {
+      document.getElementById("image-preview").innerHTML = 
+        `<img src="${uploadedImage}" class="preview-image" alt="Preview" />`;
+    } else {
+      document.getElementById("image-preview").innerHTML = `
+        <span class="upload-hint">
+          <span class="icon">📸</span>
+          Nhấp để chọn ảnh từ máy tính<br>
+          <span style="font-size:.7rem;">(Hỗ trợ JPG, PNG, GIF - tối đa 2MB)</span>
+        </span>
+      `;
+    }
+    document.getElementById("image-input").value = '';
+    openModal("item-modal");
+  }
+
+  async function saveItem() {
+    const id = document.getElementById("edit-item-id").value;
+    const name = document.getElementById("item-name").value.trim();
+    const description = document.getElementById("item-desc").value.trim();
+    const price = parseFloat(document.getElementById("item-price").value) || 0;
+    const stock = parseInt(document.getElementById("item-stock").value) || 0;
+
+    if (!name) {
+      showToast("Vui lòng nhập tên vật phẩm", "error");
+      return;
+    }
+    if (price <= 0) {
+      showToast("Giá phải lớn hơn 0", "error");
+      return;
+    }
+    if (stock < 0) {
+      showToast("Số lượng tồn kho không được âm", "error");
+      return;
+    }
+
+    const image = uploadedImage || '📦';
+    const data = { name, description, price, stock, image, status: "active" };
+    let res;
+
+    if (id) {
+      res = await API.put(`/shop/items/${id}`, data);
+    } else {
+      res = await API.post("/shop/items", data);
+    }
+
+    showToast(res.message, res.success ? "success" : "error");
+    if (res.success) {
+      closeModal("item-modal");
+      await loadItems();
+    }
+  }
+
+  async function deleteItem(itemId) {
+    const item = shopItems.find(i => i.id === itemId);
+    if (!item) {
+      showToast("Không tìm thấy vật phẩm", "error");
+      return;
+    }
+    if (!confirm(`Xóa vật phẩm "${item.name}"?`)) return;
+
+    const res = await API.delete(`/shop/items/${itemId}`);
+    showToast(res.message, res.success ? "success" : "error");
+    if (res.success) await loadItems();
+  }
+
+  init();
+</script>
+</body>
+</html>

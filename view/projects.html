@@ -1,0 +1,1092 @@
+<!-- view/projects.html — Quản lý dự án -->
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dự án — SmartEMS</title>
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="icon" type="image/png" href="image/logo_E.png" />
+  <style>
+    .project-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    .project-header .filter-group {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .project-header .filter-group select,
+    .project-header .filter-group input {
+      padding: 6px 12px;
+      border: 1.5px solid var(--border);
+      border-radius: 6px;
+      font-family: var(--font);
+      font-size: .82rem;
+      background: var(--white);
+      outline: none;
+    }
+    .project-header .filter-group select:focus,
+    .project-header .filter-group input:focus {
+      border-color: #4255ff;
+    }
+
+    .project-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+    .project-card {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 16px 20px;
+      transition: all .2s;
+      cursor: pointer;
+    }
+    .project-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+    }
+    .project-card .project-name {
+      font-weight: 700;
+      font-size: 1.05rem;
+      margin-bottom: 4px;
+    }
+    .project-card .project-desc {
+      font-size: .85rem;
+      color: var(--muted);
+      margin-bottom: 8px;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    .project-card .project-meta {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      font-size: .72rem;
+      color: var(--muted);
+    }
+    .project-card .project-meta .owner {
+      font-weight: 500;
+      color: var(--text);
+    }
+    .project-card .project-meta .status-badge {
+      padding: 2px 10px;
+      border-radius: 12px;
+      font-weight: 600;
+      font-size: .65rem;
+      text-transform: uppercase;
+    }
+    .project-card .project-meta .status-badge.active {
+      background: #dcf5ea;
+      color: #1a7a4a;
+    }
+    .project-card .project-meta .status-badge.completed {
+      background: #eef0ff;
+      color: #4255ff;
+    }
+    .project-card .project-meta .status-badge.archived {
+      background: #f1f2f4;
+      color: #6b7280;
+    }
+    .project-card .project-meta .members {
+      color: var(--muted);
+    }
+    .project-card .project-actions {
+      display: flex;
+      gap: 6px;
+      margin-top: 10px;
+    }
+    .project-card .project-actions button {
+      padding: 4px 14px;
+      border: none;
+      border-radius: 4px;
+      font-family: var(--font);
+      font-size: .72rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background .15s;
+    }
+    .project-card .project-actions .edit-btn {
+      background: #eef0ff;
+      color: var(--accent);
+    }
+    .project-card .project-actions .edit-btn:hover {
+      background: var(--accent);
+      color: #fff;
+    }
+    .project-card .project-actions .del-btn {
+      background: #fde8e8;
+      color: var(--red);
+    }
+    .project-card .project-actions .del-btn:hover {
+      background: var(--red);
+      color: #fff;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 40px 20px;
+      color: var(--muted);
+    }
+    .empty-state .icon {
+      font-size: 3rem;
+      display: block;
+      margin-bottom: 12px;
+    }
+
+    .modal-project {
+      max-width: 560px;
+    }
+    .modal-project .form-group {
+      margin-bottom: 14px;
+    }
+    .modal-project .form-group label {
+      font-weight: 500;
+      font-size: .85rem;
+      display: block;
+      margin-bottom: 3px;
+    }
+    .modal-project .form-group input,
+    .modal-project .form-group select,
+    .modal-project .form-group textarea {
+      width: 100%;
+      padding: 8px 12px;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      font-family: var(--font);
+      font-size: .85rem;
+      outline: none;
+      transition: border-color .15s;
+      background: var(--white);
+    }
+    .modal-project .form-group input:focus,
+    .modal-project .form-group select:focus,
+    .modal-project .form-group textarea:focus {
+      border-color: #4255ff;
+    }
+    .modal-project .form-group textarea {
+      resize: vertical;
+      min-height: 80px;
+    }
+    .modal-project .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .modal-commit {
+      max-width: 560px;
+    }
+    .modal-commit .form-group {
+      margin-bottom: 14px;
+    }
+    .modal-commit .form-group label {
+      font-weight: 500;
+      font-size: .85rem;
+      display: block;
+      margin-bottom: 3px;
+    }
+    .modal-commit .form-group input,
+    .modal-commit .form-group textarea {
+      width: 100%;
+      padding: 8px 12px;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      font-family: var(--font);
+      font-size: .85rem;
+      outline: none;
+      background: var(--white);
+    }
+    .modal-commit .form-group textarea {
+      resize: vertical;
+      min-height: 60px;
+    }
+    .modal-commit .file-list {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px 12px;
+      max-height: 150px;
+      overflow-y: auto;
+    }
+    .modal-commit .file-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 4px 0;
+      font-size: .82rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .modal-commit .file-item:last-child {
+      border-bottom: none;
+    }
+    .modal-commit .file-item .file-name {
+      flex: 1;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .modal-commit .file-item .file-size {
+      font-size: .7rem;
+      color: var(--muted);
+      margin: 0 8px;
+    }
+    .modal-commit .file-item .remove-btn {
+      background: none;
+      border: none;
+      color: var(--red);
+      cursor: pointer;
+      font-size: .8rem;
+    }
+    .modal-commit .file-upload-area {
+      border: 2px dashed var(--border);
+      border-radius: 8px;
+      padding: 16px;
+      text-align: center;
+      cursor: pointer;
+      transition: all .2s;
+      background: var(--bg);
+      margin-top: 6px;
+    }
+    .modal-commit .file-upload-area:hover {
+      border-color: var(--accent);
+      background: #eef0ff;
+    }
+    .modal-commit .file-upload-area .upload-hint {
+      font-size: .78rem;
+      color: var(--muted);
+    }
+
+    .commit-list {
+      margin-top: 12px;
+      max-height: 300px;
+      overflow-y: auto;
+    }
+    .commit-item {
+      background: var(--bg);
+      border-radius: 6px;
+      padding: 10px 14px;
+      margin-bottom: 8px;
+      border-left: 3px solid var(--border);
+    }
+    .commit-item.pending {
+      border-left-color: #f59e0b;
+    }
+    .commit-item.approved {
+      border-left-color: #23b26d;
+    }
+    .commit-item.rejected {
+      border-left-color: #e53935;
+    }
+    .commit-item .commit-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .commit-item .commit-author {
+      font-weight: 600;
+      font-size: .88rem;
+    }
+    .commit-item .commit-status {
+      font-size: .72rem;
+      font-weight: 600;
+      padding: 2px 10px;
+      border-radius: 12px;
+    }
+    .commit-item .commit-status.pending {
+      background: #fef3c7;
+      color: #92400e;
+    }
+    .commit-item .commit-status.approved {
+      background: #dcf5ea;
+      color: #1a7a4a;
+    }
+    .commit-item .commit-status.rejected {
+      background: #fde8e8;
+      color: #b91c1c;
+    }
+    .commit-item .commit-message {
+      font-size: .85rem;
+      color: var(--text);
+      margin: 4px 0;
+    }
+    .commit-item .commit-files {
+      font-size: .72rem;
+      color: var(--muted);
+    }
+    .commit-item .commit-actions {
+      display: flex;
+      gap: 6px;
+      margin-top: 6px;
+      flex-wrap: wrap;
+    }
+    .commit-item .commit-actions button {
+      padding: 2px 12px;
+      border: none;
+      border-radius: 4px;
+      font-family: var(--font);
+      font-size: .7rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background .15s;
+    }
+    .commit-item .commit-actions .approve-btn {
+      background: #dcf5ea;
+      color: #1a7a4a;
+    }
+    .commit-item .commit-actions .approve-btn:hover {
+      background: #1a7a4a;
+      color: #fff;
+    }
+    .commit-item .commit-actions .reject-btn {
+      background: #fde8e8;
+      color: #b91c1c;
+    }
+    .commit-item .commit-actions .reject-btn:hover {
+      background: #b91c1c;
+      color: #fff;
+    }
+    .commit-item .commit-actions .del-btn {
+      background: #f1f2f4;
+      color: #6b7280;
+    }
+    .commit-item .commit-actions .del-btn:hover {
+      background: #6b7280;
+      color: #fff;
+    }
+
+    .file-list-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 6px;
+      margin: 8px 0;
+    }
+    .file-list-grid .file-item-card {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 6px 10px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: .78rem;
+    }
+    .file-list-grid .file-item-card .file-name {
+      flex: 1;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .file-list-grid .file-item-card .download-btn {
+      background: none;
+      border: none;
+      color: var(--accent);
+      cursor: pointer;
+      font-size: .8rem;
+      padding: 2px 6px;
+    }
+    .file-list-grid .file-item-card .download-btn:hover {
+      color: var(--accent-h);
+    }
+
+    .download-all-btn {
+      background: #23b26d;
+      color: #fff;
+      border: none;
+      padding: 6px 16px;
+      border-radius: 6px;
+      font-family: var(--font);
+      font-size: .78rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background .15s;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .download-all-btn:hover {
+      background: #1a8f55;
+    }
+    .download-all-btn:disabled {
+      opacity: .5;
+      cursor: not-allowed;
+    }
+
+    @media (max-width: 600px) {
+      .project-header {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      .modal-project .form-row {
+        grid-template-columns: 1fr;
+      }
+      .project-grid {
+        grid-template-columns: 1fr;
+      }
+      .file-list-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div class="page-wrap">
+  <nav class="sidebar" id="sidebar"></nav>
+
+  <main class="main">
+    <div class="page-header">
+      <h1>Dự án</h1>
+      <p>Quản lý dự án và commit code</p>
+    </div>
+
+    <div class="project-header">
+      <div class="filter-group">
+        <select id="filter-status" onchange="loadProjects()">
+          <option value="">Tất cả trạng thái</option>
+          <option value="active">Đang hoạt động</option>
+          <option value="completed">Hoàn thành</option>
+          <option value="archived">Đã lưu trữ</option>
+        </select>
+        <input type="text" id="search-project" placeholder="Tìm kiếm..." oninput="loadProjects()" />
+      </div>
+      <div id="admin-actions" style="display:none;">
+        <button class="btn btn-primary" onclick="openAddProjectModal()">+ Tạo dự án</button>
+      </div>
+    </div>
+
+    <div class="project-grid" id="project-grid">
+      <div class="empty-state">
+        <span class="icon">📁</span>
+        <p>Đang tải dự án...</p>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- MODAL XEM DỰ ÁN CHI TIẾT -->
+<div class="modal-overlay" id="detail-modal">
+  <div class="modal modal-project" style="max-width:700px;">
+    <div class="modal-header">
+      <h2 id="detail-title">Tên dự án</h2>
+      <button class="modal-close" onclick="closeModal('detail-modal')">✕</button>
+    </div>
+    <div id="detail-body">
+      <div style="margin-bottom:12px;color:var(--muted);font-size:.85rem;" id="detail-desc">Mô tả</div>
+      <div style="display:flex;gap:12px;flex-wrap:wrap;font-size:.82rem;color:var(--muted);margin-bottom:12px;">
+        <span id="detail-owner">Chủ sở hữu: </span>
+        <span id="detail-status">Trạng thái: </span>
+        <span id="detail-members">Thành viên: </span>
+        <span id="detail-created">Tạo lúc: </span>
+        <span id="detail-file-count">File: 0</span>
+      </div>
+      
+      <!-- Danh sách file với nút tải tất cả -->
+      <div style="border-top:1px solid var(--border);padding-top:12px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:8px;">
+          <h3 style="font-size:.95rem;margin:0;">File trong dự án</h3>
+          <button class="download-all-btn" id="download-all-btn" onclick="downloadAllFiles()">
+            Tải tất cả (ZIP)
+          </button>
+        </div>
+        <div id="detail-files" class="file-list-grid">
+          <div class="empty-state" style="padding:10px;"><p>Chưa có file nào</p></div>
+        </div>
+      </div>
+      
+      <!-- Lịch sử commit -->
+      <div style="border-top:1px solid var(--border);padding-top:12px;margin-top:8px;">
+        <h3 style="font-size:.95rem;margin-bottom:8px;">Lịch sử commit</h3>
+        <div id="detail-commits" class="commit-list">
+          <div class="empty-state" style="padding:20px;"><p>Chưa có commit nào</p></div>
+        </div>
+      </div>
+      
+      <div style="margin-top:12px;border-top:1px solid var(--border);padding-top:12px;display:flex;gap:8px;flex-wrap:wrap;">
+        <button class="btn btn-primary" id="detail-commit-btn" onclick="openCommitModal(currentProjectId)">+ Gửi commit</button>
+        <button class="btn btn-ghost" onclick="closeModal('detail-modal')">Đóng</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL TẠO/SỬA DỰ ÁN (Admin) -->
+<div class="modal-overlay" id="project-modal">
+  <div class="modal modal-project">
+    <div class="modal-header">
+      <h2 id="project-modal-title">Tạo dự án</h2>
+      <button class="modal-close" onclick="closeModal('project-modal')">✕</button>
+    </div>
+    <input type="hidden" id="edit-project-id" value="" />
+    
+    <div class="form-group">
+      <label>Tên dự án *</label>
+      <input type="text" id="project-name" placeholder="Nhập tên dự án..." />
+    </div>
+    <div class="form-group">
+      <label>Mô tả</label>
+      <textarea id="project-desc" placeholder="Mô tả dự án..."></textarea>
+    </div>
+    <div class="form-group">
+      <label>Trạng thái</label>
+      <select id="project-status">
+        <option value="active">Đang hoạt động</option>
+        <option value="completed">Hoàn thành</option>
+        <option value="archived">Đã lưu trữ</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Thành viên (chọn nhiều)</label>
+      <select id="project-members" multiple style="height:100px;">
+      </select>
+      <span style="font-size:.72rem;color:var(--muted);">Giữ Ctrl/Cmd để chọn nhiều</span>
+    </div>
+    
+    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:8px;">
+      <button class="btn btn-ghost" onclick="closeModal('project-modal')">Hủy</button>
+      <button class="btn btn-primary" onclick="saveProject()">Lưu</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL GỬI COMMIT -->
+<div class="modal-overlay" id="commit-modal">
+  <div class="modal modal-commit">
+    <div class="modal-header">
+      <h2>Gửi commit</h2>
+      <button class="modal-close" onclick="closeModal('commit-modal')">✕</button>
+    </div>
+    <input type="hidden" id="commit-project-id" value="" />
+    
+    <div class="form-group">
+      <label>Nội dung commit *</label>
+      <textarea id="commit-message" placeholder="Mô tả những thay đổi..."></textarea>
+    </div>
+    <div class="form-group">
+      <label>File thay đổi</label>
+      <div class="file-list" id="commit-files">
+        <div style="color:var(--muted);font-size:.82rem;text-align:center;padding:8px;">Chưa có file</div>
+      </div>
+      <div class="file-upload-area" onclick="document.getElementById('file-input').click()">
+        <span class="upload-hint">
+          Nhấp để chọn file từ máy tính<br>
+          <span style="font-size:.7rem;">(Hỗ trợ tất cả các loại file)</span>
+        </span>
+        <input type="file" id="file-input" multiple style="display:none;" />
+      </div>
+    </div>
+    
+    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:8px;">
+      <button class="btn btn-ghost" onclick="closeModal('commit-modal')">Hủy</button>
+      <button class="btn btn-primary" onclick="submitCommit()">Gửi commit</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+<script src="main.js"></script>
+<script>
+  let currentUser = null;
+  let isAdmin = false;
+  let projects = [];
+  let allEmployees = [];
+  let currentProjectId = null;
+  let commitFiles = [];
+
+  async function init() {
+    currentUser = await requireLogin();
+    if (!currentUser) return;
+
+    isAdmin = currentUser.role === "admin";
+    renderSidebar("projects", currentUser);
+
+    if (isAdmin) {
+      document.getElementById("admin-actions").style.display = "block";
+      await loadEmployeesForSelect();
+    }
+
+    document.getElementById("file-input").addEventListener('change', function(event) {
+      const files = event.target.files;
+      for (let file of files) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          commitFiles.push({
+            name: file.name,
+            content: e.target.result,
+            size: file.size
+          });
+          renderCommitFiles();
+        };
+        reader.readAsDataURL(file);
+      }
+      this.value = '';
+    });
+
+    await loadProjects();
+  }
+
+  async function loadEmployeesForSelect() {
+    const res = await API.get("/auth/employees");
+    if (!res.success) return;
+    allEmployees = res.data;
+    
+    const select = document.getElementById("project-members");
+    select.innerHTML = '';
+    allEmployees.forEach(emp => {
+      const option = document.createElement("option");
+      option.value = emp.id;
+      option.textContent = `${emp.name} (${emp.department || 'Chưa có phòng ban'})`;
+      select.appendChild(option);
+    });
+  }
+
+  async function loadProjects() {
+    const status = document.getElementById("filter-status").value;
+    const search = document.getElementById("search-project")?.value?.trim() || "";
+
+    let url = "/projects";
+    const params = [];
+    if (status) params.push(`status=${status}`);
+    if (params.length) url += "?" + params.join("&");
+
+    const res = await API.get(url);
+    const grid = document.getElementById("project-grid");
+
+    if (!res.success) {
+      grid.innerHTML = `<div class="empty-state"><span class="icon">❌</span><p>${res.message || 'Không tải được dự án'}</p></div>`;
+      return;
+    }
+
+    let data = res.data || [];
+    
+    if (search) {
+      const keyword = search.toLowerCase();
+      data = data.filter(p => 
+        p.name.toLowerCase().includes(keyword) ||
+        p.description.toLowerCase().includes(keyword) ||
+        p.owner_name.toLowerCase().includes(keyword)
+      );
+    }
+
+    projects = data;
+
+    if (data.length === 0) {
+      grid.innerHTML = `<div class="empty-state"><span class="icon">📁</span><p>Chưa có dự án nào</p></div>`;
+      return;
+    }
+
+    const statusMap = {
+      'active': 'Đang hoạt động',
+      'completed': 'Hoàn thành',
+      'archived': 'Đã lưu trữ'
+    };
+    const statusClassMap = {
+      'active': 'active',
+      'completed': 'completed',
+      'archived': 'archived'
+    };
+
+    grid.innerHTML = data.map(project => {
+      let actions = '';
+      if (isAdmin) {
+        actions = `
+          <div class="project-actions">
+            <button class="edit-btn" onclick="event.stopPropagation();openEditProjectModal(${project.id})">Sửa</button>
+            <button class="del-btn" onclick="event.stopPropagation();deleteProject(${project.id})">Xóa</button>
+          </div>
+        `;
+      }
+
+      const memberCount = project.members ? project.members.length : 0;
+
+      return `
+        <div class="project-card" onclick="openProjectDetail(${project.id})">
+          <div class="project-name">${project.name}</div>
+          <div class="project-desc">${project.description || 'Không có mô tả'}</div>
+          <div class="project-meta">
+            <span class="owner">${project.owner_name}</span>
+            <span class="status-badge ${statusClassMap[project.status] || 'active'}">${statusMap[project.status] || 'Đang hoạt động'}</span>
+            <span class="members">${memberCount} thành viên</span>
+          </div>
+          ${actions}
+        </div>
+      `;
+    }).join('');
+  }
+
+  // ===== MỞ CHI TIẾT DỰ ÁN =====
+  async function openProjectDetail(projectId) {
+    currentProjectId = projectId;
+    const project = projects.find(p => p.id === projectId);
+    if (!project) return;
+
+    document.getElementById("detail-title").textContent = project.name;
+    document.getElementById("detail-desc").textContent = project.description || 'Không có mô tả';
+    document.getElementById("detail-owner").textContent = `Chủ sở hữu: ${project.owner_name}`;
+    
+    const statusMap = {'active': 'Đang hoạt động', 'completed': 'Hoàn thành', 'archived': 'Đã lưu trữ'};
+    document.getElementById("detail-status").textContent = `Trạng thái: ${statusMap[project.status] || 'Đang hoạt động'}`;
+    
+    const memberCount = project.members ? project.members.length : 0;
+    document.getElementById("detail-members").textContent = `Thành viên: ${memberCount}`;
+    document.getElementById("detail-created").textContent = `Tạo lúc: ${project.created_at || ''}`;
+
+    const isMember = project.members && project.members.includes(currentUser.employee_id);
+    const isOwner = project.owner_id === currentUser.employee_id;
+    const canCommit = isAdmin || isMember || isOwner;
+    document.getElementById("detail-commit-btn").style.display = canCommit ? 'inline-flex' : 'none';
+
+    await Promise.all([
+      loadCommits(projectId),
+      loadFiles(projectId)
+    ]);
+    openModal("detail-modal");
+  }
+
+  // ===== TẢI TẤT CẢ FILE =====
+  async function downloadAllFiles() {
+    const btn = document.getElementById("download-all-btn");
+    btn.disabled = true;
+    btn.textContent = "Đang tạo ZIP...";
+
+    try {
+      const res = await fetch(`/api/projects/${currentProjectId}/files/download-all`, {
+        credentials: 'include'
+      });
+      
+      if (!res.ok) {
+        const error = await res.json();
+        showToast(error.message || 'Lỗi tải file', 'error');
+        return;
+      }
+
+      const blob = await res.blob();
+      const contentDisposition = res.headers.get('content-disposition');
+      let filename = `project_${currentProjectId}_files.zip`;
+      if (contentDisposition) {
+        const match = contentDisposition.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/);
+        if (match && match[1]) {
+          filename = match[1].replace(/['"]/g, '');
+        }
+      }
+
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+      showToast('Tải tất cả file thành công!', 'success');
+    } catch (err) {
+      console.error('Download all error:', err);
+      showToast('Lỗi tải file: ' + err.message, 'error');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Tải tất cả (ZIP)';
+    }
+  }
+
+  // ===== LOAD FILES =====
+  async function loadFiles(projectId) {
+    const res = await API.get(`/projects/${projectId}/files`);
+    const container = document.getElementById("detail-files");
+
+    if (!res.success) {
+      container.innerHTML = `<div class="empty-state" style="padding:10px;"><p>${res.message || 'Không tải được'}</p></div>`;
+      return;
+    }
+
+    const data = res.data || [];
+    document.getElementById("detail-file-count").textContent = `File: ${data.length}`;
+
+    if (data.length === 0) {
+      container.innerHTML = `<div class="empty-state" style="padding:10px;"><p>Chưa có file nào</p></div>`;
+      return;
+    }
+
+    container.innerHTML = data.map(file => {
+      const size = file.size ? (file.size / 1024).toFixed(1) + 'KB' : 'Unknown';
+      return `
+        <div class="file-item-card">
+          <span class="file-name">${file.name}</span>
+          <span style="font-size:.65rem;color:var(--muted);margin:0 4px;">${size}</span>
+          <button class="download-btn" onclick="event.stopPropagation();downloadFile(${file.id})" title="Tải xuống">Tải</button>
+        </div>
+      `;
+    }).join('');
+  }
+
+  // ===== DOWNLOAD 1 FILE =====
+  async function downloadFile(fileId) {
+    try {
+      const res = await fetch(`/api/projects/${currentProjectId}/files/${fileId}/download`, {
+        credentials: 'include'
+      });
+      
+      if (!res.ok) {
+        const error = await res.json();
+        showToast(error.message || 'Lỗi tải file', 'error');
+        return;
+      }
+
+      const blob = await res.blob();
+      const contentDisposition = res.headers.get('content-disposition');
+      let filename = 'download';
+      if (contentDisposition) {
+        const match = contentDisposition.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/);
+        if (match && match[1]) {
+          filename = match[1].replace(/['"]/g, '');
+        }
+      }
+
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+      showToast('Tải file thành công!', 'success');
+    } catch (err) {
+      console.error('Download error:', err);
+      showToast('Lỗi tải file: ' + err.message, 'error');
+    }
+  }
+
+  // ===== LOAD COMMITS =====
+  async function loadCommits(projectId) {
+    const res = await API.get(`/projects/${projectId}/commits`);
+    const container = document.getElementById("detail-commits");
+
+    if (!res.success) {
+      container.innerHTML = `<div class="empty-state" style="padding:20px;"><p>${res.message || 'Không tải được'}</p></div>`;
+      return;
+    }
+
+    const data = res.data || [];
+    if (data.length === 0) {
+      container.innerHTML = `<div class="empty-state" style="padding:20px;"><p>Chưa có commit nào</p></div>`;
+      return;
+    }
+
+    const statusMap = {'pending': 'Chờ duyệt', 'approved': 'Đã duyệt', 'rejected': 'Từ chối'};
+    const statusClassMap = {'pending': 'pending', 'approved': 'approved', 'rejected': 'rejected'};
+
+    container.innerHTML = data.map(commit => {
+      const files = commit.files || [];
+      const filesText = files.length > 0 ? files.join(', ') : 'Không có file';
+      
+      let actions = '';
+      if (isAdmin && commit.status === 'pending') {
+        actions = `
+          <div class="commit-actions">
+            <button class="approve-btn" onclick="approveCommit(${commit.id})">Duyệt</button>
+            <button class="reject-btn" onclick="rejectCommit(${commit.id})">Từ chối</button>
+          </div>
+        `;
+      } else if (commit.employee_id === currentUser.employee_id || isAdmin) {
+        actions = `
+          <div class="commit-actions">
+            <button class="del-btn" onclick="deleteCommit(${commit.id})">Xóa</button>
+          </div>
+        `;
+      }
+
+      return `
+        <div class="commit-item ${statusClassMap[commit.status] || 'pending'}">
+          <div class="commit-head">
+            <span class="commit-author">${commit.employee_name}</span>
+            <span class="commit-status ${statusClassMap[commit.status] || 'pending'}">${statusMap[commit.status] || 'Chờ duyệt'}</span>
+          </div>
+          <div class="commit-message">${commit.message}</div>
+          <div class="commit-files">${filesText}</div>
+          <div style="font-size:.68rem;color:var(--muted);">${commit.created_at || ''}</div>
+          ${actions}
+        </div>
+      `;
+    }).join('');
+  }
+
+  // ===== GỬI COMMIT =====
+  function openCommitModal(projectId) {
+    document.getElementById("commit-project-id").value = projectId;
+    document.getElementById("commit-message").value = '';
+    commitFiles = [];
+    renderCommitFiles();
+    document.getElementById("file-input").value = '';
+    openModal("commit-modal");
+  }
+
+  function renderCommitFiles() {
+    const container = document.getElementById("commit-files");
+    if (commitFiles.length === 0) {
+      container.innerHTML = `<div style="color:var(--muted);font-size:.82rem;text-align:center;padding:8px;">Chưa có file</div>`;
+      return;
+    }
+    container.innerHTML = commitFiles.map((file, index) => {
+      const size = file.size ? (file.size / 1024).toFixed(1) + 'KB' : 'Unknown';
+      return `
+        <div class="file-item">
+          <span class="file-name">${file.name}</span>
+          <span class="file-size">${size}</span>
+          <button class="remove-btn" onclick="removeCommitFile(${index})">Xóa</button>
+        </div>
+      `;
+    }).join('');
+  }
+
+  function removeCommitFile(index) {
+    commitFiles.splice(index, 1);
+    renderCommitFiles();
+  }
+
+  async function submitCommit() {
+    const projectId = document.getElementById("commit-project-id").value;
+    const message = document.getElementById("commit-message").value.trim();
+
+    if (!message) {
+      showToast("Vui lòng nhập nội dung commit", "error");
+      return;
+    }
+
+    if (commitFiles.length === 0) {
+      showToast("Vui lòng chọn ít nhất 1 file", "error");
+      return;
+    }
+
+    const filesData = commitFiles.map(f => ({
+      name: f.name,
+      content: f.content
+    }));
+
+    const res = await API.post(`/projects/${projectId}/commits`, {
+      message: message,
+      files: filesData
+    });
+
+    showToast(res.message, res.success ? "success" : "error");
+    if (res.success) {
+      closeModal("commit-modal");
+      await Promise.all([
+        loadCommits(parseInt(projectId)),
+        loadFiles(parseInt(projectId))
+      ]);
+    }
+  }
+
+  // ===== ADMIN: DUYỆT COMMIT =====
+  async function approveCommit(commitId) {
+    if (!confirm("Duyệt commit này?")) return;
+    const res = await API.put(`/projects/${currentProjectId}/commits/${commitId}`, { status: "approved" });
+    showToast(res.message, res.success ? "success" : "error");
+    if (res.success) await loadCommits(currentProjectId);
+  }
+
+  async function rejectCommit(commitId) {
+    if (!confirm("Từ chối commit này?")) return;
+    const res = await API.put(`/projects/${currentProjectId}/commits/${commitId}`, { status: "rejected" });
+    showToast(res.message, res.success ? "success" : "error");
+    if (res.success) await loadCommits(currentProjectId);
+  }
+
+  async function deleteCommit(commitId) {
+    if (!confirm("Xóa commit này?")) return;
+    const res = await API.delete(`/projects/${currentProjectId}/commits/${commitId}`);
+    showToast(res.message, res.success ? "success" : "error");
+    if (res.success) {
+      await Promise.all([
+        loadCommits(currentProjectId),
+        loadFiles(currentProjectId)
+      ]);
+    }
+  }
+
+  // ===== ADMIN: QUẢN LÝ DỰ ÁN =====
+  function openAddProjectModal() {
+    document.getElementById("project-modal-title").textContent = "Tạo dự án";
+    document.getElementById("edit-project-id").value = "";
+    document.getElementById("project-name").value = "";
+    document.getElementById("project-desc").value = "";
+    document.getElementById("project-status").value = "active";
+    document.getElementById("project-members").selectedIndex = -1;
+    openModal("project-modal");
+  }
+
+  function openEditProjectModal(projectId) {
+    const project = projects.find(p => p.id === projectId);
+    if (!project) {
+      showToast("Không tìm thấy dự án", "error");
+      return;
+    }
+
+    document.getElementById("project-modal-title").textContent = "Sửa dự án";
+    document.getElementById("edit-project-id").value = project.id;
+    document.getElementById("project-name").value = project.name;
+    document.getElementById("project-desc").value = project.description || "";
+    document.getElementById("project-status").value = project.status || "active";
+    
+    const select = document.getElementById("project-members");
+    for (let i = 0; i < select.options.length; i++) {
+      select.options[i].selected = project.members && project.members.includes(parseInt(select.options[i].value));
+    }
+    openModal("project-modal");
+  }
+
+  async function saveProject() {
+    const id = document.getElementById("edit-project-id").value;
+    const name = document.getElementById("project-name").value.trim();
+    const description = document.getElementById("project-desc").value.trim();
+    const status = document.getElementById("project-status").value;
+    const select = document.getElementById("project-members");
+    const members = Array.from(select.selectedOptions).map(opt => parseInt(opt.value));
+
+    if (!name) {
+      showToast("Vui lòng nhập tên dự án", "error");
+      return;
+    }
+
+    const data = { name, description, status, members };
+    let res;
+
+    if (id) {
+      res = await API.put(`/projects/${id}`, data);
+    } else {
+      res = await API.post("/projects", data);
+    }
+
+    showToast(res.message, res.success ? "success" : "error");
+    if (res.success) {
+      closeModal("project-modal");
+      await loadProjects();
+    }
+  }
+
+  async function deleteProject(projectId) {
+    const project = projects.find(p => p.id === projectId);
+    if (!confirm(`Xóa dự án "${project?.name}"?`)) return;
+
+    const res = await API.delete(`/projects/${projectId}`);
+    showToast(res.message, res.success ? "success" : "error");
+    if (res.success) await loadProjects();
+  }
+
+  init();
+</script>
+</body>
+</html>

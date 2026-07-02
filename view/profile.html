@@ -1,0 +1,823 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hồ sơ — SmartEMS</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="icon" type="image/png" href="image/logo_E.png" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <!-- Cropper.js -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.css" />
+  <style>
+    /* ===== PROFILE COVER ===== */
+    .profile-cover-wrapper {
+      position: relative;
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 12px 12px 0 0;
+      overflow: hidden;
+    }
+    .profile-cover {
+      width: 100%;
+      height: 220px;
+      background: #d1d5db;
+      background-image: 
+        radial-gradient(circle at 20% 30%, #e5e7eb 0%, transparent 50%),
+        radial-gradient(circle at 80% 70%, #9ca3af 0%, transparent 40%);
+      position: relative;
+      cursor: pointer;
+      transition: opacity .2s;
+    }
+    .profile-cover:hover .cover-overlay {
+      opacity: 1;
+    }
+    .profile-cover img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .profile-cover .cover-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(0,0,0,0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      transition: opacity .2s;
+      color: #fff;
+      font-size: .88rem;
+      font-weight: 500;
+      gap: 6px;
+    }
+    .profile-cover .cover-overlay svg {
+      width: 18px;
+      height: 18px;
+    }
+
+    /* ===== PROFILE AVATAR ===== */
+    .profile-avatar-section {
+      position: relative;
+      padding: 0 28px 16px;
+      margin-top: -60px;
+      display: flex;
+      align-items: flex-end;
+      gap: 20px;
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-top: none;
+      border-radius: 0 0 12px 12px;
+      padding-bottom: 16px;
+    }
+    .profile-avatar-wrapper {
+      position: relative;
+      flex-shrink: 0;
+    }
+    .profile-avatar {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      background: #eef0ff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 3.2rem;
+      font-weight: 700;
+      color: var(--accent);
+      overflow: hidden;
+      border: 4px solid var(--white);
+      box-shadow: 0 2px 12px rgba(0,0,0,0.12);
+      cursor: pointer;
+      transition: border-color .2s;
+    }
+    .profile-avatar:hover {
+      border-color: var(--accent);
+    }
+    .profile-avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .profile-avatar .avatar-letter {
+      font-size: 3.2rem;
+      font-weight: 700;
+      color: var(--accent);
+    }
+
+    .profile-avatar-edit {
+      position: absolute;
+      bottom: 4px;
+      right: 4px;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: var(--accent);
+      color: #fff;
+      border: 2.5px solid #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: .8rem;
+      transition: background .15s, transform .15s;
+      box-shadow: 0 2px 8px rgba(66, 85, 255, 0.3);
+    }
+    .profile-avatar-edit:hover {
+      background: var(--accent-h);
+      transform: scale(1.05);
+    }
+
+    .profile-name-section {
+      flex: 1;
+      padding-top: 20px;
+    }
+    .profile-name-section .name {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+    .profile-name-section .role {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: .85rem;
+      color: var(--muted);
+    }
+    .profile-name-section .role .dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+    .profile-name-section .role .dot.admin {
+      background: var(--accent);
+    }
+    .profile-name-section .role .dot.employee {
+      background: var(--green);
+    }
+    .profile-name-section .dept {
+      font-size: .88rem;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+    .profile-name-section .dept span {
+      color: var(--text);
+      font-weight: 500;
+    }
+
+    /* ===== PROFILE STATS ===== */
+    .profile-stats-row {
+      display: flex;
+      gap: 24px;
+      margin-top: 6px;
+      padding-top: 8px;
+      border-top: 1px solid var(--border);
+    }
+    .profile-stats-row .stat-item {
+      text-align: center;
+    }
+    .profile-stats-row .stat-item .number {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+    .profile-stats-row .stat-item .label {
+      font-size: .68rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .04em;
+    }
+
+    /* ===== TABS ===== */
+    .profile-tabs {
+      display: flex;
+      gap: 4px;
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 4px;
+      margin: 20px 0;
+    }
+    .profile-tabs .tab-btn {
+      flex: 1;
+      padding: 10px 20px;
+      border: none;
+      background: none;
+      font-family: var(--font);
+      font-size: .88rem;
+      font-weight: 500;
+      color: var(--muted);
+      cursor: pointer;
+      border-radius: 8px;
+      transition: all .2s;
+    }
+    .profile-tabs .tab-btn:hover {
+      background: var(--bg);
+      color: var(--text);
+    }
+    .profile-tabs .tab-btn.active {
+      background: var(--accent);
+      color: #fff;
+      box-shadow: 0 2px 12px rgba(66, 85, 255, 0.25);
+    }
+
+    /* ===== TAB PANELS ===== */
+    .tab-panel {
+      display: none;
+      animation: fadeIn .25s ease;
+    }
+    .tab-panel.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .panel-card {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px 28px;
+    }
+    .panel-card .panel-title {
+      font-size: 1.05rem;
+      font-weight: 600;
+      margin-bottom: 18px;
+    }
+
+    /* Info rows */
+    .info-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4px 32px;
+    }
+    .info-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .info-row .label {
+      color: var(--muted);
+      font-weight: 500;
+      font-size: .88rem;
+    }
+    .info-row .value {
+      font-weight: 500;
+      font-size: .88rem;
+      color: var(--text);
+    }
+    .info-row:last-child {
+      border-bottom: none;
+    }
+
+    /* Form */
+    .form-group {
+      margin-bottom: 16px;
+    }
+    .form-group label {
+      display: block;
+      font-weight: 500;
+      font-size: .85rem;
+      margin-bottom: 4px;
+      color: var(--text);
+    }
+    .form-group input {
+      width: 100%;
+      padding: 9px 14px;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      font-family: var(--font);
+      font-size: .88rem;
+      color: var(--text);
+      background: var(--white);
+      transition: border-color .15s;
+      outline: none;
+    }
+    .form-group input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(66, 85, 255, 0.1);
+    }
+    .form-group .hint {
+      font-size: .78rem;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+
+    .btn {
+      padding: 9px 24px;
+      border-radius: 8px;
+      font-family: var(--font);
+      font-size: .88rem;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      transition: all .15s;
+    }
+    .btn-primary {
+      background: var(--accent);
+      color: #fff;
+    }
+    .btn-primary:hover {
+      background: var(--accent-h);
+      box-shadow: 0 2px 12px rgba(66, 85, 255, 0.25);
+    }
+    .btn-ghost {
+      background: transparent;
+      color: var(--muted);
+      border: 1.5px solid var(--border);
+    }
+    .btn-ghost:hover {
+      background: var(--bg);
+    }
+
+    .btn-row {
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+      margin-top: 8px;
+    }
+
+    /* ===== CROP MODAL ===== */
+    .crop-container {
+      max-height: 65vh;
+      min-height: 280px;
+      background: #f0f0f0;
+      border-radius: 8px;
+      margin-bottom: 16px;
+      overflow: hidden;
+    }
+    .crop-container img {
+      max-width: 100%;
+      display: block;
+    }
+    .modal-wide {
+      max-width: 560px;
+    }
+
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 700px) {
+      .profile-cover {
+        height: 140px;
+      }
+      .profile-avatar-section {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        padding: 0 16px 16px;
+        margin-top: -50px;
+      }
+      .profile-avatar {
+        width: 90px;
+        height: 90px;
+        font-size: 2.4rem;
+      }
+      .profile-avatar .avatar-letter {
+        font-size: 2.4rem;
+      }
+      .profile-name-section {
+        padding-top: 4px;
+      }
+      .profile-stats-row {
+        justify-content: center;
+      }
+      .profile-tabs {
+        flex-wrap: wrap;
+      }
+      .profile-tabs .tab-btn {
+        flex: 1 1 calc(50% - 4px);
+        padding: 8px 12px;
+        font-size: .82rem;
+      }
+      .info-grid {
+        grid-template-columns: 1fr;
+        gap: 0;
+      }
+      .panel-card {
+        padding: 18px 16px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div class="page-wrap">
+  <nav class="sidebar" id="sidebar"></nav>
+
+  <main class="main">
+    <!-- ===== COVER + AVATAR ===== -->
+    <div class="profile-cover-wrapper">
+      <!-- Cover -->
+      <div class="profile-cover" id="profile-cover" onclick="document.getElementById('cover-input').click()">
+        <img id="cover-image" src="" style="display:none;" alt="Cover" />
+        <div class="cover-overlay">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 20h9" />
+            <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
+          </svg>
+          Thay ảnh bìa
+        </div>
+      </div>
+      <input type="file" id="cover-input" accept="image/*" style="display:none;" />
+
+      <!-- Avatar -->
+      <div class="profile-avatar-section">
+        <div class="profile-avatar-wrapper">
+          <div class="profile-avatar" id="main-avatar" onclick="document.getElementById('avatar-input').click()">
+            <span class="avatar-letter" id="avatar-letter">?</span>
+          </div>
+          <div class="profile-avatar-edit" onclick="document.getElementById('avatar-input').click()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 20h9" />
+              <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
+            </svg>
+          </div>
+          <input type="file" id="avatar-input" accept="image/*" style="display:none;" />
+        </div>
+
+        <div class="profile-name-section">
+          <div class="name" id="hero-name">—</div>
+          <div class="role">
+            <span class="dot" id="hero-role-dot"></span>
+            <span id="hero-role">—</span>
+          </div>
+          <div class="dept">Role: <span id="hero-dept">—</span></div>
+          <div class="profile-stats-row">
+            <div class="stat-item">
+              <div class="number" id="stat-id">—</div>
+              <div class="label">ID</div>
+            </div>
+            <div class="stat-item">
+              <div class="number" id="stat-salary">—</div>
+              <div class="label">Lương CB</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== TABS ===== -->
+    <div class="profile-tabs">
+      <button class="tab-btn active" onclick="switchTab('info', this)">Thông tin</button>
+      <button class="tab-btn" onclick="switchTab('edit', this)">Chỉnh sửa</button>
+      <button class="tab-btn" onclick="switchTab('password', this)">Đổi mật khẩu</button>
+    </div>
+
+    <!-- ===== TAB: THÔNG TIN ===== -->
+    <div class="tab-panel active" id="tab-info">
+      <div class="panel-card">
+        <div class="panel-title">Thông tin cá nhân</div>
+        <div class="info-grid">
+          <div class="info-row"><span class="label">Họ tên</span><span class="value" id="info-name">—</span></div>
+          <div class="info-row"><span class="label">Username</span><span class="value" id="info-username">—</span></div>
+          <div class="info-row"><span class="label">Phòng ban</span><span class="value" id="info-dept">—</span></div>
+          <div class="info-row"><span class="label">Vai trò</span><span class="value" id="info-role">—</span></div>
+          <div class="info-row"><span class="label">Lương cơ bản</span><span class="value" id="info-salary">—</span></div>
+          <div class="info-row"><span class="label">ID nhân viên</span><span class="value" id="info-id">—</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== TAB: CHỈNH SỬA ===== -->
+    <div class="tab-panel" id="tab-edit">
+      <div class="panel-card">
+        <div class="panel-title">Cập nhật thông tin</div>
+        <div class="form-group">
+          <label>Họ tên</label>
+          <input type="text" id="edit-name" placeholder="Nguyễn Văn A" />
+        </div>
+        <div class="form-group">
+          <label>Phòng ban</label>
+          <input type="text" id="edit-dept" placeholder="Kỹ thuật, Marketing..." />
+        </div>
+        <div class="form-group">
+          <span class="hint"> Username và vai trò không thể tự thay đổi — liên hệ Admin nếu cần.</span>
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-primary" onclick="saveInfo()">Lưu thay đổi</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== TAB: ĐỔI MẬT KHẨU ===== -->
+    <div class="tab-panel" id="tab-password">
+      <div class="panel-card">
+        <div class="panel-title">Đổi mật khẩu</div>
+        <div class="form-group">
+          <label>Mật khẩu hiện tại</label>
+          <input type="password" id="old-pw" placeholder="Nhập mật khẩu cũ" />
+        </div>
+        <div class="form-group">
+          <label>Mật khẩu mới</label>
+          <input type="password" id="new-pw" placeholder="Tối thiểu 6 ký tự" />
+        </div>
+        <div class="form-group">
+          <label>Xác nhận mật khẩu mới</label>
+          <input type="password" id="confirm-pw" placeholder="Nhập lại mật khẩu mới" />
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-primary" onclick="changePassword()">Đổi mật khẩu</button>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- ===== MODAL CROP ẢNH ===== -->
+<div class="modal-overlay" id="avatar-modal">
+  <div class="modal modal-wide">
+    <div class="modal-header">
+      <h2>Chỉnh sửa ảnh đại diện</h2>
+      <button class="modal-close" onclick="closeModal('avatar-modal')">✕</button>
+    </div>
+    <div class="crop-container">
+      <img id="image-to-crop" src="" alt="Ảnh đại diện" />
+    </div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:8px;">
+      <button class="btn btn-ghost" onclick="cancelCrop()">Chọn ảnh khác</button>
+      <button class="btn btn-primary" onclick="uploadCroppedAvatar()">Xác nhận</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== MODAL CROP COVER ===== -->
+<div class="modal-overlay" id="cover-modal">
+  <div class="modal modal-wide">
+    <div class="modal-header">
+      <h2>Chỉnh sửa ảnh bìa</h2>
+      <button class="modal-close" onclick="closeModal('cover-modal')">✕</button>
+    </div>
+    <div class="crop-container">
+      <img id="cover-crop-image" src="" alt="Ảnh bìa" />
+    </div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:8px;">
+      <button class="btn btn-ghost" onclick="cancelCoverCrop()">Chọn ảnh khác</button>
+      <button class="btn btn-primary" onclick="uploadCroppedCover()">Xác nhận</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js"></script>
+<script src="main.js"></script>
+<script>
+  let currentUser = null;
+  let cropper = null;
+  let coverCropper = null;
+  let selectedFile = null;
+  let selectedCoverFile = null;
+
+  async function init() {
+    currentUser = await requireLogin();
+    if (!currentUser) return;
+    renderSidebar("profile", currentUser);
+    await loadProfile();
+  }
+
+  // ===== LOAD PROFILE =====
+  async function loadProfile() {
+    const res = await API.get("/auth/profile");
+    if (!res.success) { showToast("Không tải được hồ sơ", "error"); return; }
+    const d = res.data;
+
+    // Avatar
+    setAvatar(d.avatar || "", d.name);
+
+    // Cover
+    setCover(d.cover || "");
+
+    // Hero
+    document.getElementById("hero-name").textContent = d.name;
+    document.getElementById("hero-role").textContent = d.role === "admin" ? "Admin" : "Nhân viên";
+    document.getElementById("hero-dept").textContent = d.department || "—";
+
+    const dot = document.getElementById("hero-role-dot");
+    dot.className = "dot " + (d.role === "admin" ? "admin" : "employee");
+
+    // Stats
+    document.getElementById("stat-id").textContent = "#" + d.id;
+    document.getElementById("stat-salary").textContent = formatMoney(d.base_salary);
+
+    // Tab info
+    document.getElementById("info-name").textContent = d.name;
+    document.getElementById("info-username").textContent = d.username;
+    document.getElementById("info-dept").textContent = d.department || "—";
+    document.getElementById("info-role").textContent = d.role === "admin" ? "Admin" : "Nhân viên";
+    document.getElementById("info-salary").textContent = formatMoney(d.base_salary);
+    document.getElementById("info-id").textContent = "#" + d.id;
+
+    // Tab edit
+    document.getElementById("edit-name").value = d.name;
+    document.getElementById("edit-dept").value = d.department || "";
+  }
+
+  // ===== SET AVATAR =====
+  function setAvatar(base64, name) {
+    const el = document.getElementById("main-avatar");
+    const letter = document.getElementById("avatar-letter");
+    if (base64) {
+      el.style.background = "transparent";
+      letter.innerHTML = `<img src="${base64}" style="width:100%;height:100%;object-fit:cover;" />`;
+    } else {
+      el.style.background = "#eef0ff";
+      letter.textContent = name ? name.charAt(0).toUpperCase() : "?";
+    }
+  }
+
+  // ===== SET COVER =====
+  function setCover(base64) {
+    const img = document.getElementById("cover-image");
+    const cover = document.getElementById("profile-cover");
+    if (base64) {
+      img.src = base64;
+      img.style.display = "block";
+      cover.style.background = "transparent";
+    } else {
+      img.style.display = "none";
+      cover.style.background = "#d1d5db";
+      cover.style.backgroundImage = `
+        radial-gradient(circle at 20% 30%, #e5e7eb 0%, transparent 50%),
+        radial-gradient(circle at 80% 70%, #9ca3af 0%, transparent 40%)
+      `;
+    }
+  }
+
+  // ===== AVATAR UPLOAD =====
+  document.getElementById('avatar-input').addEventListener('change', function(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    if (file.size > 2 * 1024 * 1024) {
+      showToast("Ảnh quá lớn! Vui lòng chọn ảnh dưới 2MB", "error");
+      this.value = '';
+      return;
+    }
+    selectedFile = file;
+    const reader = new FileReader();
+    reader.onload = (e) => openCropModal(e.target.result, 'avatar');
+    reader.readAsDataURL(file);
+  });
+
+  // ===== COVER UPLOAD =====
+  document.getElementById('cover-input').addEventListener('change', function(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) {
+      showToast("Ảnh quá lớn! Vui lòng chọn ảnh dưới 5MB", "error");
+      this.value = '';
+      return;
+    }
+    selectedCoverFile = file;
+    const reader = new FileReader();
+    reader.onload = (e) => openCropModal(e.target.result, 'cover');
+    reader.readAsDataURL(file);
+  });
+
+  function openCropModal(imageSrc, type) {
+    const modalId = type === 'avatar' ? 'avatar-modal' : 'cover-modal';
+    const imgId = type === 'avatar' ? 'image-to-crop' : 'cover-crop-image';
+    const isCover = type === 'cover';
+    
+    openModal(modalId);
+    const image = document.getElementById(imgId);
+    image.src = imageSrc;
+
+    if (isCover && coverCropper) {
+      coverCropper.destroy();
+      coverCropper = null;
+    } else if (!isCover && cropper) {
+      cropper.destroy();
+      cropper = null;
+    }
+
+    setTimeout(() => {
+      const CropperInstance = isCover ? coverCropper : cropper;
+      const newCropper = new Cropper(image, {
+        aspectRatio: isCover ? 16/6 : 1,
+        viewMode: 1,
+        autoCropArea: 1,
+        background: false,
+        movable: true,
+        zoomable: true,
+        rotatable: false,
+        scalable: false,
+      });
+      if (isCover) {
+        coverCropper = newCropper;
+      } else {
+        cropper = newCropper;
+      }
+    }, 100);
+  }
+
+  function cancelCrop() {
+    closeModal('avatar-modal');
+    if (cropper) { cropper.destroy(); cropper = null; }
+    document.getElementById('avatar-input').value = '';
+    selectedFile = null;
+  }
+
+  function cancelCoverCrop() {
+    closeModal('cover-modal');
+    if (coverCropper) { coverCropper.destroy(); coverCropper = null; }
+    document.getElementById('cover-input').value = '';
+    selectedCoverFile = null;
+  }
+
+  async function uploadCroppedAvatar() {
+    if (!cropper) {
+      showToast("Không tìm thấy ảnh để cắt", "error");
+      return;
+    }
+    const canvas = cropper.getCroppedCanvas({
+      width: 300,
+      height: 300,
+      imageSmoothingEnabled: true,
+      imageSmoothingQuality: 'high',
+    });
+    if (!canvas) {
+      showToast("Không thể cắt ảnh, vui lòng thử lại", "error");
+      return;
+    }
+    const croppedImageData = canvas.toDataURL('image/jpeg', 0.9);
+    const res = await API.post("/auth/profile/avatar", { avatar: croppedImageData });
+    showToast(res.message, res.success ? "success" : "error");
+    if (res.success) {
+      setAvatar(croppedImageData, currentUser.name);
+      closeModal('avatar-modal');
+      if (cropper) { cropper.destroy(); cropper = null; }
+      document.getElementById('avatar-input').value = '';
+      selectedFile = null;
+      if (typeof refreshSidebarAvatar === 'function') {
+        refreshSidebarAvatar();
+      }
+    }
+  }
+
+  async function uploadCroppedCover() {
+    if (!coverCropper) {
+      showToast("Không tìm thấy ảnh để cắt", "error");
+      return;
+    }
+    const canvas = coverCropper.getCroppedCanvas({
+      width: 1200,
+      height: 450,
+      imageSmoothingEnabled: true,
+      imageSmoothingQuality: 'high',
+    });
+    if (!canvas) {
+      showToast("Không thể cắt ảnh, vui lòng thử lại", "error");
+      return;
+    }
+    const croppedImageData = canvas.toDataURL('image/jpeg', 0.9);
+    const res = await API.post("/auth/profile/cover", { cover: croppedImageData });
+    showToast(res.message, res.success ? "success" : "error");
+    if (res.success) {
+      setCover(croppedImageData);
+      closeModal('cover-modal');
+      if (coverCropper) { coverCropper.destroy(); coverCropper = null; }
+      document.getElementById('cover-input').value = '';
+      selectedCoverFile = null;
+    }
+  }
+
+  // ===== TABS =====
+  function switchTab(name, btn) {
+    document.querySelectorAll(".tab-panel").forEach(p => p.classList.remove("active"));
+    document.querySelectorAll(".profile-tabs .tab-btn").forEach(b => b.classList.remove("active"));
+    document.getElementById("tab-" + name).classList.add("active");
+    btn.classList.add("active");
+  }
+
+  // ===== SAVE INFO =====
+  async function saveInfo() {
+    const name = document.getElementById("edit-name").value.trim();
+    const dept = document.getElementById("edit-dept").value.trim();
+    const res = await API.put("/auth/profile", { name, department: dept });
+    showToast(res.message, res.success ? "success" : "error");
+    if (res.success) await loadProfile();
+  }
+
+  // ===== CHANGE PASSWORD =====
+  async function changePassword() {
+    const old_password = document.getElementById("old-pw").value;
+    const new_password = document.getElementById("new-pw").value;
+    const confirm_password = document.getElementById("confirm-pw").value;
+    if (new_password !== confirm_password) {
+      showToast("Mật khẩu xác nhận không khớp!", "error");
+      return;
+    }
+    const res = await API.put("/auth/profile", { old_password, new_password, confirm_password });
+    showToast(res.message, res.success ? "success" : "error");
+    if (res.success) {
+      ["old-pw", "new-pw", "confirm-pw"].forEach(id => document.getElementById(id).value = "");
+    }
+  }
+
+  init();
+</script>
+</body>
+</html>
