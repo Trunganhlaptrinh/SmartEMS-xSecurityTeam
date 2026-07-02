@@ -1,0 +1,52 @@
+[
+  {
+    "id": 1,
+    "employee_id": 6,
+    "item_id": 2,
+    "item_name": "Bò húc suy thân",
+    "price": 1000.0,
+    "quantity": 1,
+    "total": 1000.0,
+    "transaction_date": "2026-06-28 23:34:24"
+  },
+  {
+    "id": 2,
+    "employee_id": 6,
+    "item_id": 2,
+    "item_name": "Bò húc suy thân",
+    "price": 1000.0,
+    "quantity": 1,
+    "total": 1000.0,
+    "transaction_date": "2026-06-28 23:34:34"
+  },
+  {
+    "id": 3,
+    "employee_id": 6,
+    "item_id": 2,
+    "item_name": "Bò húc suy thân",
+    "price": 1000.0,
+    "quantity": 1,
+    "total": 1000.0,
+    "transaction_date": "2026-06-28 23:34:36"
+  },
+  {
+    "id": 8,
+    "employee_id": 6,
+    "item_id": 2,
+    "item_name": "Bò húc suy thân",
+    "price": 1000.0,
+    "quantity": 1,
+    "total": 1000.0,
+    "transaction_date": "2026-06-28 23:38:25"
+  },
+  {
+    "id": 9,
+    "employee_id": 6,
+    "item_id": 2,
+    "item_name": "Bò húc suy thân",
+    "price": 1000.0,
+    "quantity": 1,
+    "total": 1000.0,
+    "transaction_date": "2026-06-28 23:38:25"
+  }
+]
