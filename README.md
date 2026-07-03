@@ -19,8 +19,8 @@
 
 **Cách 1 — Dùng Git:**
 ```bash
-git clone https://github.com/trunganhlaptrinh/employee-management.git
-cd employee-management
+git clone https://github.com/Trunganhlaptrinh/SmartEMS-xSecurityTeam.git
+cd SmartEMS-xSecurityTeam
 ```
 
 **Cách 2 — Tải file ZIP:**
