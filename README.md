@@ -19,7 +19,7 @@
 
 **Cách 1 — Dùng Git:**
 ```bash
-git clone https://github.com/yourusername/employee-management.git
+git clone https://github.com/trunganhlaptrinh/employee-management.git
 cd employee-management
 ```
 
@@ -106,6 +106,7 @@ Nhấn `Ctrl + C` trong terminal.
 | Vai trò | Username | Password  |
 |---------|----------|-----------|
 | Admin   | `admin`  | `admin123` |
+| test   | `user`  | `123456` |
 
 > ⚠️ Tài khoản Admin được tự động tạo khi khởi chạy lần đầu. **Vui lòng đổi mật khẩu sau khi đăng nhập.**
 
