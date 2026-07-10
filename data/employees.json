@@ -66,5 +66,14 @@
     "role": "employee",
     "department": "Blue Team",
     "base_salary": 10000.0
+  },
+  {
+    "id": 13,
+    "username": "hunter2005",
+    "password_hash": "15e2b0d3c33891ebb0f1ef609ec419420c20e320ce94c65fbc8c3312448eb225",
+    "name": "Phan Công Trung Năng",
+    "role": "employee",
+    "department": "Security",
+    "base_salary": 30000000.0
   }
 ]

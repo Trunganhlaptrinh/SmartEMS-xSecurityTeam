@@ -1,4 +1,4 @@
-# app.py
+# app.py - ĐÃ FIX LỖ HỔNG CORS
 from flask import Flask, send_from_directory
 from flask_cors import CORS
 import os
@@ -28,7 +28,22 @@ app.secret_key = "employee_mgmt_secret_2025"
 
 VIEW_DIR = os.path.join(os.path.dirname(__file__), "view")
 
-CORS(app, supports_credentials=True)
+# ============================================================
+# FIX LỖ HỔNG CORS - CWE-942
+# Chỉ cho phép các origin hợp lệ, không dùng origin wildcard
+# ============================================================
+ALLOWED_ORIGINS = [
+    "http://localhost:5000",
+    "http://127.0.0.1:5000",
+]
+
+CORS(app, 
+     origins=ALLOWED_ORIGINS,
+     supports_credentials=True,
+     methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+     allow_headers=["Content-Type", "Authorization", "X-Requested-With"])
+
+print(f"[SECURITY] CORS configured - Allowed origins: {ALLOWED_ORIGINS}")
 
 
 # === ROUTES ===
