@@ -1,11 +1,1 @@
-{
-  "bots": [
-    {
-      "sender": "trunganhlaptrinh@gmail.com",
-      "password_hash": "gAAAAABqVIfp9FD0WdMuqFgyPfYMFG8YuaSwUCvSoxdDPyjo7Lf4-5e_R2QPkCoPdVaRTfD7FNi7nOdV0t1TKMJpkoeQVpoA1EwlPgEgU6eOZMYJo8iZksw=",
-      "name": "Bot Email Trung Anh",
-      "is_active": true,
-      "created_at": "2026-07-13 13:38:33"
-    }
-  ]
-}
+{}
