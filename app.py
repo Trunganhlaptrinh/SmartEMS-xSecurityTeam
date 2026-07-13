@@ -10,6 +10,7 @@ from controller.salary_controller import salary_bp
 from controller.shop_controller import shop_bp
 from controller.notification_controller import notification_bp
 from controller.project_controller import project_bp
+from controller.otp_controller import otp_bp
 
 from model.employee import Employee
 from model.attendance import Attendance
@@ -18,6 +19,7 @@ from model.salary import Salary
 from model.shop import ShopItem, ShopTransaction
 from model.notification import Notification
 from model.project import Project, Commit, ProjectFile
+from model.otp import OTP
 from util.file_helper import FileHelper
 from util.auth_helper import AuthHelper
 
@@ -49,6 +51,7 @@ app.register_blueprint(salary_bp, url_prefix="/api/salary")
 app.register_blueprint(shop_bp, url_prefix="/api/shop")
 app.register_blueprint(notification_bp, url_prefix="/api/notifications")
 app.register_blueprint(project_bp, url_prefix="/api/projects")
+app.register_blueprint(otp_bp, url_prefix="/api/otp")
 
 
 def sync_id_counters():
@@ -62,6 +65,7 @@ def sync_id_counters():
     Project._id_counter = FileHelper.get_max_id("projects") + 1
     Commit._id_counter = FileHelper.get_max_id("commits") + 1
     ProjectFile._id_counter = FileHelper.get_max_id("project_files") + 1
+    OTP._id_counter = FileHelper.get_max_id("otp_codes") + 1
 
 
 def create_default_admin():
