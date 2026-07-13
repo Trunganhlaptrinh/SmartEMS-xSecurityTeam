@@ -57,6 +57,18 @@
       background: #f1f2f4;
       color: #6b7280;
     }
+    .badge-green {
+      background: #dcf5ea;
+      color: #1a7a4a;
+    }
+    .badge-red {
+      background: #fde8e8;
+      color: #b91c1c;
+    }
+    .badge-yellow {
+      background: #fef3c7;
+      color: #92400e;
+    }
     .btn-secondary {
       background: #eef0ff;
       color: #4255ff;
@@ -73,6 +85,125 @@
       background: #b91c1c;
       color: #fff;
     }
+    .btn-success {
+      background: #dcf5ea;
+      color: #1a7a4a;
+    }
+    .btn-success:hover {
+      background: #1a7a4a;
+      color: #fff;
+    }
+    .btn-warning {
+      background: #fef3c7;
+      color: #92400e;
+    }
+    .btn-warning:hover {
+      background: #92400e;
+      color: #fff;
+    }
+
+    /* Email Bot styles */
+    .bot-card {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px 16px;
+      margin-bottom: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .bot-card .bot-info {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .bot-card .bot-info .bot-email {
+      font-weight: 600;
+      color: var(--text);
+    }
+    .bot-card .bot-info .bot-name {
+      color: var(--muted);
+      font-size: .82rem;
+    }
+    .bot-card .bot-status {
+      font-size: .72rem;
+      font-weight: 600;
+      padding: 2px 10px;
+      border-radius: 12px;
+    }
+    .bot-card .bot-status.active {
+      background: #dcf5ea;
+      color: #1a7a4a;
+    }
+    .bot-card .bot-status.inactive {
+      background: #fde8e8;
+      color: #b91c1c;
+    }
+    .bot-card .bot-actions {
+      display: flex;
+      gap: 4px;
+    }
+    .bot-card .bot-actions .btn-sm {
+      padding: 3px 10px;
+      font-size: .7rem;
+      border-radius: 4px;
+    }
+
+    .bot-empty {
+      text-align: center;
+      padding: 20px;
+      color: var(--muted);
+      font-size: .88rem;
+    }
+
+    .help-box {
+      background: #f8f9fc;
+      border-radius: 8px;
+      padding: 14px 16px;
+      border: 1px solid var(--border);
+      margin-top: 12px;
+    }
+    .help-box details summary {
+      cursor: pointer;
+      font-weight: 600;
+      color: var(--accent);
+    }
+    .help-box details summary:hover {
+      color: var(--accent-h);
+    }
+    .help-box details .help-content {
+      margin-top: 10px;
+      font-size: .85rem;
+      line-height: 1.8;
+      color: var(--muted);
+    }
+    .help-box details .help-content code {
+      background: #eef0ff;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: .8rem;
+      color: var(--accent);
+    }
+    .help-box details .help-content .warning-box {
+      background: #fff3cd;
+      padding: 8px 12px;
+      border-radius: 4px;
+      margin-top: 8px;
+      border-left: 3px solid #ffc107;
+    }
+
+    .bot-count-badge {
+      background: #eef0ff;
+      color: var(--accent);
+      padding: 2px 10px;
+      border-radius: 12px;
+      font-size: .72rem;
+      font-weight: 600;
+    }
   </style>
 </head>
 <body>
@@ -82,23 +213,90 @@
 
   <main class="main">
     <div class="page-header">
-      <h1>Quản lý và tạo tài khoản cho nhân viên</h1>
+      <h1>Quản lý và tạo tài khoản</h1>
       <p>Thêm, sửa, xóa và tìm kiếm tài khoản nhân viên</p>
+    </div>
+
+    <!-- ============================================ -->
+    <!-- QUẢN LÝ EMAIL BOT (đưa lên trên cùng) -->
+    <!-- ============================================ -->
+    <div class="card">
+      <div class="card-header">
+        <h2>Quản lý Email Bot</h2>
+        <span id="bot-count" class="bot-count-badge">0 bot</span>
+      </div>
+
+      <!-- Form thêm bot -->
+      <div class="form-row" style="margin-bottom:12px;">
+        <div class="form-group">
+          <label>Email Bot</label>
+          <input type="email" id="bot-email" placeholder="ví dụ: trunganh123@gmail.com" />
+          <span style="font-size:.72rem;color:var(--muted);">Email (Google Gmail) dùng để gửi mã OTP</span>
+        </div>
+        <div class="form-group">
+          <label>Mật khẩu ứng dụng (16 ký tự từ Gmail)</label>
+          <input type="password" id="bot-password" placeholder="abcd efgh ijkl mnop" />
+          <span style="font-size:.72rem;color:var(--muted);">Mật khẩu ứng dụng Gmail (16 ký tự, có dấu cách)</span>
+        </div>
+        <div class="form-group" style="min-width:120px;">
+          <label>Tên (tùy chọn)</label>
+          <input type="text" id="bot-name" placeholder="Bot 1" />
+        </div>
+      </div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px;">
+        <button class="btn btn-primary" onclick="addEmailBot()">Thêm Email Bot</button>
+        <button class="btn btn-ghost" onclick="loadEmailBots()">Tải lại</button>
+        <button class="btn btn-ghost" onclick="testEmailBot()">Test gửi email</button>
+      </div>
+
+      <!-- Danh sách bot -->
+      <div id="bot-list">
+        <div class="bot-empty">
+          <p>Chưa có Email Bot nào. Thêm bot để hệ thống có thể gửi OTP.</p>
+        </div>
+      </div>
+
+      <!-- Hướng dẫn -->
+      <div class="help-box">
+        <details>
+          <summary>Hướng dẫn lấy mật khẩu ứng dụng Gmail</summary>
+          <div class="help-content">
+            <p><strong>Bước 1:</strong> Tạo email Gmail mới để làm bot (ví dụ: <code>nhanvien@gmail.com</code>)</p>
+            <p><strong>Bước 2:</strong> Bật Xác minh 2 bước</p>
+            <ul style="margin-left:20px;">
+              <li>Đăng nhập vào email bot</li>
+              <li>Vào <strong>Google Account → Bảo mật</strong></li>
+              <li>Bật <strong>Xác minh 2 bước</strong></li>
+            </ul>
+            <p><strong>Bước 3:</strong> Tạo mật khẩu ứng dụng</p>
+            <ul style="margin-left:20px;">
+              <li>Truy cập: <a href="https://myaccount.google.com/apppasswords" target="_blank">https://myaccount.google.com/apppasswords</a></li>
+              <li>Chọn: <strong>Ứng dụng: Mail</strong> | <strong>Thiết bị: Windows</strong></li>
+              <li>Nhấn <strong>Tạo</strong> và copy mật khẩu 16 ký tự (có dấu cách)</li>
+            </ul>
+            <div class="warning-box">
+              <strong>Lưu ý:</strong> Mật khẩu ứng dụng có dạng <code>abcd efgh ijkl mnop</code> (16 ký tự, có dấu cách)
+            </div>
+          </div>
+        </details>
+      </div>
     </div>
 
     <!-- FORM THÊM NHÂN VIÊN -->
     <div class="card">
       <div class="card-header">
         <h2>Thêm nhân viên mới</h2>
+        <span id="bot-status-badge" style="font-size:.78rem;"></span>
       </div>
       <div class="form-row">
         <div class="form-group">
-          <label>Họ tên *</label>
+          <label>Họ và tên *</label>
           <input type="text" id="emp-name" placeholder="Nguyễn Văn A" />
         </div>
         <div class="form-group">
-          <label>Tên đăng nhập *</label>
-          <input type="text" id="emp-username" placeholder="nguyenvana" />
+          <label>Tên đăng nhập tài khoản (username hoặc Gmail) *</label>
+          <input type="text" id="emp-username" placeholder="ví dụ: nhanvien123 hoặc nhanvien123@gmail.com" />
+          <span style="font-size:.72rem;color:var(--muted);">Có thể nhập bất kỳ ký tự nào. Nếu là Gmail phải có Email Bot.</span>
         </div>
       </div>
       <div class="form-row">
@@ -151,12 +349,13 @@
               <th>Tên đăng nhập</th>
               <th>Phòng ban</th>
               <th>Vai trò</th>
+              <th>Trạng thái</th>
               <th>Lương CB</th>
               <th>Thao tác</th>
             </tr>
           </thead>
           <tbody id="emp-body">
-            <tr><td colspan="8" class="empty">Đang tải...</td></tr>
+            <tr><td colspan="9" class="empty">Đang tải...</td></tr>
           </tbody>
         </table>
       </div>
@@ -176,6 +375,12 @@
     <div class="form-group">
       <label>Họ tên *</label>
       <input type="text" id="edit-emp-name" />
+    </div>
+    
+    <div class="form-group">
+      <label>Tên đăng nhập</label>
+      <input type="text" id="edit-emp-username" disabled style="background:#f1f2f4;" />
+      <span style="font-size:.72rem;color:var(--muted);">Không thể thay đổi tên đăng nhập</span>
     </div>
     
     <div class="form-group">
@@ -204,37 +409,224 @@
   </div>
 </div>
 
+<!-- MODAL SỬA BOT -->
+<div class="modal-overlay" id="edit-bot-modal">
+  <div class="modal" style="max-width:440px;">
+    <div class="modal-header">
+      <h2>Sửa Email Bot</h2>
+      <button class="modal-close" onclick="closeModal('edit-bot-modal')">✕</button>
+    </div>
+    <input type="hidden" id="edit-bot-email" />
+    
+    <div class="form-group">
+      <label>Email Bot</label>
+      <input type="email" id="edit-bot-email-display" disabled style="background:#f1f2f4;" />
+    </div>
+    
+    <div class="form-group">
+      <label>Tên hiển thị</label>
+      <input type="text" id="edit-bot-name" placeholder="Bot 1" />
+    </div>
+    
+    <div class="form-group">
+      <label>Mật khẩu ứng dụng (để trống nếu không đổi)</label>
+      <input type="password" id="edit-bot-password" placeholder="abcd efgh ijkl mnop" />
+    </div>
+    
+    <div class="form-group">
+      <label>Trạng thái</label>
+      <select id="edit-bot-status">
+        <option value="true">Hoạt động</option>
+        <option value="false">Tạm dừng</option>
+      </select>
+    </div>
+    
+    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:8px;">
+      <button class="btn btn-ghost" onclick="closeModal('edit-bot-modal')">Hủy</button>
+      <button class="btn btn-primary" onclick="saveEditBot()">Lưu</button>
+    </div>
+  </div>
+</div>
+
 <div id="toast"></div>
 <script src="main.js"></script>
 <script>
   let currentUser = null;
+  let emailBots = [];
 
   async function init() {
     currentUser = await requireLogin();
     if (!currentUser) return;
 
-    // chỉ admin mới được vào trang này
     if (currentUser.role !== "admin") {
       window.location.href = "dashboard.html";
       return;
     }
 
     renderSidebar("employees", currentUser);
+    await loadEmailBots();
     await loadEmployees();
   }
 
-  // === THÊM NHÂN VIÊN ===
+  // ============================================================
+  // QUẢN LÝ EMAIL BOT
+  // ============================================================
+
+  async function loadEmailBots() {
+    const res = await API.get("/auth/email-bots");
+    const list = document.getElementById("bot-list");
+    const count = document.getElementById("bot-count");
+
+    if (!res.success) {
+      list.innerHTML = `<div class="bot-empty"><p>${res.message || 'Lỗi tải danh sách bot'}</p></div>`;
+      count.textContent = "0 bot";
+      return;
+    }
+
+    emailBots = res.data || [];
+    const hasActive = res.has_active || false;
+
+    count.textContent = emailBots.length + " bot";
+
+    // Cập nhật badge trên form thêm nhân viên
+    const badge = document.getElementById("bot-status-badge");
+    if (hasActive) {
+      badge.innerHTML = '<span class="badge badge-green">Bot đang hoạt động</span>';
+    } else {
+      badge.innerHTML = '<span class="badge badge-red">Chưa có bot hoạt động</span>';
+    }
+
+    if (emailBots.length === 0) {
+      list.innerHTML = `
+        <div class="bot-empty">
+          <p>Chưa có Email Bot nào. Thêm bot để hệ thống có thể gửi OTP.</p>
+          <p style="font-size:.78rem;color:var(--muted);">Cần ít nhất 1 bot hoạt động để tạo tài khoản Gmail.</p>
+        </div>
+      `;
+      return;
+    }
+
+    list.innerHTML = emailBots.map(bot => {
+      const isActive = bot.is_active !== false;
+      return `
+        <div class="bot-card">
+          <div class="bot-info">
+            <span class="bot-email">${bot.sender}</span>
+            <span class="bot-name">${bot.name || bot.sender}</span>
+            <span class="bot-status ${isActive ? 'active' : 'inactive'}">${isActive ? 'Hoạt động' : 'Tạm dừng'}</span>
+            <span style="font-size:.68rem;color:var(--muted);">${bot.created_at || ''}</span>
+          </div>
+          <div class="bot-actions">
+            <button class="btn btn-secondary btn-sm" onclick="openEditBot('${bot.sender}')">Sửa</button>
+            <button class="btn btn-danger btn-sm" onclick="deleteEmailBot('${bot.sender}')">Xóa</button>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  async function addEmailBot() {
+    const sender = document.getElementById("bot-email").value.trim();
+    const password = document.getElementById("bot-password").value.trim();
+    const name = document.getElementById("bot-name").value.trim();
+
+    if (!sender) {
+      showToast("Vui lòng nhập email bot", "error");
+      return;
+    }
+    if (!password) {
+      showToast("Vui lòng nhập mật khẩu ứng dụng", "error");
+      return;
+    }
+    if (!sender.includes("@") || !sender.includes(".")) {
+      showToast("Email không hợp lệ", "error");
+      return;
+    }
+
+    const res = await API.post("/auth/email-bots", { sender, password, name });
+
+    showToast(res.message, res.success ? "success" : "error");
+    if (res.success) {
+      document.getElementById("bot-email").value = "";
+      document.getElementById("bot-password").value = "";
+      document.getElementById("bot-name").value = "";
+      await loadEmailBots();
+    }
+  }
+
+  function openEditBot(sender) {
+    const bot = emailBots.find(b => b.sender === sender);
+    if (!bot) {
+      showToast("Không tìm thấy bot", "error");
+      return;
+    }
+
+    document.getElementById("edit-bot-email").value = bot.sender;
+    document.getElementById("edit-bot-email-display").value = bot.sender;
+    document.getElementById("edit-bot-name").value = bot.name || "";
+    document.getElementById("edit-bot-password").value = "";
+    document.getElementById("edit-bot-status").value = bot.is_active !== false ? "true" : "false";
+
+    openModal("edit-bot-modal");
+  }
+
+  async function saveEditBot() {
+    const sender = document.getElementById("edit-bot-email").value;
+    const name = document.getElementById("edit-bot-name").value.trim();
+    const password = document.getElementById("edit-bot-password").value.trim();
+    const is_active = document.getElementById("edit-bot-status").value === "true";
+
+    const data = { name, is_active };
+    if (password) {
+      data.password = password;
+    }
+
+    const res = await API.put(`/auth/email-bots/${encodeURIComponent(sender)}`, data);
+
+    showToast(res.message, res.success ? "success" : "error");
+    if (res.success) {
+      closeModal("edit-bot-modal");
+      await loadEmailBots();
+    }
+  }
+
+  async function deleteEmailBot(sender) {
+    if (!confirm(`Xóa email bot "${sender}"?`)) return;
+
+    const res = await API.delete(`/auth/email-bots/${encodeURIComponent(sender)}`);
+    showToast(res.message, res.success ? "success" : "error");
+    if (res.success) {
+      await loadEmailBots();
+    }
+  }
+
+  async function testEmailBot() {
+    const testEmail = prompt("Nhập email để test gửi OTP:", "your_email@gmail.com");
+    
+    if (!testEmail) return;
+    if (!testEmail.includes("@") || !testEmail.includes(".")) {
+      showToast("Email không hợp lệ", "error");
+      return;
+    }
+
+    const res = await API.post("/auth/email-bots/test", { test_email: testEmail });
+    showToast(res.message, res.success ? "success" : "error");
+  }
+
+  // ============================================================
+  // QUẢN LÝ NHÂN VIÊN (có hỗ trợ khóa tài khoản)
+  // ============================================================
+
   async function addEmployee() {
-    const name        = document.getElementById("emp-name").value.trim();
-    const username    = document.getElementById("emp-username").value.trim();
-    const password    = document.getElementById("emp-password").value;
-    const department  = document.getElementById("emp-dept").value.trim();
-    const role        = document.getElementById("emp-role").value;
+    const name = document.getElementById("emp-name").value.trim();
+    const username = document.getElementById("emp-username").value.trim();
+    const password = document.getElementById("emp-password").value;
+    const department = document.getElementById("emp-dept").value.trim();
+    const role = document.getElementById("emp-role").value;
     const base_salary = parseFloat(document.getElementById("emp-salary").value) || 0;
 
-    // Validate
     if (!name) return showToast("Vui lòng nhập họ tên", "error");
-    if (!username || username.length < 3) return showToast("Tên đăng nhập ít nhất 3 ký tự", "error");
+    if (!username) return showToast("Vui lòng nhập tên đăng nhập", "error");
     if (!password || password.length < 6) return showToast("Mật khẩu ít nhất 6 ký tự", "error");
 
     const res = await API.post("/auth/employees", {
@@ -249,18 +641,16 @@
     }
   }
 
-  // === TẢI DANH SÁCH NHÂN VIÊN + TÌM KIẾM ===
   async function loadEmployees() {
     const search = document.getElementById("search-employee")?.value?.trim() || "";
     const res = await API.get("/auth/employees");
     const tbody = document.getElementById("emp-body");
 
     if (!res.success) {
-      tbody.innerHTML = `<tr><td colspan="8" class="empty">Không tải được danh sách</td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="9" class="empty">Không tải được danh sách</td></tr>`;
       return;
     }
 
-    // Lọc theo từ khóa tìm kiếm
     let filtered = res.data;
     if (search) {
       const keyword = search.toLowerCase();
@@ -274,7 +664,7 @@
     document.getElementById("emp-count").textContent = filtered.length + " nhân viên";
 
     if (filtered.length === 0) {
-      tbody.innerHTML = `<tr><td colspan="8" class="empty">Không tìm thấy nhân viên nào</td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="9" class="empty">Không tìm thấy nhân viên nào</td></tr>`;
       return;
     }
 
@@ -282,7 +672,29 @@
       const isSelf = e.id === currentUser.employee_id;
       const avatarUrl = e.avatar || "image/logo_profile_co_ban.png";
       const isAdmin = e.role === "admin";
+      const isLocked = e.is_locked === true;
+      const loginAttempts = e.login_attempts || 0;
       
+      // Trạng thái tài khoản
+      let statusHtml = '';
+      if (isLocked) {
+        statusHtml = '<span class="badge badge-red"> Đã khóa</span>';
+      } else if (loginAttempts > 0) {
+        statusHtml = `<span class="badge badge-yellow"> ${loginAttempts}/5 lần sai</span>`;
+      } else {
+        statusHtml = '<span class="badge badge-green"> Hoạt động</span>';
+      }
+
+      // Nút mở khóa (chỉ hiện khi tài khoản bị khóa và không phải là admin đang đăng nhập)
+      let unlockBtn = '';
+      if (isLocked && !isSelf) {
+        unlockBtn = `
+          <button class="btn btn-warning btn-sm" onclick="unlockAccount(${e.id}, '${e.name}')">
+            Mở khóa
+          </button>
+        `;
+      }
+
       return `
         <tr>
           <td class="avatar-cell">
@@ -293,16 +705,16 @@
           </td>
           <td style="color:#9ca3af;font-weight:500;">#${e.id}</td>
           <td style="font-weight:600;">${e.name}</td>
-          <td style="color:#6b7280;">${e.username}</td>
+          <td style="color:#4255ff;">${e.username}</td>
           <td>${e.department || "—"}</td>
-          <td>${isAdmin
-                ? '<span class="badge badge-blue">Admin</span>'
-                : '<span class="badge badge-gray">Nhân viên</span>'}</td>
+          <td>${isAdmin ? '<span class="badge badge-blue">Admin</span>' : '<span class="badge badge-gray">Nhân viên</span>'}</td>
+          <td>${statusHtml}</td>
           <td style="font-weight:600;color:var(--text);">${formatMoney(e.base_salary)}</td>
           <td class="actions-cell">
             ${isSelf 
               ? '<span style="color:#9ca3af;font-size:.82rem;font-weight:500;">Bạn</span>'
               : `
+                ${unlockBtn}
                 <button class="btn btn-secondary btn-sm" onclick="openEditEmployee(${e.id})">Sửa</button>
                 <button class="btn btn-danger btn-sm" onclick="removeEmployee(${e.id},'${e.name}')">Xóa</button>
                 `
@@ -313,7 +725,20 @@
     }).join("");
   }
 
-  // === MỞ MODAL SỬA NHÂN VIÊN ===
+  // ============================================================
+  // MỞ KHÓA TÀI KHOẢN
+  // ============================================================
+  async function unlockAccount(id, name) {
+    if (!confirm(`Mở khóa tài khoản cho "${name}"?`)) return;
+
+    const res = await API.post(`/auth/employees/${id}/unlock`, {});
+    
+    showToast(res.message, res.success ? "success" : "error");
+    if (res.success) {
+      await loadEmployees();
+    }
+  }
+
   async function openEditEmployee(id) {
     const res = await API.get("/auth/employees");
     if (!res.success) return;
@@ -321,21 +746,21 @@
     const emp = res.data.find(e => e.id === id);
     if (!emp) return showToast("Không tìm thấy nhân viên", "error");
 
-    document.getElementById("edit-emp-id").value      = emp.id;
-    document.getElementById("edit-emp-name").value    = emp.name;
-    document.getElementById("edit-emp-dept").value    = emp.department || "";
-    document.getElementById("edit-emp-role").value    = emp.role;
-    document.getElementById("edit-emp-salary").value  = emp.base_salary;
+    document.getElementById("edit-emp-id").value = emp.id;
+    document.getElementById("edit-emp-name").value = emp.name;
+    document.getElementById("edit-emp-username").value = emp.username;
+    document.getElementById("edit-emp-dept").value = emp.department || "";
+    document.getElementById("edit-emp-role").value = emp.role;
+    document.getElementById("edit-emp-salary").value = emp.base_salary;
 
     openModal("edit-employee-modal");
   }
 
-  // === LƯU SỬA NHÂN VIÊN ===
   async function saveEditEmployee() {
-    const id          = document.getElementById("edit-emp-id").value;
-    const name        = document.getElementById("edit-emp-name").value.trim();
-    const department  = document.getElementById("edit-emp-dept").value.trim();
-    const role        = document.getElementById("edit-emp-role").value;
+    const id = document.getElementById("edit-emp-id").value;
+    const name = document.getElementById("edit-emp-name").value.trim();
+    const department = document.getElementById("edit-emp-dept").value.trim();
+    const role = document.getElementById("edit-emp-role").value;
     const base_salary = parseFloat(document.getElementById("edit-emp-salary").value) || 0;
 
     if (!name) return showToast("Họ tên không được để trống", "error");
@@ -351,13 +776,15 @@
     }
   }
 
-  // === XÓA NHÂN VIÊN ===
   async function removeEmployee(id, name) {
     if (!confirm(`Xóa nhân viên "${name}"? Hành động này không thể hoàn tác.`)) return;
     const res = await API.delete(`/auth/employees/${id}`);
     showToast(res.message, res.success ? "success" : "error");
     if (res.success) await loadEmployees();
   }
+
+  // Tải lại bot list mỗi 30 giây
+  setInterval(loadEmailBots, 30000);
 
   init();
 </script>

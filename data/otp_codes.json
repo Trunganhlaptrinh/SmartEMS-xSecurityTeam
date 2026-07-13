@@ -1,0 +1,20 @@
+[
+  {
+    "id": 26,
+    "employee_id": 15,
+    "email": "trunganhlaptrinh@gmail.com",
+    "code": "472147",
+    "created_at": "2026-07-13 13:39:48",
+    "expires_at": "2026-07-13 13:44:48",
+    "used": false
+  },
+  {
+    "id": 27,
+    "employee_id": 14,
+    "email": "anhnthe190843@gmail.com",
+    "code": "594985",
+    "created_at": "2026-07-13 13:40:29",
+    "expires_at": "2026-07-13 13:45:29",
+    "used": true
+  }
+]
