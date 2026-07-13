@@ -53,13 +53,16 @@ def login():
     # ============================================================
     # KIỂM TRA MẬT KHẨU
     # ============================================================
+        # ============================================================
+    # KIỂM TRA MẬT KHẨU
+    # ============================================================
     if not AuthHelper.check_password(password, found["password_hash"]):
         # Tăng số lần đăng nhập sai
         login_attempts = found.get("login_attempts", 0) + 1
         employees[found_index]["login_attempts"] = login_attempts
         
-        # Nếu vượt quá số lần cho phép -> khóa tài khoản
-        if login_attempts >= MAX_LOGIN_ATTEMPTS:
+        # Nếu vượt quá số lần cho phép và không phải admin -> khóa tài khoản
+        if found["role"] != "admin" and login_attempts >= MAX_LOGIN_ATTEMPTS:
             employees[found_index]["is_locked"] = True
             FileHelper.write_all("employees", employees)
             return jsonify({
@@ -69,9 +72,16 @@ def login():
         
         FileHelper.write_all("employees", employees)
         remaining = MAX_LOGIN_ATTEMPTS - login_attempts
+        if remaining < 0:
+            remaining = 0
+        # Thông báo riêng cho admin
+        if found["role"] == "admin":
+            message = f"Sai tên đăng nhập hoặc mật khẩu. Còn {remaining} lần thử."
+        else:
+            message = f"Sai tên đăng nhập hoặc mật khẩu. Còn {remaining} lần thử trước khi tài khoản bị khóa."
         return jsonify({
             "success": False, 
-            "message": f"Sai tên đăng nhập hoặc mật khẩu. Còn {remaining} lần thử trước khi tài khoản bị khóa."
+            "message": message
         }), 401
 
     # ============================================================
