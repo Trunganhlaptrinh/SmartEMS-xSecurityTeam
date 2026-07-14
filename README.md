@@ -106,7 +106,7 @@ Nhấn `Ctrl + C` trong terminal.
 | Vai trò | Username | Password  |
 |---------|----------|-----------|
 | Admin   | `admin`  | `admin123` |
-| test   | `user`  | `123456` |
+| User   | `test`  | `123456` |
 
 > ⚠️ Tài khoản Admin được tự động tạo khi khởi chạy lần đầu. **Vui lòng đổi mật khẩu sau khi đăng nhập.**
 
