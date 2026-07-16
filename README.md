@@ -1,4 +1,4 @@
-#  SmartEMS — Employee Management System
+#  SmartEMS — Smart Employee Management Solution
 
 > Hệ thống quản lý nhân viên thông minh với các chức năng vippro
 
