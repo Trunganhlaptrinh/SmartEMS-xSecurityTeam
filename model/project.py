@@ -2,6 +2,7 @@
 # Model: Quản lý dự án
 
 from datetime import datetime
+from util.file_helper import FileHelper
 
 class Project:
     _id_counter = 1
@@ -16,6 +17,8 @@ class Project:
         self.owner_name = owner_name
         self.status = status
         self.members = members or []
+        self.progress = 0          # Thêm
+        self.total_tasks = 0       # Thêm
         self.created_at = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         self.updated_at = self.created_at
 
@@ -28,6 +31,8 @@ class Project:
             "owner_name": self.owner_name,
             "status": self.status,
             "members": self.members,
+            "progress": self.progress,          # Thêm
+            "total_tasks": self.total_tasks,    # Thêm
             "created_at": self.created_at,
             "updated_at": self.updated_at
         }
@@ -42,11 +47,14 @@ class Project:
         proj.owner_name = data["owner_name"]
         proj.status = data.get("status", "active")
         proj.members = data.get("members", [])
+        proj.progress = data.get("progress", 0)           # Thêm
+        proj.total_tasks = data.get("total_tasks", 0)     # Thêm
         proj.created_at = data.get("created_at", "")
         proj.updated_at = data.get("updated_at", "")
         return proj
 
 
+# Giữ nguyên 2 class dưới
 class ProjectFile:
     _id_counter = 1
 

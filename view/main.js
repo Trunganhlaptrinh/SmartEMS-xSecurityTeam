@@ -202,7 +202,7 @@ async function getUserAvatar() {
 function renderSidebar(currentPage, user) {
   const isAdmin = user.role === "admin";
 
-  // Links dành cho Admin (chỉ giữ Quản lí nhân viên)
+  // Links dành cho Admin
   const adminLinks = isAdmin ? `
     <a class="nav-item ${currentPage === 'employees' ? 'active' : ''}" href="employees.html">
       <img src="image/logo_quan_li_nhan_vien.png" style="height:18px;width:18px;object-fit:contain;" />
@@ -251,6 +251,13 @@ function renderSidebar(currentPage, user) {
       Dự án
     </a>
 
+    <!-- ==================== TASKS ==================== -->
+    <a class="nav-item ${currentPage === 'tasks' ? 'active' : ''}" href="tasks.html">
+      <img src="image/logo_project.png" style="height:18px;width:18px;object-fit:contain;" />
+      Quản lý Task
+    </a>
+    <!-- ============================================== -->
+
     ${adminLinks}
 
     <div class="sidebar-bottom">
@@ -265,6 +272,7 @@ function renderSidebar(currentPage, user) {
     </div>
   `;
 
+  // ... (phần avatar giữ nguyên)
   getUserAvatar().then(avatar => {
     const sidebar = document.getElementById("sidebar");
     if (!sidebar) return;

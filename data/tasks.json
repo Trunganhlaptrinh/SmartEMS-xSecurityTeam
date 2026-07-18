@@ -1,0 +1,16 @@
+[
+  {
+    "id": 1,
+    "title": "Thiết kế trang Dashboard mới cho nhân viên",
+    "description": "Cần redesign giao diện Dashboard để hiển thị rõ hơn các chỉ số KPI, task cá nhân, và thông báo.",
+    "assignee_id": 13,
+    "assignee_name": "Phan Công Trung Năng",
+    "creator_id": 1,
+    "creator_name": "Admin TrungAnh",
+    "status": "inprogress",
+    "priority": "high",
+    "due_date": "2026-07-25",
+    "created_at": "2026-07-18 16:12:35",
+    "updated_at": "2026-07-18 16:19:49"
+  }
+]

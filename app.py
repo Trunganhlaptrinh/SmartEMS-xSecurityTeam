@@ -10,6 +10,11 @@ from controller.salary_controller import salary_bp
 from controller.shop_controller import shop_bp
 from controller.notification_controller import notification_bp
 from controller.project_controller import project_bp
+<<<<<<< Updated upstream
+=======
+from controller.otp_controller import otp_bp
+from controller.task_controller import task_bp  # Task Management
+>>>>>>> Stashed changes
 
 from model.employee import Employee
 from model.attendance import Attendance
@@ -18,6 +23,11 @@ from model.salary import Salary
 from model.shop import ShopItem, ShopTransaction
 from model.notification import Notification
 from model.project import Project, Commit, ProjectFile
+<<<<<<< Updated upstream
+=======
+from model.otp import OTP
+from model.task import Task  # Task Management
+>>>>>>> Stashed changes
 from util.file_helper import FileHelper
 from util.auth_helper import AuthHelper
 
@@ -64,6 +74,11 @@ app.register_blueprint(salary_bp, url_prefix="/api/salary")
 app.register_blueprint(shop_bp, url_prefix="/api/shop")
 app.register_blueprint(notification_bp, url_prefix="/api/notifications")
 app.register_blueprint(project_bp, url_prefix="/api/projects")
+<<<<<<< Updated upstream
+=======
+app.register_blueprint(otp_bp, url_prefix="/api/otp")
+app.register_blueprint(task_bp, url_prefix="/api/tasks")  # Task Management
+>>>>>>> Stashed changes
 
 
 def sync_id_counters():
@@ -77,6 +92,11 @@ def sync_id_counters():
     Project._id_counter = FileHelper.get_max_id("projects") + 1
     Commit._id_counter = FileHelper.get_max_id("commits") + 1
     ProjectFile._id_counter = FileHelper.get_max_id("project_files") + 1
+<<<<<<< Updated upstream
+=======
+    OTP._id_counter = FileHelper.get_max_id("otp_codes") + 1
+    Task._id_counter = FileHelper.get_max_id("tasks") + 1  # Task Management
+>>>>>>> Stashed changes
 
 
 def create_default_admin():
@@ -97,4 +117,5 @@ def create_default_admin():
 if __name__ == "__main__":
     sync_id_counters()
     create_default_admin()
+    print("🚀 Server Task Management đã sẵn sàng!")
     app.run(host="0.0.0.0", port=5000, debug=True)
