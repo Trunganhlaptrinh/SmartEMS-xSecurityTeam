@@ -5,6 +5,14 @@
     "from_date": "2026-06-27",
     "to_date": "2026-06-28",
     "reason": "dđ",
+    "status": "approved"
+  },
+  {
+    "id": 4,
+    "employee_id": 6,
+    "from_date": "2026-07-24",
+    "to_date": "2026-07-26",
+    "reason": "test bảo mật của trunganh",
     "status": "pending"
   }
 ]

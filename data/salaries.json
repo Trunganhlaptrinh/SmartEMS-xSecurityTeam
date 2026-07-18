@@ -16,5 +16,23 @@
     "bonus": 1010101.0,
     "deduction": 0,
     "total": 1110101.0
+  },
+  {
+    "id": 3,
+    "employee_id": 6,
+    "month": "2026-07",
+    "base": 100000.0,
+    "bonus": 0.0,
+    "deduction": 0.0,
+    "total": 100000.0
+  },
+  {
+    "id": 4,
+    "employee_id": 8,
+    "month": "2026-07",
+    "base": 100000.0,
+    "bonus": 0.0,
+    "deduction": 0.0,
+    "total": 100000.0
   }
 ]
