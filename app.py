@@ -1,4 +1,3 @@
-# app.py - ĐÃ FIX LỖ HỔNG CORS
 from flask import Flask, send_from_directory
 from flask_cors import CORS
 import os
@@ -10,7 +9,6 @@ from controller.salary_controller import salary_bp
 from controller.shop_controller import shop_bp
 from controller.notification_controller import notification_bp
 from controller.project_controller import project_bp
-from controller.otp_controller import otp_bp
 from controller.task_controller import task_bp
 
 from model.employee import Employee
@@ -20,18 +18,24 @@ from model.salary import Salary
 from model.shop import ShopItem, ShopTransaction
 from model.notification import Notification
 from model.project import Project, Commit, ProjectFile
-from model.otp import OTP
 from model.task import Task
 
 from util.file_helper import FileHelper
 from util.auth_helper import AuthHelper
 
 
+# ==========================
+# KHAI BÁO APP
+# ==========================
 app = Flask(__name__)
 app.secret_key = "employee_mgmt_secret_2025"
 
 VIEW_DIR = os.path.join(os.path.dirname(__file__), "view")
 
+
+# ==========================
+# FIX CORS
+# ==========================
 ALLOWED_ORIGINS = [
     "http://localhost:5000",
     "http://127.0.0.1:5000",
@@ -50,11 +54,13 @@ CORS(
 )
 
 print(
-    f"[SECURITY] CORS configured - Allowed origins: "
-    f"{ALLOWED_ORIGINS}"
+    f"[SECURITY] CORS configured - Allowed origins: {ALLOWED_ORIGINS}"
 )
 
 
+# ==========================
+# ROUTES
+# ==========================
 @app.route("/")
 def index():
     return send_from_directory(VIEW_DIR, "index.html")
@@ -66,7 +72,7 @@ def serve_view(filename):
 
 
 # ==========================
-# REGISTER BLUEPRINTS
+# REGISTER BLUEPRINT
 # ==========================
 app.register_blueprint(auth_bp, url_prefix="/api/auth")
 app.register_blueprint(attendance_bp, url_prefix="/api/attendance")
@@ -75,17 +81,34 @@ app.register_blueprint(salary_bp, url_prefix="/api/salary")
 app.register_blueprint(shop_bp, url_prefix="/api/shop")
 app.register_blueprint(notification_bp, url_prefix="/api/notifications")
 app.register_blueprint(project_bp, url_prefix="/api/projects")
-app.register_blueprint(otp_bp, url_prefix="/api/otp")
 app.register_blueprint(task_bp, url_prefix="/api/tasks")
 
 
+# ==========================
+# SYNC ID COUNTER
+# ==========================
 def sync_id_counters():
-    Employee._id_counter = FileHelper.get_max_id("employees") + 1
-    Attendance._id_counter = FileHelper.get_max_id("attendance") + 1
-    Leave._id_counter = FileHelper.get_max_id("leaves") + 1
-    Salary._id_counter = FileHelper.get_max_id("salaries") + 1
 
-    ShopItem._id_counter = FileHelper.get_max_id("shop_items") + 1
+    Employee._id_counter = (
+        FileHelper.get_max_id("employees") + 1
+    )
+
+    Attendance._id_counter = (
+        FileHelper.get_max_id("attendance") + 1
+    )
+
+    Leave._id_counter = (
+        FileHelper.get_max_id("leaves") + 1
+    )
+
+    Salary._id_counter = (
+        FileHelper.get_max_id("salaries") + 1
+    )
+
+    ShopItem._id_counter = (
+        FileHelper.get_max_id("shop_items") + 1
+    )
+
     ShopTransaction._id_counter = (
         FileHelper.get_max_id("shop_transactions") + 1
     )
@@ -94,23 +117,37 @@ def sync_id_counters():
         FileHelper.get_max_id("notifications") + 1
     )
 
-    Project._id_counter = FileHelper.get_max_id("projects") + 1
-    Commit._id_counter = FileHelper.get_max_id("commits") + 1
+    Project._id_counter = (
+        FileHelper.get_max_id("projects") + 1
+    )
+
+    Commit._id_counter = (
+        FileHelper.get_max_id("commits") + 1
+    )
+
     ProjectFile._id_counter = (
         FileHelper.get_max_id("project_files") + 1
     )
 
-    OTP._id_counter = FileHelper.get_max_id("otp_codes") + 1
-    Task._id_counter = FileHelper.get_max_id("tasks") + 1
+    Task._id_counter = (
+        FileHelper.get_max_id("tasks") + 1
+    )
 
 
+# ==========================
+# TẠO ADMIN MẶC ĐỊNH
+# ==========================
 def create_default_admin():
+
     employees = FileHelper.read_all("employees")
 
     if not employees:
+
         admin = Employee(
             username="admin",
-            password_hash=AuthHelper.hash_password("admin123"),
+            password_hash=AuthHelper.hash_password(
+                "admin123"
+            ),
             name="Administrator",
             role="admin",
             department="Management",
@@ -122,17 +159,22 @@ def create_default_admin():
             admin.to_dict()
         )
 
-        print(
-            "Đã tạo tài khoản admin mặc định:"
-            " admin / admin123"
-        )
+        print("Đã tạo tài khoản admin mặc định:")
+        print("Username: admin")
+        print("Password: admin123")
 
 
+# ==========================
+# MAIN
+# ==========================
 if __name__ == "__main__":
+
     sync_id_counters()
     create_default_admin()
 
-    print("🚀 Server Task Management đã sẵn sàng!")
+    print(
+        "🚀 Server SmartEMS + Task Management đã sẵn sàng!"
+    )
 
     app.run(
         host="0.0.0.0",

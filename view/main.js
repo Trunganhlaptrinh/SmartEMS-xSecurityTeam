@@ -251,12 +251,17 @@ function renderSidebar(currentPage, user) {
       Dự án
     </a>
 
-    <!-- ==================== TASKS ==================== -->
     <a class="nav-item ${currentPage === 'tasks' ? 'active' : ''}" href="tasks.html">
       <img src="image/logo_project.png" style="height:18px;width:18px;object-fit:contain;" />
       Quản lý Task
     </a>
-    <!-- ============================================== -->
+
+    <a class="nav-item ${currentPage === 'tasks' ? 'active' : ''}" href="tasks.html">
+      <img src="image/logo_project.png"
+         style="height:18px;width:18px;object-fit:contain;" />
+     Quản lý Task
+    </a>
+
 
     ${adminLinks}
 
