@@ -278,5 +278,12 @@
     "date": "2026-07-10",
     "status": "absent",
     "note": "Điểm danh lúc 09:37:47"
+  },
+  {
+    "id": 41,
+    "employee_id": 13,
+    "date": "2026-07-19",
+    "status": "absent",
+    "note": "Điểm danh lúc 10:26:11"
   }
 ]
