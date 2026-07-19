@@ -1,43 +1,101 @@
 <!DOCTYPE html>
-<!-- view/index.html — trang đăng nhập -->
+<!-- view/index.html — trang đăng nhập với OTP -->
 <html lang="vi">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Đăng nhập — Quản lý Nhân viên</title>
+  <title>Đăng nhập — SmartEMS</title>
   <link rel="stylesheet" href="style.css" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="icon" type="image/png" href="image/logo_E.png" />
+  <style>
+    .otp-section {
+      display: none;
+      margin-top: 16px;
+      padding: 16px;
+      background: #f0f4ff;
+      border-radius: 8px;
+      border: 1px solid #e4e7ec;
+    }
+    .otp-section .otp-hint {
+      font-size: .82rem;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+    .otp-section .otp-hint .otp-debug {
+      display: none;
+      color: #e53935;
+      font-weight: 700;
+    }
+    .otp-section .otp-input {
+      text-align: center;
+      letter-spacing: 8px;
+      font-size: 1.4rem;
+      font-weight: 700;
+    }
+    .otp-section .resend-btn {
+      background: none;
+      border: none;
+      color: var(--accent);
+      cursor: pointer;
+      font-size: .78rem;
+      text-decoration: underline;
+    }
+    .otp-section .resend-btn:disabled {
+      opacity: .5;
+      cursor: not-allowed;
+    }
+    .otp-section .timer {
+      font-size: .78rem;
+      color: var(--muted);
+    }
+  </style>
 </head>
 <body>
 
 <div class="login-wrap">
   <div class="login-box">
-    <!-- logo -->
     <h1><img src="image/logo_E.png" style="height:36px;vertical-align:middle;margin-right:8px;" />SmartEMS</h1>
     
+    <!-- FORM ĐĂNG NHẬP -->
+    <div id="login-form">
+      <div class="form-group">
+        <label for="username">Tên đăng nhập</label>
+        <input type="text" id="username" placeholder="Nhập username hoặc email" autocomplete="username" />
+      </div>
 
-    <!-- form đăng nhập -->
-    <div class="form-group">
-      <label for="username">Tên đăng nhập</label>
-      <input type="text" id="username" placeholder="Nhập username" autocomplete="username" />
+      <div class="form-group">
+        <label for="password">Mật khẩu</label>
+        <input type="password" id="password" placeholder="Nhập mật khẩu" autocomplete="current-password" />
+      </div>
+
+      <p id="err-msg" style="color:#e53935;font-size:.85rem;margin-bottom:12px;display:none;"></p>
+
+      <button class="btn btn-primary" style="width:100%;justify-content:center;" onclick="doLogin()">
+        Đăng nhập
+      </button>
     </div>
 
-    <div class="form-group">
-      <label for="password">Mật khẩu</label>
-      <input type="password" id="password" placeholder="Nhập mật khẩu" autocomplete="current-password" />
+    <!-- FORM OTP -->
+    <div id="otp-form" class="otp-section">
+      <div class="otp-hint">
+        🔐 Mã xác thực đã được gửi đến <strong id="otp-email">email</strong>
+        <span id="otp-debug" class="otp-debug"></span>
+      </div>
+      <div class="form-group">
+        <label for="otp-code">Nhập mã OTP (6 số)</label>
+        <input type="text" id="otp-code" class="otp-input" maxlength="6" placeholder="_ _ _ _ _ _" />
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <span class="timer" id="otp-timer">⏳ 05:00</span>
+        <button class="resend-btn" id="resend-btn" onclick="resendOTP()">Gửi lại mã</button>
+      </div>
+      <p id="otp-err-msg" style="color:#e53935;font-size:.85rem;margin-top:8px;display:none;"></p>
+      <button class="btn btn-primary" style="width:100%;justify-content:center;margin-top:8px;" onclick="verifyOTP()">
+        Xác nhận
+      </button>
     </div>
-
-    <p id="err-msg" style="color:#e53935;font-size:.85rem;margin-bottom:12px;display:none;"></p>
-
-    <button class="btn btn-primary" style="width:100%;justify-content:center;" onclick="doLogin()">
-      Đăng nhập
-    </button>
-
-    <!-- <p style="margin-top:16px;font-size:.8rem;color:#9ca3af;text-align:center;">
-      Tài khoản mặc định: <strong>admin</strong> / <strong>admin123</strong>
-    </p> -->
   </div>
 </div>
 
@@ -45,12 +103,15 @@
 
 <script src="main.js"></script>
 <script>
-  // nếu đã đăng nhập thì chuyển thẳng vào dashboard
+  let pendingEmployeeId = null;
+  let otpTimer = null;
+  let otpSeconds = 300;
+
+  // Kiểm tra đã đăng nhập chưa
   API.get("/auth/me").then(res => {
     if (res.success) window.location.href = "dashboard.html";
   });
 
-  // xử lý đăng nhập
   async function doLogin() {
     const username = document.getElementById("username").value.trim();
     const password = document.getElementById("password").value;
@@ -58,17 +119,137 @@
 
     errMsg.style.display = "none";
 
+    if (!username || !password) {
+      errMsg.textContent = "Vui lòng nhập đầy đủ tên đăng nhập và mật khẩu";
+      errMsg.style.display = "block";
+      return;
+    }
+
     const res = await API.post("/auth/login", { username, password });
-    if (res.success) {
+    
+    // ✅ Đăng nhập thành công (không cần OTP)
+    if (res.success && !res.require_otp) {
       showToast("Đăng nhập thành công!", "success");
       setTimeout(() => window.location.href = "dashboard.html", 600);
+      return;
+    }
+
+    // ✅ Cần OTP (user có @gmail.com)
+    if (res.success && res.require_otp) {
+      pendingEmployeeId = res.employee_id;
+      document.getElementById("otp-email").textContent = res.email || "email của bạn";
+      
+      // Hiển thị debug code nếu có (khi không gửi được email)
+      const debugEl = document.getElementById("otp-debug");
+      if (res.debug_code) {
+        debugEl.textContent = ` (Debug: ${res.debug_code})`;
+        debugEl.style.display = 'inline';
+      } else {
+        debugEl.style.display = 'none';
+      }
+      
+      document.getElementById("login-form").style.display = "none";
+      document.getElementById("otp-form").style.display = "block";
+      document.getElementById("otp-code").value = "";
+      document.getElementById("otp-code").focus();
+      startOTPTimer(300);
+      showToast("Đã gửi mã OTP đến email của bạn!", "success");
+      return;
+    }
+
+    // ❌ Lỗi đăng nhập (bao gồm cả lỗi khóa tài khoản)
+    errMsg.textContent = res.message || "Sai tên đăng nhập hoặc mật khẩu";
+    errMsg.style.display = "block";
+    
+    // Nếu tài khoản bị khóa, hiển thị thông báo màu đỏ đậm hơn
+    if (res.message && res.message.includes("bị khóa")) {
+      errMsg.style.color = "#b91c1c";
+      errMsg.style.fontWeight = "600";
     } else {
-      errMsg.textContent    = res.message || "Đăng nhập thất bại";
-      errMsg.style.display  = "block";
+      errMsg.style.color = "#e53935";
+      errMsg.style.fontWeight = "normal";
     }
   }
 
-  // cho phép nhấn Enter để đăng nhập
+  async function verifyOTP() {
+    const code = document.getElementById("otp-code").value.trim();
+    const errMsg = document.getElementById("otp-err-msg");
+    
+    errMsg.style.display = "none";
+
+    if (!code || code.length < 6) {
+      errMsg.textContent = "Vui lòng nhập đủ 6 số OTP";
+      errMsg.style.display = "block";
+      return;
+    }
+
+    const res = await API.post("/otp/verify", {
+      employee_id: pendingEmployeeId,
+      code: code
+    });
+
+    if (res.success) {
+      showToast("Xác thực thành công!", "success");
+      clearInterval(otpTimer);
+      setTimeout(() => window.location.href = "dashboard.html", 600);
+    } else {
+      errMsg.textContent = res.message || "Mã OTP không hợp lệ hoặc đã hết hạn";
+      errMsg.style.display = "block";
+    }
+  }
+
+  async function resendOTP() {
+    const btn = document.getElementById("resend-btn");
+    btn.disabled = true;
+    btn.textContent = "Đang gửi...";
+
+    const res = await API.post("/otp/resend", {
+      employee_id: pendingEmployeeId
+    });
+
+    if (res.success) {
+      // Hiển thị debug code nếu có
+      const debugEl = document.getElementById("otp-debug");
+      if (res.debug_code) {
+        debugEl.textContent = ` (Debug: ${res.debug_code})`;
+        debugEl.style.display = 'inline';
+      }
+      showToast("Đã gửi lại mã OTP!", "success");
+      startOTPTimer(300);
+    } else {
+      showToast(res.message || "Không thể gửi lại mã", "error");
+    }
+
+    btn.disabled = false;
+    btn.textContent = "Gửi lại mã";
+  }
+
+  function startOTPTimer(seconds) {
+    otpSeconds = seconds;
+    const timerEl = document.getElementById("otp-timer");
+    const btn = document.getElementById("resend-btn");
+    btn.disabled = true;
+
+    clearInterval(otpTimer);
+    otpTimer = setInterval(() => {
+      otpSeconds--;
+      const mins = String(Math.floor(otpSeconds / 60)).padStart(2, '0');
+      const secs = String(otpSeconds % 60).padStart(2, '0');
+      timerEl.textContent = `⏳ ${mins}:${secs}`;
+
+      if (otpSeconds <= 0) {
+        clearInterval(otpTimer);
+        btn.disabled = false;
+        timerEl.textContent = "⏳ Đã hết hạn";
+      }
+    }, 1000);
+  }
+
+  // Enter để submit
+  document.getElementById("otp-code").addEventListener("keydown", e => {
+    if (e.key === "Enter") verifyOTP();
+  });
+
   document.getElementById("password").addEventListener("keydown", e => {
     if (e.key === "Enter") doLogin();
   });

@@ -1,0 +1,50 @@
+[
+  {
+    "id": 1,
+    "title": "dfsdf",
+    "content": "fdsfsdf",
+    "author_id": 1,
+    "author_name": "Admin TrungAnh",
+    "notification_type": "general",
+    "priority": "normal",
+    "created_at": "2026-06-29 00:19:48",
+    "updated_at": "2026-06-29 00:19:55",
+    "status": "archived"
+  },
+  {
+    "id": 2,
+    "title": "Họp làm IAA",
+    "content": "làm báo cáo nào các đại ka :D",
+    "author_id": 1,
+    "author_name": "Admin TrungAnh",
+    "notification_type": "meeting",
+    "priority": "high",
+    "created_at": "2026-06-29 00:24:41",
+    "updated_at": "2026-06-29 00:24:41",
+    "status": "active"
+  },
+  {
+    "id": 3,
+    "title": "<img src=x onerror=alert('XSS-ThongBao')>",
+    "content": "hahahahha",
+    "author_id": 1,
+    "author_name": "Admin TrungAnh",
+    "notification_type": "general",
+    "priority": "normal",
+    "created_at": "2026-07-18 20:55:46",
+    "updated_at": "2026-07-18 20:56:04",
+    "status": "archived"
+  },
+  {
+    "id": 4,
+    "title": "<img src=x onerror=alert('XSS-ThongBao')>",
+    "content": "hahahaha",
+    "author_id": 1,
+    "author_name": "Admin TrungAnh",
+    "notification_type": "general",
+    "priority": "normal",
+    "created_at": "2026-07-18 21:00:26",
+    "updated_at": "2026-07-18 21:07:54",
+    "status": "archived"
+  }
+]

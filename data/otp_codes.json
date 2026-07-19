@@ -1,0 +1,29 @@
+[
+  {
+    "id": 27,
+    "employee_id": 14,
+    "email": "anhnthe190843@gmail.com",
+    "code": "594985",
+    "created_at": "2026-07-13 13:40:29",
+    "expires_at": "2026-07-13 13:45:29",
+    "used": true
+  },
+  {
+    "id": 28,
+    "employee_id": 15,
+    "email": "trunganhlaptrinh@gmail.com",
+    "code": "352355",
+    "created_at": "2026-07-14 08:25:22",
+    "expires_at": "2026-07-14 08:30:22",
+    "used": true
+  },
+  {
+    "id": 29,
+    "employee_id": 16,
+    "email": "phanhieu03022005@gmail.com",
+    "code": "071568",
+    "created_at": "2026-07-14 08:27:03",
+    "expires_at": "2026-07-14 08:32:03",
+    "used": false
+  }
+]

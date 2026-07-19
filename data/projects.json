@@ -1,0 +1,32 @@
+[
+  {
+    "id": 1,
+    "name": "Làm web bán hàng",
+    "description": "hahaha",
+    "owner_id": 1,
+    "owner_name": "Admin TrungAnh",
+    "status": "active",
+    "members": [
+      6,
+      8,
+      9,
+      10,
+      11
+    ],
+    "created_at": "2026-06-29 00:48:28",
+    "updated_at": "2026-06-29 00:49:19"
+  },
+  {
+    "id": 2,
+    "name": "Test dự án",
+    "description": "test thôi",
+    "owner_id": 1,
+    "owner_name": "Admin TrungAnh",
+    "status": "active",
+    "members": [
+      6
+    ],
+    "created_at": "2026-06-29 00:49:56",
+    "updated_at": "2026-06-29 00:49:56"
+  }
+]

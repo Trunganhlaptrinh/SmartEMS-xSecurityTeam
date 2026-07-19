@@ -1,0 +1,289 @@
+[
+  {
+    "id": 1,
+    "employee_id": 1,
+    "date": "2026-06-26",
+    "status": "absent",
+    "note": ""
+  },
+  {
+    "id": 2,
+    "employee_id": 2,
+    "date": "2026-06-26",
+    "status": "late",
+    "note": ""
+  },
+  {
+    "id": 3,
+    "employee_id": 4,
+    "date": "2026-06-27",
+    "status": "late",
+    "note": ""
+  },
+  {
+    "id": 4,
+    "employee_id": 3,
+    "date": "2026-06-27",
+    "status": "present",
+    "note": ""
+  },
+  {
+    "id": 5,
+    "employee_id": 3,
+    "date": "2026-06-28",
+    "status": "late",
+    "note": ""
+  },
+  {
+    "id": 6,
+    "employee_id": 6,
+    "date": "2026-06-27",
+    "status": "present",
+    "note": "Admin sửa trạng thái thành present"
+  },
+  {
+    "id": 7,
+    "employee_id": 1,
+    "date": "2026-06-27",
+    "status": "absent",
+    "note": "Điểm danh lúc 21:57:22"
+  },
+  {
+    "id": 8,
+    "employee_id": 6,
+    "date": "2026-06-26",
+    "status": "present",
+    "note": "Admin điểm danh"
+  },
+  {
+    "id": 9,
+    "employee_id": 6,
+    "date": "2026-06-25",
+    "status": "late",
+    "note": "Admin điểm danh"
+  },
+  {
+    "id": 10,
+    "employee_id": 6,
+    "date": "2026-06-28",
+    "status": "present",
+    "note": "Admin điểm danh"
+  },
+  {
+    "id": 11,
+    "employee_id": 6,
+    "date": "2026-06-16",
+    "status": "present",
+    "note": "Admin điểm danh"
+  },
+  {
+    "id": 12,
+    "employee_id": 6,
+    "date": "2026-06-15",
+    "status": "absent",
+    "note": "Admin điểm danh"
+  },
+  {
+    "id": 13,
+    "employee_id": 6,
+    "date": "2026-06-30",
+    "status": "present",
+    "note": "Admin sửa trạng thái thành present"
+  },
+  {
+    "id": 14,
+    "employee_id": 10,
+    "date": "2026-06-27",
+    "status": "present",
+    "note": "Admin điểm danh"
+  },
+  {
+    "id": 15,
+    "employee_id": 9,
+    "date": "2026-06-27",
+    "status": "present",
+    "note": "Admin điểm danh"
+  },
+  {
+    "id": 16,
+    "employee_id": 6,
+    "date": "2026-06-24",
+    "status": "present",
+    "note": "Admin điểm danh"
+  },
+  {
+    "id": 17,
+    "employee_id": 6,
+    "date": "2026-06-23",
+    "status": "present",
+    "note": "Admin điểm danh"
+  },
+  {
+    "id": 18,
+    "employee_id": 6,
+    "date": "2026-06-22",
+    "status": "present",
+    "note": "Admin điểm danh"
+  },
+  {
+    "id": 19,
+    "employee_id": 6,
+    "date": "2026-06-21",
+    "status": "present",
+    "note": "Admin sửa trạng thái thành present"
+  },
+  {
+    "id": 20,
+    "employee_id": 6,
+    "date": "2026-06-20",
+    "status": "present",
+    "note": "Admin điểm danh"
+  },
+  {
+    "id": 21,
+    "employee_id": 6,
+    "date": "2026-06-09",
+    "status": "present",
+    "note": "Admin điểm danh"
+  },
+  {
+    "id": 22,
+    "employee_id": 6,
+    "date": "2026-06-11",
+    "status": "late",
+    "note": "Admin điểm danh"
+  },
+  {
+    "id": 23,
+    "employee_id": 6,
+    "date": "2026-06-12",
+    "status": "present",
+    "note": "Admin điểm danh"
+  },
+  {
+    "id": 24,
+    "employee_id": 6,
+    "date": "2026-06-13",
+    "status": "present",
+    "note": "Admin điểm danh"
+  },
+  {
+    "id": 25,
+    "employee_id": 6,
+    "date": "2026-06-17",
+    "status": "absent",
+    "note": "Admin điểm danh"
+  },
+  {
+    "id": 26,
+    "employee_id": 6,
+    "date": "2026-06-18",
+    "status": "present",
+    "note": "Admin sửa trạng thái thành present"
+  },
+  {
+    "id": 27,
+    "employee_id": 6,
+    "date": "2026-06-19",
+    "status": "late",
+    "note": "Admin điểm danh"
+  },
+  {
+    "id": 28,
+    "employee_id": 6,
+    "date": "2026-06-01",
+    "status": "present",
+    "note": "Admin điểm danh"
+  },
+  {
+    "id": 29,
+    "employee_id": 6,
+    "date": "2026-06-02",
+    "status": "present",
+    "note": "Admin điểm danh"
+  },
+  {
+    "id": 30,
+    "employee_id": 6,
+    "date": "2026-06-03",
+    "status": "present",
+    "note": "Admin điểm danh"
+  },
+  {
+    "id": 31,
+    "employee_id": 6,
+    "date": "2026-06-04",
+    "status": "present",
+    "note": "Admin điểm danh"
+  },
+  {
+    "id": 32,
+    "employee_id": 6,
+    "date": "2026-06-05",
+    "status": "present",
+    "note": "Admin điểm danh"
+  },
+  {
+    "id": 33,
+    "employee_id": 6,
+    "date": "2026-06-06",
+    "status": "present",
+    "note": "Admin điểm danh"
+  },
+  {
+    "id": 34,
+    "employee_id": 6,
+    "date": "2026-06-08",
+    "status": "late",
+    "note": "Admin điểm danh"
+  },
+  {
+    "id": 35,
+    "employee_id": 6,
+    "date": "2026-06-10",
+    "status": "late",
+    "note": "Admin điểm danh"
+  },
+  {
+    "id": 36,
+    "employee_id": 6,
+    "date": "2026-05-30",
+    "status": "present",
+    "note": "Admin điểm danh"
+  },
+  {
+    "id": 37,
+    "employee_id": 8,
+    "date": "2026-06-27",
+    "status": "absent",
+    "note": "Điểm danh lúc 22:24:02"
+  },
+  {
+    "id": 38,
+    "employee_id": 8,
+    "date": "2026-06-28",
+    "status": "absent",
+    "note": "Điểm danh lúc 12:53:35"
+  },
+  {
+    "id": 39,
+    "employee_id": 6,
+    "date": "2026-06-29",
+    "status": "present",
+    "note": "Điểm danh lúc 00:34:40"
+  },
+  {
+    "id": 40,
+    "employee_id": 13,
+    "date": "2026-07-10",
+    "status": "absent",
+    "note": "Điểm danh lúc 09:37:47"
+  },
+  {
+    "id": 41,
+    "employee_id": 13,
+    "date": "2026-07-19",
+    "status": "absent",
+    "note": "Điểm danh lúc 10:26:11"
+  }
+]

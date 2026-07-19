@@ -1,0 +1,20 @@
+[
+  {
+    "id": 1,
+    "employee_id": 6,
+    "month": "2026-06",
+    "base": 100000.0,
+    "bonus": 110000.0,
+    "deduction": 2000.0,
+    "total": 208000.0
+  },
+  {
+    "id": 2,
+    "employee_id": 8,
+    "month": "2026-06",
+    "base": 100000.0,
+    "bonus": 1010101.0,
+    "deduction": 0,
+    "total": 1110101.0
+  }
+]
