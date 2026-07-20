@@ -61,13 +61,18 @@ const API = {
     }
   },
 
-  // gọi DELETE request
-  async delete(path) {
+  // gọi DELETE request (hỗ trợ gửi kèm body JSON, ví dụ { api_key: ... })
+  async delete(path, body) {
     try {
-      const res = await fetch(BASE_URL + path, {
+      const options = {
         method: "DELETE",
         credentials: "include"
-      });
+      };
+      if (body !== undefined) {
+        options.headers = { "Content-Type": "application/json" };
+        options.body = JSON.stringify(body);
+      }
+      const res = await fetch(BASE_URL + path, options);
       return await res.json();
     } catch (err) {
       console.error("DELETE error:", err);
@@ -250,14 +255,24 @@ function renderSidebar(currentPage, user) {
       <img src="image/logo_project.png" style="height:18px;width:18px;object-fit:contain;" />
       Dự án
     </a>
+
     <a class="nav-item ${currentPage === 'contracts' ? 'active' : ''}" href="contracts.html">
       <span>🔒</span>
       Hợp đồng
     </a>
+
+    <!-- Task Management - GIỮ NGUYÊN -->
     <a class="nav-item ${currentPage === 'tasks' ? 'active' : ''}" href="tasks.html">
       <span>📋</span>
-        Quản lý Task
+      Quản lý Task
     </a>
+
+    <!-- ChatEMS - DÙNG logo_chatems.png -->
+    <a class="nav-item ${currentPage === 'chatems' ? 'active' : ''}" href="chatems.html">
+      <img src="image/logo_chatems.png" style="height:18px;width:18px;object-fit:contain;" />
+      ChatEMS
+    </a>
+
     ${adminLinks}
 
     <div class="sidebar-bottom">
