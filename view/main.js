@@ -250,6 +250,10 @@ function renderSidebar(currentPage, user) {
       <img src="image/logo_project.png" style="height:18px;width:18px;object-fit:contain;" />
       Dự án
     </a>
+    <a class="nav-item ${currentPage === 'contracts' ? 'active' : ''}" href="contracts.html">
+      <span>🔒</span>
+      Hợp đồng
+    </a>
     <a class="nav-item ${currentPage === 'tasks' ? 'active' : ''}" href="tasks.html">
       <span>📋</span>
         Quản lý Task

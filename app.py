@@ -9,6 +9,7 @@ from controller.salary_controller import salary_bp
 from controller.shop_controller import shop_bp
 from controller.notification_controller import notification_bp
 from controller.project_controller import project_bp
+from controller.contract_controller import contract_bp, contract_list_bp
 from controller.otp_controller import otp_bp
 from controller.task_controller import task_bp
 from controller.dashboard_controller import dashboard_bp
@@ -20,6 +21,7 @@ from model.salary import Salary
 from model.shop import ShopItem, ShopTransaction
 from model.notification import Notification
 from model.project import Project, Commit, ProjectFile
+from model.contract import Contract
 from model.otp import OTP
 from model.task import Task
 
@@ -30,7 +32,14 @@ from util.auth_helper import AuthHelper
 # APP
 # =====================================
 app = Flask(__name__)
-app.secret_key = "employee_mgmt_secret_2025"
+# Secret key: ưu tiên lấy từ biến môi trường SECRET_KEY (khi deploy thật),
+# nếu chưa set thì tạm dùng giá trị mặc định + cảnh báo để không quên đổi.
+app.secret_key = os.environ.get("SECRET_KEY", "employee_mgmt_secret_2025")
+if not os.environ.get("SECRET_KEY"):
+    print(
+        "[SECURITY] ⚠️  Chưa đặt biến môi trường SECRET_KEY, đang dùng giá trị mặc định "
+        "(KHÔNG an toàn khi chạy thật ngoài internet). Nên set: export SECRET_KEY=\"...\""
+    )
 
 VIEW_DIR = os.path.join(os.path.dirname(__file__), "view")
 
@@ -84,6 +93,8 @@ app.register_blueprint(project_bp, url_prefix="/api/projects")
 app.register_blueprint(otp_bp, url_prefix="/api/otp")
 
 
+app.register_blueprint(contract_bp, url_prefix="/api/projects")
+app.register_blueprint(contract_list_bp, url_prefix="/api/contracts")
 app.register_blueprint(task_bp, url_prefix="/api/tasks")
 app.register_blueprint(
     dashboard_bp,
@@ -133,6 +144,10 @@ def sync_id_counters():
 
     ProjectFile._id_counter = (
         FileHelper.get_max_id("project_files") + 1
+    )
+
+    Contract._id_counter = (
+        FileHelper.get_max_id("contracts") + 1
     )
 
     OTP._id_counter = (
