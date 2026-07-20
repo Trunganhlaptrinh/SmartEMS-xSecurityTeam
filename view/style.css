@@ -383,3 +383,68 @@ tr:hover td      { background: var(--bg); }
   .main { margin-left: 0; padding: 20px 16px; }
   .form-row { grid-template-columns: 1fr; }
 }
+
+/* ===== HỢP ĐỒNG (dùng chung: trang Hợp đồng riêng + trong chi tiết Dự án) ===== */
+.contract-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.contract-item {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-left: 3px solid #ffb020;
+  border-radius: 10px;
+  padding: 14px 18px;
+}
+.contract-item .contract-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.contract-item .contract-title {
+  font-weight: 700;
+  font-size: .95rem;
+}
+.contract-item .project-badge {
+  background: #eef0ff;
+  color: #4255ff;
+  font-size: .68rem;
+  font-weight: 600;
+  padding: 2px 10px;
+  border-radius: 12px;
+}
+.contract-item .contract-desc {
+  font-size: .82rem;
+  color: var(--muted);
+  margin: 6px 0;
+}
+.contract-item .contract-meta {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  font-size: .72rem;
+  color: var(--muted);
+  margin-top: 4px;
+}
+.contract-item .contract-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 8px;
+}
+.contract-item .contract-actions span {
+  cursor: pointer;
+  font-size: .78rem;
+  font-weight: 500;
+}
+.contract-item .contract-actions .download-link { color: var(--accent); }
+.contract-item .contract-actions .edit-btn { color: #4255ff; }
+.contract-item .contract-actions .del-btn { color: var(--red); }
+.contract-lock-note {
+  font-size: .78rem;
+  color: var(--muted);
+  padding: 10px;
+  text-align: center;
+}

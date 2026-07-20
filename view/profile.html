@@ -1,403 +1,443 @@
+<!-- view/projects.html — Quản lý dự án -->
 <!DOCTYPE html>
 <html lang="vi">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Hồ sơ — SmartEMS</title>
+  <title>Dự án — SmartEMS</title>
   <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="icon" type="image/png" href="image/logo_E.png" />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-  <!-- Cropper.js -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.css" />
   <style>
-    /* ===== PROFILE COVER ===== */
-    .profile-cover-wrapper {
-      position: relative;
-      background: var(--white);
-      border: 1px solid var(--border);
-      border-radius: 12px 12px 0 0;
-      overflow: hidden;
-    }
-    .profile-cover {
-      width: 100%;
-      height: 220px;
-      background: #d1d5db;
-      background-image: 
-        radial-gradient(circle at 20% 30%, #e5e7eb 0%, transparent 50%),
-        radial-gradient(circle at 80% 70%, #9ca3af 0%, transparent 40%);
-      position: relative;
-      cursor: pointer;
-      transition: opacity .2s;
-    }
-    .profile-cover:hover .cover-overlay {
-      opacity: 1;
-    }
-    .profile-cover img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-    .profile-cover .cover-overlay {
-      position: absolute;
-      inset: 0;
-      background: rgba(0,0,0,0.3);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      opacity: 0;
-      transition: opacity .2s;
-      color: #fff;
-      font-size: .88rem;
-      font-weight: 500;
-      gap: 6px;
-    }
-    .profile-cover .cover-overlay svg {
-      width: 18px;
-      height: 18px;
-    }
-
-    /* ===== PROFILE AVATAR ===== */
-    .profile-avatar-section {
-      position: relative;
-      padding: 0 28px 16px;
-      margin-top: -60px;
-      display: flex;
-      align-items: flex-end;
-      gap: 20px;
-      background: var(--white);
-      border: 1px solid var(--border);
-      border-top: none;
-      border-radius: 0 0 12px 12px;
-      padding-bottom: 16px;
-    }
-    .profile-avatar-wrapper {
-      position: relative;
-      flex-shrink: 0;
-    }
-    .profile-avatar {
-      width: 120px;
-      height: 120px;
-      border-radius: 50%;
-      background: #eef0ff;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 3.2rem;
-      font-weight: 700;
-      color: var(--accent);
-      overflow: hidden;
-      border: 4px solid var(--white);
-      box-shadow: 0 2px 12px rgba(0,0,0,0.12);
-      cursor: pointer;
-      transition: border-color .2s;
-    }
-    .profile-avatar:hover {
-      border-color: var(--accent);
-    }
-    .profile-avatar img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-    .profile-avatar .avatar-letter {
-      font-size: 3.2rem;
-      font-weight: 700;
-      color: var(--accent);
-    }
-
-    .profile-avatar-edit {
-      position: absolute;
-      bottom: 4px;
-      right: 4px;
-      width: 32px;
-      height: 32px;
-      border-radius: 50%;
-      background: var(--accent);
-      color: #fff;
-      border: 2.5px solid #fff;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      font-size: .8rem;
-      transition: background .15s, transform .15s;
-      box-shadow: 0 2px 8px rgba(66, 85, 255, 0.3);
-    }
-    .profile-avatar-edit:hover {
-      background: var(--accent-h);
-      transform: scale(1.05);
-    }
-
-    .profile-name-section {
-      flex: 1;
-      padding-top: 20px;
-    }
-    .profile-name-section .name {
-      font-size: 1.5rem;
-      font-weight: 700;
-      color: var(--text);
-    }
-    .profile-name-section .role {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      font-size: .85rem;
-      color: var(--muted);
-    }
-    .profile-name-section .role .dot {
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
-      display: inline-block;
-    }
-    .profile-name-section .role .dot.admin {
-      background: var(--accent);
-    }
-    .profile-name-section .role .dot.employee {
-      background: var(--green);
-    }
-    .profile-name-section .dept {
-      font-size: .88rem;
-      color: var(--muted);
-      margin-top: 2px;
-    }
-    .profile-name-section .dept span {
-      color: var(--text);
-      font-weight: 500;
-    }
-
-    /* ===== PROFILE STATS ===== */
-    .profile-stats-row {
-      display: flex;
-      gap: 24px;
-      margin-top: 6px;
-      padding-top: 8px;
-      border-top: 1px solid var(--border);
-    }
-    .profile-stats-row .stat-item {
-      text-align: center;
-    }
-    .profile-stats-row .stat-item .number {
-      font-size: 1rem;
-      font-weight: 700;
-      color: var(--text);
-    }
-    .profile-stats-row .stat-item .label {
-      font-size: .68rem;
-      color: var(--muted);
-      text-transform: uppercase;
-      letter-spacing: .04em;
-    }
-
-    /* ===== TABS ===== */
-    .profile-tabs {
-      display: flex;
-      gap: 4px;
-      background: var(--white);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 4px;
-      margin: 20px 0;
-    }
-    .profile-tabs .tab-btn {
-      flex: 1;
-      padding: 10px 20px;
-      border: none;
-      background: none;
-      font-family: var(--font);
-      font-size: .88rem;
-      font-weight: 500;
-      color: var(--muted);
-      cursor: pointer;
-      border-radius: 8px;
-      transition: all .2s;
-    }
-    .profile-tabs .tab-btn:hover {
-      background: var(--bg);
-      color: var(--text);
-    }
-    .profile-tabs .tab-btn.active {
-      background: var(--accent);
-      color: #fff;
-      box-shadow: 0 2px 12px rgba(66, 85, 255, 0.25);
-    }
-
-    /* ===== TAB PANELS ===== */
-    .tab-panel {
-      display: none;
-      animation: fadeIn .25s ease;
-    }
-    .tab-panel.active {
-      display: block;
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(6px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    .panel-card {
-      background: var(--white);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 24px 28px;
-    }
-    .panel-card .panel-title {
-      font-size: 1.05rem;
-      font-weight: 600;
-      margin-bottom: 18px;
-    }
-
-    /* Info rows */
-    .info-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 4px 32px;
-    }
-    .info-row {
+    .project-header {
       display: flex;
       justify-content: space-between;
-      padding: 10px 0;
-      border-bottom: 1px solid var(--border);
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 20px;
     }
-    .info-row .label {
-      color: var(--muted);
-      font-weight: 500;
-      font-size: .88rem;
+    .project-header .filter-group {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
     }
-    .info-row .value {
-      font-weight: 500;
-      font-size: .88rem;
-      color: var(--text);
-    }
-    .info-row:last-child {
-      border-bottom: none;
-    }
-
-    /* Form */
-    .form-group {
-      margin-bottom: 16px;
-    }
-    .form-group label {
-      display: block;
-      font-weight: 500;
-      font-size: .85rem;
-      margin-bottom: 4px;
-      color: var(--text);
-    }
-    .form-group input {
-      width: 100%;
-      padding: 9px 14px;
+    .project-header .filter-group select,
+    .project-header .filter-group input {
+      padding: 6px 12px;
       border: 1.5px solid var(--border);
-      border-radius: 8px;
+      border-radius: 6px;
       font-family: var(--font);
-      font-size: .88rem;
-      color: var(--text);
+      font-size: .82rem;
       background: var(--white);
-      transition: border-color .15s;
       outline: none;
     }
-    .form-group input:focus {
-      border-color: var(--accent);
-      box-shadow: 0 0 0 3px rgba(66, 85, 255, 0.1);
-    }
-    .form-group .hint {
-      font-size: .78rem;
-      color: var(--muted);
-      margin-top: 4px;
+    .project-header .filter-group select:focus,
+    .project-header .filter-group input:focus {
+      border-color: #4255ff;
     }
 
-    .btn {
-      padding: 9px 24px;
-      border-radius: 8px;
-      font-family: var(--font);
-      font-size: .88rem;
-      font-weight: 600;
-      cursor: pointer;
-      border: none;
-      transition: all .15s;
+    .project-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 16px;
+      margin-bottom: 20px;
     }
-    .btn-primary {
+    .project-card {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 16px 20px;
+      transition: all .2s;
+      cursor: pointer;
+    }
+    .project-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+    }
+    .project-card .project-name {
+      font-weight: 700;
+      font-size: 1.05rem;
+      margin-bottom: 4px;
+    }
+    .project-card .project-desc {
+      font-size: .85rem;
+      color: var(--muted);
+      margin-bottom: 8px;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    .project-card .project-meta {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      font-size: .72rem;
+      color: var(--muted);
+    }
+    .project-card .project-meta .owner {
+      font-weight: 500;
+      color: var(--text);
+    }
+    .project-card .project-meta .status-badge {
+      padding: 2px 10px;
+      border-radius: 12px;
+      font-weight: 600;
+      font-size: .65rem;
+      text-transform: uppercase;
+    }
+    .project-card .project-meta .status-badge.active {
+      background: #dcf5ea;
+      color: #1a7a4a;
+    }
+    .project-card .project-meta .status-badge.completed {
+      background: #eef0ff;
+      color: #4255ff;
+    }
+    .project-card .project-meta .status-badge.archived {
+      background: #f1f2f4;
+      color: #6b7280;
+    }
+    .project-card .project-meta .members {
+      color: var(--muted);
+    }
+    .project-card .project-actions {
+      display: flex;
+      gap: 6px;
+      margin-top: 10px;
+    }
+    .project-card .project-actions button {
+      padding: 4px 14px;
+      border: none;
+      border-radius: 4px;
+      font-family: var(--font);
+      font-size: .72rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background .15s;
+    }
+    .project-card .project-actions .edit-btn {
+      background: #eef0ff;
+      color: var(--accent);
+    }
+    .project-card .project-actions .edit-btn:hover {
       background: var(--accent);
       color: #fff;
     }
-    .btn-primary:hover {
-      background: var(--accent-h);
-      box-shadow: 0 2px 12px rgba(66, 85, 255, 0.25);
+    .project-card .project-actions .del-btn {
+      background: #fde8e8;
+      color: var(--red);
     }
-    .btn-ghost {
-      background: transparent;
+    .project-card .project-actions .del-btn:hover {
+      background: var(--red);
+      color: #fff;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 40px 20px;
       color: var(--muted);
-      border: 1.5px solid var(--border);
     }
-    .btn-ghost:hover {
-      background: var(--bg);
-    }
-
-    .btn-row {
-      display: flex;
-      gap: 10px;
-      justify-content: flex-end;
-      margin-top: 8px;
-    }
-
-    /* ===== CROP MODAL ===== */
-    .crop-container {
-      max-height: 65vh;
-      min-height: 280px;
-      background: #f0f0f0;
-      border-radius: 8px;
-      margin-bottom: 16px;
-      overflow: hidden;
-    }
-    .crop-container img {
-      max-width: 100%;
+    .empty-state .icon {
+      font-size: 3rem;
       display: block;
+      margin-bottom: 12px;
     }
-    .modal-wide {
+
+    .modal-project {
       max-width: 560px;
     }
+    .modal-project .form-group {
+      margin-bottom: 14px;
+    }
+    .modal-project .form-group label {
+      font-weight: 500;
+      font-size: .85rem;
+      display: block;
+      margin-bottom: 3px;
+    }
+    .modal-project .form-group input,
+    .modal-project .form-group select,
+    .modal-project .form-group textarea {
+      width: 100%;
+      padding: 8px 12px;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      font-family: var(--font);
+      font-size: .85rem;
+      outline: none;
+      transition: border-color .15s;
+      background: var(--white);
+    }
+    .modal-project .form-group input:focus,
+    .modal-project .form-group select:focus,
+    .modal-project .form-group textarea:focus {
+      border-color: #4255ff;
+    }
+    .modal-project .form-group textarea {
+      resize: vertical;
+      min-height: 80px;
+    }
+    .modal-project .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
 
-    /* ===== RESPONSIVE ===== */
-    @media (max-width: 700px) {
-      .profile-cover {
-        height: 140px;
-      }
-      .profile-avatar-section {
+    .modal-commit {
+      max-width: 560px;
+    }
+    .modal-commit .form-group {
+      margin-bottom: 14px;
+    }
+    .modal-commit .form-group label {
+      font-weight: 500;
+      font-size: .85rem;
+      display: block;
+      margin-bottom: 3px;
+    }
+    .modal-commit .form-group input,
+    .modal-commit .form-group textarea {
+      width: 100%;
+      padding: 8px 12px;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      font-family: var(--font);
+      font-size: .85rem;
+      outline: none;
+      background: var(--white);
+    }
+    .modal-commit .form-group textarea {
+      resize: vertical;
+      min-height: 60px;
+    }
+    .modal-commit .file-list {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px 12px;
+      max-height: 150px;
+      overflow-y: auto;
+    }
+    .modal-commit .file-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 4px 0;
+      font-size: .82rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .modal-commit .file-item:last-child {
+      border-bottom: none;
+    }
+    .modal-commit .file-item .file-name {
+      flex: 1;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .modal-commit .file-item .file-size {
+      font-size: .7rem;
+      color: var(--muted);
+      margin: 0 8px;
+    }
+    .modal-commit .file-item .remove-btn {
+      background: none;
+      border: none;
+      color: var(--red);
+      cursor: pointer;
+      font-size: .8rem;
+    }
+    .modal-commit .file-upload-area {
+      border: 2px dashed var(--border);
+      border-radius: 8px;
+      padding: 16px;
+      text-align: center;
+      cursor: pointer;
+      transition: all .2s;
+      background: var(--bg);
+      margin-top: 6px;
+    }
+    .modal-commit .file-upload-area:hover {
+      border-color: var(--accent);
+      background: #eef0ff;
+    }
+    .modal-commit .file-upload-area .upload-hint {
+      font-size: .78rem;
+      color: var(--muted);
+    }
+
+    .commit-list {
+      margin-top: 12px;
+      max-height: 300px;
+      overflow-y: auto;
+    }
+    .commit-item {
+      background: var(--bg);
+      border-radius: 6px;
+      padding: 10px 14px;
+      margin-bottom: 8px;
+      border-left: 3px solid var(--border);
+    }
+    .commit-item.pending {
+      border-left-color: #f59e0b;
+    }
+    .commit-item.approved {
+      border-left-color: #23b26d;
+    }
+    .commit-item.rejected {
+      border-left-color: #e53935;
+    }
+    .commit-item .commit-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .commit-item .commit-author {
+      font-weight: 600;
+      font-size: .88rem;
+    }
+    .commit-item .commit-status {
+      font-size: .72rem;
+      font-weight: 600;
+      padding: 2px 10px;
+      border-radius: 12px;
+    }
+    .commit-item .commit-status.pending {
+      background: #fef3c7;
+      color: #92400e;
+    }
+    .commit-item .commit-status.approved {
+      background: #dcf5ea;
+      color: #1a7a4a;
+    }
+    .commit-item .commit-status.rejected {
+      background: #fde8e8;
+      color: #b91c1c;
+    }
+    .commit-item .commit-message {
+      font-size: .85rem;
+      color: var(--text);
+      margin: 4px 0;
+    }
+    .commit-item .commit-files {
+      font-size: .72rem;
+      color: var(--muted);
+    }
+    .commit-item .commit-actions {
+      display: flex;
+      gap: 6px;
+      margin-top: 6px;
+      flex-wrap: wrap;
+    }
+    .commit-item .commit-actions button {
+      padding: 2px 12px;
+      border: none;
+      border-radius: 4px;
+      font-family: var(--font);
+      font-size: .7rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background .15s;
+    }
+    .commit-item .commit-actions .approve-btn {
+      background: #dcf5ea;
+      color: #1a7a4a;
+    }
+    .commit-item .commit-actions .approve-btn:hover {
+      background: #1a7a4a;
+      color: #fff;
+    }
+    .commit-item .commit-actions .reject-btn {
+      background: #fde8e8;
+      color: #b91c1c;
+    }
+    .commit-item .commit-actions .reject-btn:hover {
+      background: #b91c1c;
+      color: #fff;
+    }
+    .commit-item .commit-actions .del-btn {
+      background: #f1f2f4;
+      color: #6b7280;
+    }
+    .commit-item .commit-actions .del-btn:hover {
+      background: #6b7280;
+      color: #fff;
+    }
+
+    .file-list-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 6px;
+      margin: 8px 0;
+    }
+    .file-list-grid .file-item-card {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 6px 10px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: .78rem;
+    }
+    .file-list-grid .file-item-card .file-name {
+      flex: 1;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .file-list-grid .file-item-card .download-btn {
+      background: none;
+      border: none;
+      color: var(--accent);
+      cursor: pointer;
+      font-size: .8rem;
+      padding: 2px 6px;
+    }
+    .file-list-grid .file-item-card .download-btn:hover {
+      color: var(--accent-h);
+    }
+
+    .download-all-btn {
+      background: #23b26d;
+      color: #fff;
+      border: none;
+      padding: 6px 16px;
+      border-radius: 6px;
+      font-family: var(--font);
+      font-size: .78rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background .15s;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .download-all-btn:hover {
+      background: #1a8f55;
+    }
+    .download-all-btn:disabled {
+      opacity: .5;
+      cursor: not-allowed;
+    }
+
+    @media (max-width: 600px) {
+      .project-header {
         flex-direction: column;
-        align-items: center;
-        text-align: center;
-        padding: 0 16px 16px;
-        margin-top: -50px;
+        align-items: stretch;
       }
-      .profile-avatar {
-        width: 90px;
-        height: 90px;
-        font-size: 2.4rem;
-      }
-      .profile-avatar .avatar-letter {
-        font-size: 2.4rem;
-      }
-      .profile-name-section {
-        padding-top: 4px;
-      }
-      .profile-stats-row {
-        justify-content: center;
-      }
-      .profile-tabs {
-        flex-wrap: wrap;
-      }
-      .profile-tabs .tab-btn {
-        flex: 1 1 calc(50% - 4px);
-        padding: 8px 12px;
-        font-size: .82rem;
-      }
-      .info-grid {
+      .modal-project .form-row {
         grid-template-columns: 1fr;
-        gap: 0;
       }
-      .panel-card {
-        padding: 18px 16px;
+      .project-grid {
+        grid-template-columns: 1fr;
+      }
+      .file-list-grid {
+        grid-template-columns: 1fr;
       }
     }
   </style>
@@ -408,413 +448,901 @@
   <nav class="sidebar" id="sidebar"></nav>
 
   <main class="main">
-    <!-- ===== COVER + AVATAR ===== -->
-    <div class="profile-cover-wrapper">
-      <!-- Cover -->
-      <div class="profile-cover" id="profile-cover" onclick="document.getElementById('cover-input').click()">
-        <img id="cover-image" src="" style="display:none;" alt="Cover" />
-        <div class="cover-overlay">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M12 20h9" />
-            <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
-          </svg>
-          Thay ảnh bìa
-        </div>
+    <div class="page-header">
+      <h1>Dự án</h1>
+      <p>Quản lý dự án và commit code</p>
+    </div>
+
+    <div class="project-header">
+      <div class="filter-group">
+        <select id="filter-status" onchange="loadProjects()">
+          <option value="">Tất cả trạng thái</option>
+          <option value="active">Đang hoạt động</option>
+          <option value="completed">Hoàn thành</option>
+          <option value="archived">Đã lưu trữ</option>
+        </select>
+        <input type="text" id="search-project" placeholder="Tìm kiếm..." oninput="loadProjects()" />
       </div>
-      <input type="file" id="cover-input" accept="image/*" style="display:none;" />
-
-      <!-- Avatar -->
-      <div class="profile-avatar-section">
-        <div class="profile-avatar-wrapper">
-          <div class="profile-avatar" id="main-avatar" onclick="document.getElementById('avatar-input').click()">
-            <span class="avatar-letter" id="avatar-letter">?</span>
-          </div>
-          <div class="profile-avatar-edit" onclick="document.getElementById('avatar-input').click()">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M12 20h9" />
-              <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
-            </svg>
-          </div>
-          <input type="file" id="avatar-input" accept="image/*" style="display:none;" />
-        </div>
-
-        <div class="profile-name-section">
-          <div class="name" id="hero-name">—</div>
-          <div class="role">
-            <span class="dot" id="hero-role-dot"></span>
-            <span id="hero-role">—</span>
-          </div>
-          <div class="dept">Role: <span id="hero-dept">—</span></div>
-          <div class="profile-stats-row">
-            <div class="stat-item">
-              <div class="number" id="stat-id">—</div>
-              <div class="label">ID</div>
-            </div>
-            <div class="stat-item">
-              <div class="number" id="stat-salary">—</div>
-              <div class="label">Lương CB</div>
-            </div>
-          </div>
-        </div>
+      <div id="admin-actions" style="display:none;">
+        <button class="btn btn-primary" onclick="openAddProjectModal()">+ Tạo dự án</button>
       </div>
     </div>
 
-    <!-- ===== TABS ===== -->
-    <div class="profile-tabs">
-      <button class="tab-btn active" onclick="switchTab('info', this)">Thông tin</button>
-      <button class="tab-btn" onclick="switchTab('edit', this)">Chỉnh sửa</button>
-      <button class="tab-btn" onclick="switchTab('password', this)">Đổi mật khẩu</button>
-    </div>
-
-    <!-- ===== TAB: THÔNG TIN ===== -->
-    <div class="tab-panel active" id="tab-info">
-      <div class="panel-card">
-        <div class="panel-title">Thông tin cá nhân</div>
-        <div class="info-grid">
-          <div class="info-row"><span class="label">Họ tên</span><span class="value" id="info-name">—</span></div>
-          <div class="info-row"><span class="label">Username</span><span class="value" id="info-username">—</span></div>
-          <div class="info-row"><span class="label">Phòng ban</span><span class="value" id="info-dept">—</span></div>
-          <div class="info-row"><span class="label">Vai trò</span><span class="value" id="info-role">—</span></div>
-          <div class="info-row"><span class="label">Lương cơ bản</span><span class="value" id="info-salary">—</span></div>
-          <div class="info-row"><span class="label">ID nhân viên</span><span class="value" id="info-id">—</span></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- ===== TAB: CHỈNH SỬA ===== -->
-    <div class="tab-panel" id="tab-edit">
-      <div class="panel-card">
-        <div class="panel-title">Cập nhật thông tin</div>
-        <div class="form-group">
-          <label>Họ tên</label>
-          <input type="text" id="edit-name" placeholder="Nguyễn Văn A" />
-        </div>
-        <div class="form-group">
-          <label>Phòng ban</label>
-          <input type="text" id="edit-dept" placeholder="Kỹ thuật, Marketing..." />
-        </div>
-        <div class="form-group">
-          <span class="hint"> Username và vai trò không thể tự thay đổi — liên hệ Admin nếu cần.</span>
-        </div>
-        <div class="btn-row">
-          <button class="btn btn-primary" onclick="saveInfo()">Lưu thay đổi</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- ===== TAB: ĐỔI MẬT KHẨU ===== -->
-    <div class="tab-panel" id="tab-password">
-      <div class="panel-card">
-        <div class="panel-title">Đổi mật khẩu</div>
-        <div class="form-group">
-          <label>Mật khẩu hiện tại</label>
-          <input type="password" id="old-pw" placeholder="Nhập mật khẩu cũ" />
-        </div>
-        <div class="form-group">
-          <label>Mật khẩu mới</label>
-          <input type="password" id="new-pw" placeholder="Tối thiểu 6 ký tự" />
-        </div>
-        <div class="form-group">
-          <label>Xác nhận mật khẩu mới</label>
-          <input type="password" id="confirm-pw" placeholder="Nhập lại mật khẩu mới" />
-        </div>
-        <div class="btn-row">
-          <button class="btn btn-primary" onclick="changePassword()">Đổi mật khẩu</button>
-        </div>
+    <div class="project-grid" id="project-grid">
+      <div class="empty-state">
+        <span class="icon">📁</span>
+        <p>Đang tải dự án...</p>
       </div>
     </div>
   </main>
 </div>
 
-<!-- ===== MODAL CROP ẢNH ===== -->
-<div class="modal-overlay" id="avatar-modal">
-  <div class="modal modal-wide">
+<!-- MODAL XEM DỰ ÁN CHI TIẾT -->
+<div class="modal-overlay" id="detail-modal">
+  <div class="modal modal-project" style="max-width:700px;">
     <div class="modal-header">
-      <h2>Chỉnh sửa ảnh đại diện</h2>
-      <button class="modal-close" onclick="closeModal('avatar-modal')">✕</button>
+      <h2 id="detail-title">Tên dự án</h2>
+      <button class="modal-close" onclick="closeModal('detail-modal')">✕</button>
     </div>
-    <div class="crop-container">
-      <img id="image-to-crop" src="" alt="Ảnh đại diện" />
-    </div>
-    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:8px;">
-      <button class="btn btn-ghost" onclick="cancelCrop()">Chọn ảnh khác</button>
-      <button class="btn btn-primary" onclick="uploadCroppedAvatar()">Xác nhận</button>
+    <div id="detail-body">
+      <div style="margin-bottom:12px;color:var(--muted);font-size:.85rem;" id="detail-desc">Mô tả</div>
+      <div style="display:flex;gap:12px;flex-wrap:wrap;font-size:.82rem;color:var(--muted);margin-bottom:12px;">
+        <span id="detail-owner">Chủ sở hữu: </span>
+        <span id="detail-status">Trạng thái: </span>
+        <span id="detail-members">Thành viên: </span>
+        <span id="detail-created">Tạo lúc: </span>
+        <span id="detail-file-count">File: 0</span>
+      </div>
+      
+      <!-- Danh sách file với nút tải tất cả -->
+      <div style="border-top:1px solid var(--border);padding-top:12px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:8px;">
+          <h3 style="font-size:.95rem;margin:0;">File trong dự án</h3>
+          <button class="download-all-btn" id="download-all-btn" onclick="downloadAllFiles()">
+            Tải tất cả (ZIP)
+          </button>
+        </div>
+        <div id="detail-files" class="file-list-grid">
+          <div class="empty-state" style="padding:10px;"><p>Chưa có file nào</p></div>
+        </div>
+      </div>
+      
+      <!-- Lịch sử commit -->
+      <div style="border-top:1px solid var(--border);padding-top:12px;margin-top:8px;">
+        <h3 style="font-size:.95rem;margin-bottom:8px;">Lịch sử commit</h3>
+        <div id="detail-commits" class="commit-list">
+          <div class="empty-state" style="padding:20px;"><p>Chưa có commit nào</p></div>
+        </div>
+      </div>
+
+      <!-- Hợp đồng dự án: chỉ admin và người được admin chỉ định mới thấy mục này -->
+      <div style="border-top:1px solid var(--border);padding-top:12px;margin-top:8px;" id="contract-section">
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:8px;">
+          <h3 style="font-size:.95rem;margin:0;">🔒 Hợp đồng dự án</h3>
+          <button class="btn btn-primary" id="add-contract-btn" style="display:none;" onclick="openAddContractModal()">+ Thêm hợp đồng</button>
+        </div>
+        <div id="detail-contracts" class="contract-list" style="max-height:260px;overflow-y:auto;">
+          <div class="empty-state" style="padding:10px;"><p>Chưa có hợp đồng nào</p></div>
+        </div>
+      </div>
+      
+      <div style="margin-top:12px;border-top:1px solid var(--border);padding-top:12px;display:flex;gap:8px;flex-wrap:wrap;">
+        <button class="btn btn-primary" id="detail-commit-btn" onclick="openCommitModal(currentProjectId)">+ Gửi commit</button>
+        <button class="btn btn-ghost" onclick="closeModal('detail-modal')">Đóng</button>
+      </div>
     </div>
   </div>
 </div>
 
-<!-- ===== MODAL CROP COVER ===== -->
-<div class="modal-overlay" id="cover-modal">
-  <div class="modal modal-wide">
+<!-- MODAL TẠO/SỬA DỰ ÁN (Admin) -->
+<div class="modal-overlay" id="project-modal">
+  <div class="modal modal-project">
     <div class="modal-header">
-      <h2>Chỉnh sửa ảnh bìa</h2>
-      <button class="modal-close" onclick="closeModal('cover-modal')">✕</button>
+      <h2 id="project-modal-title">Tạo dự án</h2>
+      <button class="modal-close" onclick="closeModal('project-modal')">✕</button>
     </div>
-    <div class="crop-container">
-      <img id="cover-crop-image" src="" alt="Ảnh bìa" />
+    <input type="hidden" id="edit-project-id" value="" />
+    
+    <div class="form-group">
+      <label>Tên dự án *</label>
+      <input type="text" id="project-name" placeholder="Nhập tên dự án..." />
     </div>
+    <div class="form-group">
+      <label>Mô tả</label>
+      <textarea id="project-desc" placeholder="Mô tả dự án..."></textarea>
+    </div>
+    <div class="form-group">
+      <label>Trạng thái</label>
+      <select id="project-status">
+        <option value="active">Đang hoạt động</option>
+        <option value="completed">Hoàn thành</option>
+        <option value="archived">Đã lưu trữ</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Thành viên (chọn nhiều)</label>
+      <select id="project-members" multiple style="height:100px;">
+      </select>
+      <span style="font-size:.72rem;color:var(--muted);">Giữ Ctrl/Cmd để chọn nhiều</span>
+    </div>
+    
     <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:8px;">
-      <button class="btn btn-ghost" onclick="cancelCoverCrop()">Chọn ảnh khác</button>
-      <button class="btn btn-primary" onclick="uploadCroppedCover()">Xác nhận</button>
+      <button class="btn btn-ghost" onclick="closeModal('project-modal')">Hủy</button>
+      <button class="btn btn-primary" onclick="saveProject()">Lưu</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL GỬI COMMIT -->
+<div class="modal-overlay" id="commit-modal">
+  <div class="modal modal-commit">
+    <div class="modal-header">
+      <h2>Gửi commit</h2>
+      <button class="modal-close" onclick="closeModal('commit-modal')">✕</button>
+    </div>
+    <input type="hidden" id="commit-project-id" value="" />
+    
+    <div class="form-group">
+      <label>Nội dung commit *</label>
+      <textarea id="commit-message" placeholder="Mô tả những thay đổi..."></textarea>
+    </div>
+    <div class="form-group">
+      <label>File thay đổi</label>
+      <div class="file-list" id="commit-files">
+        <div style="color:var(--muted);font-size:.82rem;text-align:center;padding:8px;">Chưa có file</div>
+      </div>
+      <div class="file-upload-area" onclick="document.getElementById('file-input').click()">
+        <span class="upload-hint">
+          Nhấp để chọn file từ máy tính<br>
+          <span style="font-size:.7rem;">(Hỗ trợ tất cả các loại file)</span>
+        </span>
+        <input type="file" id="file-input" multiple style="display:none;" />
+      </div>
+    </div>
+    
+    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:8px;">
+      <button class="btn btn-ghost" onclick="closeModal('commit-modal')">Hủy</button>
+      <button class="btn btn-primary" onclick="submitCommit()">Gửi commit</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL THÊM/SỬA HỢP ĐỒNG (Admin) -->
+<div class="modal-overlay" id="contract-modal">
+  <div class="modal modal-project">
+    <div class="modal-header">
+      <h2 id="contract-modal-title">Thêm hợp đồng</h2>
+      <button class="modal-close" onclick="closeModal('contract-modal')">✕</button>
+    </div>
+    <input type="hidden" id="edit-contract-id" value="" />
+    <input type="hidden" id="contract-project-id" value="" />
+
+    <div class="form-group">
+      <label>Tên hợp đồng *</label>
+      <input type="text" id="contract-title" placeholder="Nhập tên hợp đồng..." />
+    </div>
+    <div class="form-group">
+      <label>Mô tả / điều khoản</label>
+      <textarea id="contract-desc" placeholder="Nội dung, điều khoản hợp đồng..."></textarea>
+    </div>
+    <div class="form-group">
+      <label>File hợp đồng đính kèm</label>
+      <input type="file" id="contract-file-input" />
+      <span id="contract-file-current" style="font-size:.72rem;color:var(--muted);"></span>
+    </div>
+    <div class="form-group">
+      <label>Người được xem hợp đồng này (chỉ định) *</label>
+      <select id="contract-viewers" multiple style="height:100px;">
+      </select>
+      <span style="font-size:.72rem;color:var(--muted);">Giữ Ctrl/Cmd để chọn nhiều. Ngoài admin, chỉ những người được chọn ở đây mới xem được hợp đồng.</span>
+    </div>
+
+    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:8px;">
+      <button class="btn btn-ghost" onclick="closeModal('contract-modal')">Hủy</button>
+      <button class="btn btn-primary" onclick="saveContract()">Lưu</button>
     </div>
   </div>
 </div>
 
 <div id="toast"></div>
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js"></script>
 <script src="main.js"></script>
 <script>
   let currentUser = null;
-  let cropper = null;
-  let coverCropper = null;
-  let selectedFile = null;
-  let selectedCoverFile = null;
+  let isAdmin = false;
+  let projects = [];
+  let allEmployees = [];
+  let currentProjectId = null;
+  let commitFiles = [];
+  let currentContracts = [];
+  let contractFile = null; // { name, content(base64) } file mới chọn khi thêm/sửa hợp đồng
 
   async function init() {
     currentUser = await requireLogin();
     if (!currentUser) return;
-    renderSidebar("profile", currentUser);
-    await loadProfile();
-  }
 
-  // ===== LOAD PROFILE =====
-  async function loadProfile() {
-    const res = await API.get("/auth/profile");
-    if (!res.success) { showToast("Không tải được hồ sơ", "error"); return; }
-    const d = res.data;
+    isAdmin = currentUser.role === "admin";
+    renderSidebar("projects", currentUser);
 
-    // Avatar
-    setAvatar(d.avatar || "", d.name);
-
-    // Cover
-    setCover(d.cover || "");
-
-    // Hero
-    document.getElementById("hero-name").textContent = d.name;
-    document.getElementById("hero-role").textContent = d.role === "admin" ? "Admin" : "Nhân viên";
-    document.getElementById("hero-dept").textContent = d.department || "—";
-
-    const dot = document.getElementById("hero-role-dot");
-    dot.className = "dot " + (d.role === "admin" ? "admin" : "employee");
-
-    // Stats
-    document.getElementById("stat-id").textContent = "#" + d.id;
-    document.getElementById("stat-salary").textContent = formatMoney(d.base_salary);
-
-    // Tab info
-    document.getElementById("info-name").textContent = d.name;
-    document.getElementById("info-username").textContent = d.username;
-    document.getElementById("info-dept").textContent = d.department || "—";
-    document.getElementById("info-role").textContent = d.role === "admin" ? "Admin" : "Nhân viên";
-    document.getElementById("info-salary").textContent = formatMoney(d.base_salary);
-    document.getElementById("info-id").textContent = "#" + d.id;
-
-    // Tab edit
-    document.getElementById("edit-name").value = d.name;
-    document.getElementById("edit-dept").value = d.department || "";
-  }
-
-  // ===== SET AVATAR =====
-  function setAvatar(base64, name) {
-    const el = document.getElementById("main-avatar");
-    const letter = document.getElementById("avatar-letter");
-    if (base64) {
-      el.style.background = "transparent";
-      letter.innerHTML = `<img src="${base64}" style="width:100%;height:100%;object-fit:cover;" />`;
-    } else {
-      el.style.background = "#eef0ff";
-      letter.textContent = name ? name.charAt(0).toUpperCase() : "?";
+    if (isAdmin) {
+      document.getElementById("admin-actions").style.display = "block";
+      await loadEmployeesForSelect();
     }
-  }
 
-  // ===== SET COVER =====
-  function setCover(base64) {
-    const img = document.getElementById("cover-image");
-    const cover = document.getElementById("profile-cover");
-    if (base64) {
-      img.src = base64;
-      img.style.display = "block";
-      cover.style.background = "transparent";
-    } else {
-      img.style.display = "none";
-      cover.style.background = "#d1d5db";
-      cover.style.backgroundImage = `
-        radial-gradient(circle at 20% 30%, #e5e7eb 0%, transparent 50%),
-        radial-gradient(circle at 80% 70%, #9ca3af 0%, transparent 40%)
-      `;
-    }
-  }
-
-  // ===== AVATAR UPLOAD =====
-  document.getElementById('avatar-input').addEventListener('change', function(event) {
-    const file = event.target.files[0];
-    if (!file) return;
-    if (file.size > 2 * 1024 * 1024) {
-      showToast("Ảnh quá lớn! Vui lòng chọn ảnh dưới 2MB", "error");
+    document.getElementById("file-input").addEventListener('change', function(event) {
+      const files = event.target.files;
+      for (let file of files) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          commitFiles.push({
+            name: file.name,
+            content: e.target.result,
+            size: file.size
+          });
+          renderCommitFiles();
+        };
+        reader.readAsDataURL(file);
+      }
       this.value = '';
-      return;
-    }
-    selectedFile = file;
-    const reader = new FileReader();
-    reader.onload = (e) => openCropModal(e.target.result, 'avatar');
-    reader.readAsDataURL(file);
-  });
+    });
 
-  // ===== COVER UPLOAD =====
-  document.getElementById('cover-input').addEventListener('change', function(event) {
-    const file = event.target.files[0];
-    if (!file) return;
-    if (file.size > 5 * 1024 * 1024) {
-      showToast("Ảnh quá lớn! Vui lòng chọn ảnh dưới 5MB", "error");
-      this.value = '';
-      return;
-    }
-    selectedCoverFile = file;
-    const reader = new FileReader();
-    reader.onload = (e) => openCropModal(e.target.result, 'cover');
-    reader.readAsDataURL(file);
-  });
+    await loadProjects();
+  }
 
-  function openCropModal(imageSrc, type) {
-    const modalId = type === 'avatar' ? 'avatar-modal' : 'cover-modal';
-    const imgId = type === 'avatar' ? 'image-to-crop' : 'cover-crop-image';
-    const isCover = type === 'cover';
+  async function loadEmployeesForSelect() {
+    const res = await API.get("/auth/employees");
+    if (!res.success) return;
+    allEmployees = res.data;
     
-    openModal(modalId);
-    const image = document.getElementById(imgId);
-    image.src = imageSrc;
+    const select = document.getElementById("project-members");
+    select.innerHTML = '';
+    allEmployees.forEach(emp => {
+      const option = document.createElement("option");
+      option.value = emp.id;
+      option.textContent = `${emp.name} (${emp.department || 'Chưa có phòng ban'})`;
+      select.appendChild(option);
+    });
 
-    if (isCover && coverCropper) {
-      coverCropper.destroy();
-      coverCropper = null;
-    } else if (!isCover && cropper) {
-      cropper.destroy();
-      cropper = null;
-    }
-
-    setTimeout(() => {
-      const CropperInstance = isCover ? coverCropper : cropper;
-      const newCropper = new Cropper(image, {
-        aspectRatio: isCover ? 16/6 : 1,
-        viewMode: 1,
-        autoCropArea: 1,
-        background: false,
-        movable: true,
-        zoomable: true,
-        rotatable: false,
-        scalable: false,
+    // select người được chỉ định xem hợp đồng (dùng chung danh sách nhân viên)
+    const viewerSelect = document.getElementById("contract-viewers");
+    if (viewerSelect) {
+      viewerSelect.innerHTML = '';
+      allEmployees.forEach(emp => {
+        const option = document.createElement("option");
+        option.value = emp.id;
+        option.textContent = `${emp.name} (${emp.department || 'Chưa có phòng ban'})`;
+        viewerSelect.appendChild(option);
       });
-      if (isCover) {
-        coverCropper = newCropper;
+    }
+  }
+
+  async function loadProjects() {
+    const status = document.getElementById("filter-status").value;
+    const search = document.getElementById("search-project")?.value?.trim() || "";
+
+    let url = "/projects";
+    const params = [];
+    if (status) params.push(`status=${status}`);
+    if (params.length) url += "?" + params.join("&");
+
+    const res = await API.get(url);
+    const grid = document.getElementById("project-grid");
+
+    if (!res.success) {
+      grid.innerHTML = `<div class="empty-state"><span class="icon">❌</span><p>${res.message || 'Không tải được dự án'}</p></div>`;
+      return;
+    }
+
+    let data = res.data || [];
+    
+    if (search) {
+      const keyword = search.toLowerCase();
+      data = data.filter(p => 
+        p.name.toLowerCase().includes(keyword) ||
+        p.description.toLowerCase().includes(keyword) ||
+        p.owner_name.toLowerCase().includes(keyword)
+      );
+    }
+
+    projects = data;
+
+    if (data.length === 0) {
+      grid.innerHTML = `<div class="empty-state"><span class="icon">📁</span><p>Chưa có dự án nào</p></div>`;
+      return;
+    }
+
+    const statusMap = {
+      'active': 'Đang hoạt động',
+      'completed': 'Hoàn thành',
+      'archived': 'Đã lưu trữ'
+    };
+    const statusClassMap = {
+      'active': 'active',
+      'completed': 'completed',
+      'archived': 'archived'
+    };
+
+    grid.innerHTML = data.map(project => {
+      let actions = '';
+      if (isAdmin) {
+        actions = `
+          <div class="project-actions">
+            <button class="edit-btn" onclick="event.stopPropagation();openEditProjectModal(${project.id})">Sửa</button>
+            <button class="del-btn" onclick="event.stopPropagation();deleteProject(${project.id})">Xóa</button>
+          </div>
+        `;
+      }
+
+      const memberCount = project.members ? project.members.length : 0;
+
+      return `
+        <div class="project-card" onclick="openProjectDetail(${project.id})">
+          <div class="project-name">${project.name}</div>
+          <div class="project-desc">${project.description || 'Không có mô tả'}</div>
+          <div class="project-meta">
+            <span class="owner">${project.owner_name}</span>
+            <span class="status-badge ${statusClassMap[project.status] || 'active'}">${statusMap[project.status] || 'Đang hoạt động'}</span>
+            <span class="members">${memberCount} thành viên</span>
+          </div>
+          ${actions}
+        </div>
+      `;
+    }).join('');
+  }
+
+  // ===== MỞ CHI TIẾT DỰ ÁN =====
+  async function openProjectDetail(projectId) {
+    currentProjectId = projectId;
+    const project = projects.find(p => p.id === projectId);
+    if (!project) return;
+
+    document.getElementById("detail-title").textContent = project.name;
+    document.getElementById("detail-desc").textContent = project.description || 'Không có mô tả';
+    document.getElementById("detail-owner").textContent = `Chủ sở hữu: ${project.owner_name}`;
+    
+    const statusMap = {'active': 'Đang hoạt động', 'completed': 'Hoàn thành', 'archived': 'Đã lưu trữ'};
+    document.getElementById("detail-status").textContent = `Trạng thái: ${statusMap[project.status] || 'Đang hoạt động'}`;
+    
+    const memberCount = project.members ? project.members.length : 0;
+    document.getElementById("detail-members").textContent = `Thành viên: ${memberCount}`;
+    document.getElementById("detail-created").textContent = `Tạo lúc: ${project.created_at || ''}`;
+
+    const isMember = project.members && project.members.includes(currentUser.employee_id);
+    const isOwner = project.owner_id === currentUser.employee_id;
+    const canCommit = isAdmin || isMember || isOwner;
+    document.getElementById("detail-commit-btn").style.display = canCommit ? 'inline-flex' : 'none';
+
+    document.getElementById("add-contract-btn").style.display = isAdmin ? 'inline-flex' : 'none';
+
+    await Promise.all([
+      loadCommits(projectId),
+      loadFiles(projectId),
+      loadContracts(projectId)
+    ]);
+    openModal("detail-modal");
+  }
+
+  // ===== TẢI TẤT CẢ FILE =====
+  async function downloadAllFiles() {
+    const btn = document.getElementById("download-all-btn");
+    btn.disabled = true;
+    btn.textContent = "Đang tạo ZIP...";
+
+    try {
+      const res = await fetch(`/api/projects/${currentProjectId}/files/download-all`, {
+        credentials: 'include'
+      });
+      
+      if (!res.ok) {
+        const error = await res.json();
+        showToast(error.message || 'Lỗi tải file', 'error');
+        return;
+      }
+
+      const blob = await res.blob();
+      const contentDisposition = res.headers.get('content-disposition');
+      let filename = `project_${currentProjectId}_files.zip`;
+      if (contentDisposition) {
+        const match = contentDisposition.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/);
+        if (match && match[1]) {
+          filename = match[1].replace(/['"]/g, '');
+        }
+      }
+
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+      showToast('Tải tất cả file thành công!', 'success');
+    } catch (err) {
+      console.error('Download all error:', err);
+      showToast('Lỗi tải file: ' + err.message, 'error');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Tải tất cả (ZIP)';
+    }
+  }
+
+  // ===== LOAD FILES =====
+  async function loadFiles(projectId) {
+    const res = await API.get(`/projects/${projectId}/files`);
+    const container = document.getElementById("detail-files");
+
+    if (!res.success) {
+      container.innerHTML = `<div class="empty-state" style="padding:10px;"><p>${res.message || 'Không tải được'}</p></div>`;
+      return;
+    }
+
+    const data = res.data || [];
+    document.getElementById("detail-file-count").textContent = `File: ${data.length}`;
+
+    if (data.length === 0) {
+      container.innerHTML = `<div class="empty-state" style="padding:10px;"><p>Chưa có file nào</p></div>`;
+      return;
+    }
+
+    container.innerHTML = data.map(file => {
+      const size = file.size ? (file.size / 1024).toFixed(1) + 'KB' : 'Unknown';
+      return `
+        <div class="file-item-card">
+          <span class="file-name">${file.name}</span>
+          <span style="font-size:.65rem;color:var(--muted);margin:0 4px;">${size}</span>
+          <button class="download-btn" onclick="event.stopPropagation();downloadFile(${file.id})" title="Tải xuống">Tải</button>
+        </div>
+      `;
+    }).join('');
+  }
+
+  // ===== DOWNLOAD 1 FILE =====
+  async function downloadFile(fileId) {
+    try {
+      const res = await fetch(`/api/projects/${currentProjectId}/files/${fileId}/download`, {
+        credentials: 'include'
+      });
+      
+      if (!res.ok) {
+        const error = await res.json();
+        showToast(error.message || 'Lỗi tải file', 'error');
+        return;
+      }
+
+      const blob = await res.blob();
+      const contentDisposition = res.headers.get('content-disposition');
+      let filename = 'download';
+      if (contentDisposition) {
+        const match = contentDisposition.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/);
+        if (match && match[1]) {
+          filename = match[1].replace(/['"]/g, '');
+        }
+      }
+
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+      showToast('Tải file thành công!', 'success');
+    } catch (err) {
+      console.error('Download error:', err);
+      showToast('Lỗi tải file: ' + err.message, 'error');
+    }
+  }
+
+  // ===== LOAD COMMITS =====
+  async function loadCommits(projectId) {
+    const res = await API.get(`/projects/${projectId}/commits`);
+    const container = document.getElementById("detail-commits");
+
+    if (!res.success) {
+      container.innerHTML = `<div class="empty-state" style="padding:20px;"><p>${res.message || 'Không tải được'}</p></div>`;
+      return;
+    }
+
+    const data = res.data || [];
+    if (data.length === 0) {
+      container.innerHTML = `<div class="empty-state" style="padding:20px;"><p>Chưa có commit nào</p></div>`;
+      return;
+    }
+
+    const statusMap = {'pending': 'Chờ duyệt', 'approved': 'Đã duyệt', 'rejected': 'Từ chối'};
+    const statusClassMap = {'pending': 'pending', 'approved': 'approved', 'rejected': 'rejected'};
+
+    container.innerHTML = data.map(commit => {
+      const files = commit.files || [];
+      const filesText = files.length > 0 ? files.join(', ') : 'Không có file';
+      
+      let actions = '';
+      if (isAdmin && commit.status === 'pending') {
+        actions = `
+          <div class="commit-actions">
+            <button class="approve-btn" onclick="approveCommit(${commit.id})">Duyệt</button>
+            <button class="reject-btn" onclick="rejectCommit(${commit.id})">Từ chối</button>
+          </div>
+        `;
+      } else if (commit.employee_id === currentUser.employee_id || isAdmin) {
+        actions = `
+          <div class="commit-actions">
+            <button class="del-btn" onclick="deleteCommit(${commit.id})">Xóa</button>
+          </div>
+        `;
+      }
+
+      return `
+        <div class="commit-item ${statusClassMap[commit.status] || 'pending'}">
+          <div class="commit-head">
+            <span class="commit-author">${commit.employee_name}</span>
+            <span class="commit-status ${statusClassMap[commit.status] || 'pending'}">${statusMap[commit.status] || 'Chờ duyệt'}</span>
+          </div>
+          <div class="commit-message">${commit.message}</div>
+          <div class="commit-files">${filesText}</div>
+          <div style="font-size:.68rem;color:var(--muted);">${commit.created_at || ''}</div>
+          ${actions}
+        </div>
+      `;
+    }).join('');
+  }
+
+  // ===== GỬI COMMIT =====
+  function openCommitModal(projectId) {
+    document.getElementById("commit-project-id").value = projectId;
+    document.getElementById("commit-message").value = '';
+    commitFiles = [];
+    renderCommitFiles();
+    document.getElementById("file-input").value = '';
+    openModal("commit-modal");
+  }
+
+  function renderCommitFiles() {
+    const container = document.getElementById("commit-files");
+    if (commitFiles.length === 0) {
+      container.innerHTML = `<div style="color:var(--muted);font-size:.82rem;text-align:center;padding:8px;">Chưa có file</div>`;
+      return;
+    }
+    container.innerHTML = commitFiles.map((file, index) => {
+      const size = file.size ? (file.size / 1024).toFixed(1) + 'KB' : 'Unknown';
+      return `
+        <div class="file-item">
+          <span class="file-name">${file.name}</span>
+          <span class="file-size">${size}</span>
+          <button class="remove-btn" onclick="removeCommitFile(${index})">Xóa</button>
+        </div>
+      `;
+    }).join('');
+  }
+
+  function removeCommitFile(index) {
+    commitFiles.splice(index, 1);
+    renderCommitFiles();
+  }
+
+  async function submitCommit() {
+    const projectId = document.getElementById("commit-project-id").value;
+    const message = document.getElementById("commit-message").value.trim();
+
+    if (!message) {
+      showToast("Vui lòng nhập nội dung commit", "error");
+      return;
+    }
+
+    if (commitFiles.length === 0) {
+      showToast("Vui lòng chọn ít nhất 1 file", "error");
+      return;
+    }
+
+    const filesData = commitFiles.map(f => ({
+      name: f.name,
+      content: f.content
+    }));
+
+    const res = await API.post(`/projects/${projectId}/commits`, {
+      message: message,
+      files: filesData
+    });
+
+    showToast(res.message, res.success ? "success" : "error");
+    if (res.success) {
+      closeModal("commit-modal");
+      await Promise.all([
+        loadCommits(parseInt(projectId)),
+        loadFiles(parseInt(projectId))
+      ]);
+    }
+  }
+
+  // ===== ADMIN: DUYỆT COMMIT =====
+  async function approveCommit(commitId) {
+    if (!confirm("Duyệt commit này?")) return;
+    const res = await API.put(`/projects/${currentProjectId}/commits/${commitId}`, { status: "approved" });
+    showToast(res.message, res.success ? "success" : "error");
+    if (res.success) await loadCommits(currentProjectId);
+  }
+
+  async function rejectCommit(commitId) {
+    if (!confirm("Từ chối commit này?")) return;
+    const res = await API.put(`/projects/${currentProjectId}/commits/${commitId}`, { status: "rejected" });
+    showToast(res.message, res.success ? "success" : "error");
+    if (res.success) await loadCommits(currentProjectId);
+  }
+
+  async function deleteCommit(commitId) {
+    if (!confirm("Xóa commit này?")) return;
+    const res = await API.delete(`/projects/${currentProjectId}/commits/${commitId}`);
+    showToast(res.message, res.success ? "success" : "error");
+    if (res.success) {
+      await Promise.all([
+        loadCommits(currentProjectId),
+        loadFiles(currentProjectId)
+      ]);
+    }
+  }
+
+  // ===== HỢP ĐỒNG DỰ ÁN =====
+  // Chỉ admin và người được admin chỉ định (allowed_viewers) mới thấy được hợp đồng.
+  // Nếu server trả 403/không có quyền, ẩn hẳn mục này thay vì báo lỗi.
+  async function loadContracts(projectId) {
+    const res = await API.get(`/projects/${projectId}/contracts`);
+    const container = document.getElementById("detail-contracts");
+    const section = document.getElementById("contract-section");
+
+    if (!res.success) {
+      // người dùng không có quyền xem mục hợp đồng -> ẩn cả khối, không cần hiện lỗi
+      currentContracts = [];
+      section.style.display = isAdmin ? 'block' : 'none';
+      container.innerHTML = `<div class="empty-state" style="padding:10px;"><p>${res.message || 'Không tải được'}</p></div>`;
+      return;
+    }
+
+    section.style.display = 'block';
+    currentContracts = res.data || [];
+
+    if (currentContracts.length === 0) {
+      container.innerHTML = `<div class="empty-state" style="padding:10px;"><p>Chưa có hợp đồng nào</p></div>`;
+      return;
+    }
+
+    const empMap = {};
+    allEmployees.forEach(e => empMap[e.id] = e.name);
+
+    container.innerHTML = currentContracts.map(contract => {
+      const viewerNames = (contract.allowed_viewers || [])
+        .map(id => empMap[id] || `ID ${id}`)
+        .join(', ') || 'Chưa chỉ định ai';
+
+      let actions = `<span class="download-link" onclick="downloadContract(${contract.id})" title="Tải file hợp đồng">📥 Tải file</span>`;
+      if (isAdmin) {
+        actions += `
+          <span class="edit-btn" onclick="openEditContractModal(${contract.id})">Sửa</span>
+          <span class="del-btn" onclick="deleteContract(${contract.id})">Xóa</span>
+        `;
+      }
+
+      return `
+        <div class="contract-item">
+          <div class="contract-head">
+            <span class="contract-title">${contract.title}</span>
+          </div>
+          <div class="contract-desc">${contract.description || 'Không có mô tả'}</div>
+          <div class="contract-meta">
+            <span>Tạo bởi: ${contract.created_by_name}</span>
+            <span>${contract.created_at || ''}</span>
+            ${isAdmin ? `<span>Người được xem: ${viewerNames}</span>` : ''}
+          </div>
+          <div class="contract-actions" style="margin-top:6px;">${actions}</div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  // ===== TẢI FILE HỢP ĐỒNG =====
+  async function downloadContract(contractId) {
+    try {
+      const res = await fetch(`/api/projects/${currentProjectId}/contracts/${contractId}/download`, {
+        credentials: 'include'
+      });
+
+      if (!res.ok) {
+        const error = await res.json();
+        showToast(error.message || 'Lỗi tải hợp đồng', 'error');
+        return;
+      }
+
+      const blob = await res.blob();
+      const contentDisposition = res.headers.get('content-disposition');
+      let filename = 'hop_dong';
+      if (contentDisposition) {
+        const match = contentDisposition.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/);
+        if (match && match[1]) {
+          filename = match[1].replace(/['"]/g, '');
+        }
+      }
+
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error('Download contract error:', err);
+      showToast('Lỗi tải hợp đồng: ' + err.message, 'error');
+    }
+  }
+
+  // ===== ADMIN: THÊM/SỬA HỢP ĐỒNG =====
+  function openAddContractModal() {
+    document.getElementById("contract-modal-title").textContent = "Thêm hợp đồng";
+    document.getElementById("edit-contract-id").value = "";
+    document.getElementById("contract-project-id").value = currentProjectId;
+    document.getElementById("contract-title").value = "";
+    document.getElementById("contract-desc").value = "";
+    document.getElementById("contract-file-input").value = "";
+    document.getElementById("contract-file-current").textContent = "";
+    document.getElementById("contract-viewers").selectedIndex = -1;
+    contractFile = null;
+    openModal("contract-modal");
+  }
+
+  function openEditContractModal(contractId) {
+    const contract = currentContracts.find(c => c.id === contractId);
+    if (!contract) {
+      showToast("Không tìm thấy hợp đồng", "error");
+      return;
+    }
+
+    document.getElementById("contract-modal-title").textContent = "Sửa hợp đồng";
+    document.getElementById("edit-contract-id").value = contract.id;
+    document.getElementById("contract-project-id").value = currentProjectId;
+    document.getElementById("contract-title").value = contract.title;
+    document.getElementById("contract-desc").value = contract.description || "";
+    document.getElementById("contract-file-input").value = "";
+    document.getElementById("contract-file-current").textContent = contract.file_name
+      ? `File hiện tại: ${contract.file_name} (chọn file mới nếu muốn thay thế)`
+      : "Chưa có file đính kèm";
+    contractFile = null;
+
+    const select = document.getElementById("contract-viewers");
+    for (let i = 0; i < select.options.length; i++) {
+      select.options[i].selected = contract.allowed_viewers &&
+        contract.allowed_viewers.includes(parseInt(select.options[i].value));
+    }
+    openModal("contract-modal");
+  }
+
+  async function saveContract() {
+    const id = document.getElementById("edit-contract-id").value;
+    const projectId = document.getElementById("contract-project-id").value;
+    const title = document.getElementById("contract-title").value.trim();
+    const description = document.getElementById("contract-desc").value.trim();
+    const select = document.getElementById("contract-viewers");
+    const allowed_viewers = Array.from(select.selectedOptions).map(opt => parseInt(opt.value));
+
+    if (!title) {
+      showToast("Vui lòng nhập tên hợp đồng", "error");
+      return;
+    }
+
+    const fileInput = document.getElementById("contract-file-input");
+    const doSave = async () => {
+      const data = {
+        title,
+        description,
+        allowed_viewers,
+        file_name: contractFile ? contractFile.name : "",
+        file_content: contractFile ? contractFile.content : ""
+      };
+
+      let res;
+      if (id) {
+        res = await API.put(`/projects/${projectId}/contracts/${id}`, data);
       } else {
-        cropper = newCropper;
+        res = await API.post(`/projects/${projectId}/contracts`, data);
       }
-    }, 100);
-  }
 
-  function cancelCrop() {
-    closeModal('avatar-modal');
-    if (cropper) { cropper.destroy(); cropper = null; }
-    document.getElementById('avatar-input').value = '';
-    selectedFile = null;
-  }
-
-  function cancelCoverCrop() {
-    closeModal('cover-modal');
-    if (coverCropper) { coverCropper.destroy(); coverCropper = null; }
-    document.getElementById('cover-input').value = '';
-    selectedCoverFile = null;
-  }
-
-  async function uploadCroppedAvatar() {
-    if (!cropper) {
-      showToast("Không tìm thấy ảnh để cắt", "error");
-      return;
-    }
-    const canvas = cropper.getCroppedCanvas({
-      width: 300,
-      height: 300,
-      imageSmoothingEnabled: true,
-      imageSmoothingQuality: 'high',
-    });
-    if (!canvas) {
-      showToast("Không thể cắt ảnh, vui lòng thử lại", "error");
-      return;
-    }
-    const croppedImageData = canvas.toDataURL('image/jpeg', 0.9);
-    const res = await API.post("/auth/profile/avatar", { avatar: croppedImageData });
-    showToast(res.message, res.success ? "success" : "error");
-    if (res.success) {
-      setAvatar(croppedImageData, currentUser.name);
-      closeModal('avatar-modal');
-      if (cropper) { cropper.destroy(); cropper = null; }
-      document.getElementById('avatar-input').value = '';
-      selectedFile = null;
-      if (typeof refreshSidebarAvatar === 'function') {
-        refreshSidebarAvatar();
+      showToast(res.message, res.success ? "success" : "error");
+      if (res.success) {
+        closeModal("contract-modal");
+        await loadContracts(projectId);
       }
+    };
+
+    // nếu người dùng chọn file mới -> đọc base64 trước khi gửi
+    if (fileInput.files && fileInput.files[0]) {
+      const file = fileInput.files[0];
+      const reader = new FileReader();
+      reader.onload = async function (e) {
+        contractFile = { name: file.name, content: e.target.result };
+        await doSave();
+      };
+      reader.readAsDataURL(file);
+    } else {
+      await doSave();
     }
   }
 
-  async function uploadCroppedCover() {
-    if (!coverCropper) {
-      showToast("Không tìm thấy ảnh để cắt", "error");
+  async function deleteContract(contractId) {
+    const contract = currentContracts.find(c => c.id === contractId);
+    if (!confirm(`Xóa hợp đồng "${contract?.title}"?`)) return;
+
+    const res = await API.delete(`/projects/${currentProjectId}/contracts/${contractId}`);
+    showToast(res.message, res.success ? "success" : "error");
+    if (res.success) await loadContracts(currentProjectId);
+  }
+
+  // ===== ADMIN: QUẢN LÝ DỰ ÁN =====
+  function openAddProjectModal() {
+    document.getElementById("project-modal-title").textContent = "Tạo dự án";
+    document.getElementById("edit-project-id").value = "";
+    document.getElementById("project-name").value = "";
+    document.getElementById("project-desc").value = "";
+    document.getElementById("project-status").value = "active";
+    document.getElementById("project-members").selectedIndex = -1;
+    openModal("project-modal");
+  }
+
+  function openEditProjectModal(projectId) {
+    const project = projects.find(p => p.id === projectId);
+    if (!project) {
+      showToast("Không tìm thấy dự án", "error");
       return;
     }
-    const canvas = coverCropper.getCroppedCanvas({
-      width: 1200,
-      height: 450,
-      imageSmoothingEnabled: true,
-      imageSmoothingQuality: 'high',
-    });
-    if (!canvas) {
-      showToast("Không thể cắt ảnh, vui lòng thử lại", "error");
+
+    document.getElementById("project-modal-title").textContent = "Sửa dự án";
+    document.getElementById("edit-project-id").value = project.id;
+    document.getElementById("project-name").value = project.name;
+    document.getElementById("project-desc").value = project.description || "";
+    document.getElementById("project-status").value = project.status || "active";
+    
+    const select = document.getElementById("project-members");
+    for (let i = 0; i < select.options.length; i++) {
+      select.options[i].selected = project.members && project.members.includes(parseInt(select.options[i].value));
+    }
+    openModal("project-modal");
+  }
+
+  async function saveProject() {
+    const id = document.getElementById("edit-project-id").value;
+    const name = document.getElementById("project-name").value.trim();
+    const description = document.getElementById("project-desc").value.trim();
+    const status = document.getElementById("project-status").value;
+    const select = document.getElementById("project-members");
+    const members = Array.from(select.selectedOptions).map(opt => parseInt(opt.value));
+
+    if (!name) {
+      showToast("Vui lòng nhập tên dự án", "error");
       return;
     }
-    const croppedImageData = canvas.toDataURL('image/jpeg', 0.9);
-    const res = await API.post("/auth/profile/cover", { cover: croppedImageData });
+
+    const data = { name, description, status, members };
+    let res;
+
+    if (id) {
+      res = await API.put(`/projects/${id}`, data);
+    } else {
+      res = await API.post("/projects", data);
+    }
+
     showToast(res.message, res.success ? "success" : "error");
     if (res.success) {
-      setCover(croppedImageData);
-      closeModal('cover-modal');
-      if (coverCropper) { coverCropper.destroy(); coverCropper = null; }
-      document.getElementById('cover-input').value = '';
-      selectedCoverFile = null;
+      closeModal("project-modal");
+      await loadProjects();
     }
   }
 
-  // ===== TABS =====
-  function switchTab(name, btn) {
-    document.querySelectorAll(".tab-panel").forEach(p => p.classList.remove("active"));
-    document.querySelectorAll(".profile-tabs .tab-btn").forEach(b => b.classList.remove("active"));
-    document.getElementById("tab-" + name).classList.add("active");
-    btn.classList.add("active");
-  }
+  async function deleteProject(projectId) {
+    const project = projects.find(p => p.id === projectId);
+    if (!confirm(`Xóa dự án "${project?.name}"?`)) return;
 
-  // ===== SAVE INFO =====
-  async function saveInfo() {
-    const name = document.getElementById("edit-name").value.trim();
-    const dept = document.getElementById("edit-dept").value.trim();
-    const res = await API.put("/auth/profile", { name, department: dept });
+    const res = await API.delete(`/projects/${projectId}`);
     showToast(res.message, res.success ? "success" : "error");
-    if (res.success) await loadProfile();
-  }
-
-  // ===== CHANGE PASSWORD =====
-  async function changePassword() {
-    const old_password = document.getElementById("old-pw").value;
-    const new_password = document.getElementById("new-pw").value;
-    const confirm_password = document.getElementById("confirm-pw").value;
-    if (new_password !== confirm_password) {
-      showToast("Mật khẩu xác nhận không khớp!", "error");
-      return;
-    }
-    const res = await API.put("/auth/profile", { old_password, new_password, confirm_password });
-    showToast(res.message, res.success ? "success" : "error");
-    if (res.success) {
-      ["old-pw", "new-pw", "confirm-pw"].forEach(id => document.getElementById(id).value = "");
-    }
+    if (res.success) await loadProjects();
   }
 
   init();
