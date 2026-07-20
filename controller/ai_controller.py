@@ -402,6 +402,8 @@ Phong ban: {len(set(e.get('department', '') for e in employees if e.get('departm
     
     return result
 
+# fix prompt ở đoạn này cho tự nhiên lại mất mịa 2h vì cái này
+
 # ============================================================
 # CALL OPENROUTER API - TỰ NHIÊN NHẤT
 # ============================================================
