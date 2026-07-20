@@ -1,0 +1,373 @@
+<!-- view/contracts.html — Trang Hợp đồng (xem tất cả hợp đồng được phép truy cập) -->
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hợp đồng — SmartEMS</title>
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="icon" type="image/png" href="image/logo_E.png" />
+  <style>
+    .contract-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    .contract-header .filter-group {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .contract-header .filter-group input {
+      padding: 6px 12px;
+      border: 1.5px solid var(--border);
+      border-radius: 6px;
+      font-family: var(--font);
+      font-size: .82rem;
+      background: var(--white);
+      outline: none;
+      min-width: 220px;
+    }
+    .contract-header .filter-group input:focus {
+      border-color: #4255ff;
+    }
+    .modal-contract { max-width: 560px; }
+    @media (max-width: 700px) {
+      .contract-header { flex-direction: column; align-items: stretch; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="page-wrap">
+  <nav class="sidebar" id="sidebar"></nav>
+
+  <main class="main">
+    <div class="page-header">
+      <h1>🔒 Hợp đồng</h1>
+      <p>Hợp đồng dự án — chỉ admin và người được chỉ định mới xem được</p>
+    </div>
+
+    <div class="contract-header">
+      <div class="filter-group">
+        <input type="text" id="search-contract" placeholder="Tìm theo tên hợp đồng, dự án..." oninput="loadContracts()" />
+      </div>
+      <div id="admin-actions" style="display:none;">
+        <button class="btn btn-primary" onclick="openAddContractModal()">+ Thêm hợp đồng</button>
+      </div>
+    </div>
+
+    <div class="contract-list" id="contract-list">
+      <div class="empty-state">
+        <span class="icon">🔒</span>
+        <p>Đang tải hợp đồng...</p>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- MODAL THÊM/SỬA HỢP ĐỒNG (Admin) -->
+<div class="modal-overlay" id="contract-modal">
+  <div class="modal modal-contract">
+    <div class="modal-header">
+      <h2 id="contract-modal-title">Thêm hợp đồng</h2>
+      <button class="modal-close" onclick="closeModal('contract-modal')">✕</button>
+    </div>
+    <input type="hidden" id="edit-contract-id" value="" />
+
+    <div class="form-group">
+      <label>Dự án *</label>
+      <select id="contract-project"></select>
+    </div>
+    <div class="form-group">
+      <label>Tên hợp đồng *</label>
+      <input type="text" id="contract-title" placeholder="Nhập tên hợp đồng..." />
+    </div>
+    <div class="form-group">
+      <label>Mô tả / điều khoản</label>
+      <textarea id="contract-desc" placeholder="Nội dung, điều khoản hợp đồng..." style="min-height:80px;"></textarea>
+    </div>
+    <div class="form-group">
+      <label>File hợp đồng đính kèm</label>
+      <input type="file" id="contract-file-input" />
+      <span id="contract-file-current" style="font-size:.72rem;color:var(--muted);display:block;margin-top:4px;"></span>
+    </div>
+    <div class="form-group">
+      <label>Người được xem hợp đồng này (chỉ định) *</label>
+      <select id="contract-viewers" multiple style="height:100px;">
+      </select>
+      <span style="font-size:.72rem;color:var(--muted);">Giữ Ctrl/Cmd để chọn nhiều. Ngoài admin, chỉ những người được chọn ở đây mới xem được hợp đồng.</span>
+    </div>
+
+    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:8px;">
+      <button class="btn btn-ghost" onclick="closeModal('contract-modal')">Hủy</button>
+      <button class="btn btn-primary" onclick="saveContract()">Lưu</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+<script src="main.js"></script>
+<script>
+  let currentUser = null;
+  let isAdmin = false;
+  let allEmployees = [];
+  let allProjects = [];
+  let contracts = [];
+  let contractFile = null; // { name, content(base64) } file mới chọn khi thêm/sửa
+
+  async function init() {
+    currentUser = await requireLogin();
+    if (!currentUser) return;
+
+    isAdmin = currentUser.role === "admin";
+    renderSidebar("contracts", currentUser);
+
+    if (isAdmin) {
+      document.getElementById("admin-actions").style.display = "block";
+      await Promise.all([loadEmployeesForSelect(), loadProjectsForSelect()]);
+    }
+
+    await loadContracts();
+  }
+
+  async function loadEmployeesForSelect() {
+    const res = await API.get("/auth/employees");
+    if (!res.success) return;
+    allEmployees = res.data;
+
+    const select = document.getElementById("contract-viewers");
+    select.innerHTML = '';
+    allEmployees.forEach(emp => {
+      const option = document.createElement("option");
+      option.value = emp.id;
+      option.textContent = `${emp.name} (${emp.department || 'Chưa có phòng ban'})`;
+      select.appendChild(option);
+    });
+  }
+
+  async function loadProjectsForSelect() {
+    const res = await API.get("/projects");
+    if (!res.success) return;
+    allProjects = res.data;
+
+    const select = document.getElementById("contract-project");
+    select.innerHTML = '';
+    allProjects.forEach(p => {
+      const option = document.createElement("option");
+      option.value = p.id;
+      option.textContent = p.name;
+      select.appendChild(option);
+    });
+  }
+
+  // ===== TẢI DANH SÁCH HỢP ĐỒNG =====
+  async function loadContracts() {
+    const search = document.getElementById("search-contract").value.trim();
+    let url = "/contracts";
+    if (search) url += `?search=${encodeURIComponent(search)}`;
+
+    const res = await API.get(url);
+    const container = document.getElementById("contract-list");
+
+    if (!res.success) {
+      container.innerHTML = `<div class="empty-state"><span class="icon">❌</span><p>${res.message || 'Không tải được hợp đồng'}</p></div>`;
+      return;
+    }
+
+    contracts = res.data || [];
+
+    if (contracts.length === 0) {
+      container.innerHTML = `
+        <div class="empty-state">
+          <span class="icon">🔒</span>
+          <p>${isAdmin ? 'Chưa có hợp đồng nào' : 'Bạn chưa được chỉ định xem hợp đồng nào'}</p>
+        </div>`;
+      return;
+    }
+
+    const empMap = {};
+    allEmployees.forEach(e => empMap[e.id] = e.name);
+
+    container.innerHTML = contracts.map(contract => {
+      const viewerNames = (contract.allowed_viewers || [])
+        .map(id => empMap[id] || `ID ${id}`)
+        .join(', ') || 'Chưa chỉ định ai';
+
+      let actions = `<span class="download-link" onclick="downloadContract(${contract.project_id},${contract.id})">📥 Tải file</span>`;
+      if (isAdmin) {
+        actions += `
+          <span class="edit-btn" onclick="openEditContractModal(${contract.id})">Sửa</span>
+          <span class="del-btn" onclick="deleteContract(${contract.project_id},${contract.id})">Xóa</span>
+        `;
+      }
+
+      return `
+        <div class="contract-item">
+          <div class="contract-head">
+            <span class="contract-title">${contract.title}</span>
+            <span class="project-badge">${contract.project_name}</span>
+          </div>
+          <div class="contract-desc">${contract.description || 'Không có mô tả'}</div>
+          <div class="contract-meta">
+            <span>Tạo bởi: ${contract.created_by_name}</span>
+            <span>${contract.created_at || ''}</span>
+            ${isAdmin ? `<span>Người được xem: ${viewerNames}</span>` : ''}
+          </div>
+          <div class="contract-actions">${actions}</div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  // ===== TẢI FILE HỢP ĐỒNG =====
+  async function downloadContract(projectId, contractId) {
+    try {
+      const res = await fetch(`/api/projects/${projectId}/contracts/${contractId}/download`, {
+        credentials: 'include'
+      });
+
+      if (!res.ok) {
+        const error = await res.json();
+        showToast(error.message || 'Lỗi tải hợp đồng', 'error');
+        return;
+      }
+
+      const blob = await res.blob();
+      const contentDisposition = res.headers.get('content-disposition');
+      let filename = 'hop_dong';
+      if (contentDisposition) {
+        const match = contentDisposition.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/);
+        if (match && match[1]) {
+          filename = match[1].replace(/['"]/g, '');
+        }
+      }
+
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error('Download contract error:', err);
+      showToast('Lỗi tải hợp đồng: ' + err.message, 'error');
+    }
+  }
+
+  // ===== ADMIN: THÊM/SỬA HỢP ĐỒNG =====
+  function openAddContractModal() {
+    document.getElementById("contract-modal-title").textContent = "Thêm hợp đồng";
+    document.getElementById("edit-contract-id").value = "";
+    document.getElementById("contract-project").disabled = false;
+    document.getElementById("contract-title").value = "";
+    document.getElementById("contract-desc").value = "";
+    document.getElementById("contract-file-input").value = "";
+    document.getElementById("contract-file-current").textContent = "";
+    document.getElementById("contract-viewers").selectedIndex = -1;
+    contractFile = null;
+    openModal("contract-modal");
+  }
+
+  function openEditContractModal(contractId) {
+    const contract = contracts.find(c => c.id === contractId);
+    if (!contract) {
+      showToast("Không tìm thấy hợp đồng", "error");
+      return;
+    }
+
+    document.getElementById("contract-modal-title").textContent = "Sửa hợp đồng";
+    document.getElementById("edit-contract-id").value = contract.id;
+    document.getElementById("contract-project").value = contract.project_id;
+    // không cho đổi dự án khi sửa (hợp đồng gắn cố định với dự án đã tạo)
+    document.getElementById("contract-project").disabled = true;
+    document.getElementById("contract-title").value = contract.title;
+    document.getElementById("contract-desc").value = contract.description || "";
+    document.getElementById("contract-file-input").value = "";
+    document.getElementById("contract-file-current").textContent = contract.file_name
+      ? `File hiện tại: ${contract.file_name} (chọn file mới nếu muốn thay thế)`
+      : "Chưa có file đính kèm";
+    contractFile = null;
+
+    const select = document.getElementById("contract-viewers");
+    for (let i = 0; i < select.options.length; i++) {
+      select.options[i].selected = contract.allowed_viewers &&
+        contract.allowed_viewers.includes(parseInt(select.options[i].value));
+    }
+    openModal("contract-modal");
+  }
+
+  async function saveContract() {
+    const id = document.getElementById("edit-contract-id").value;
+    const projectId = document.getElementById("contract-project").value;
+    const title = document.getElementById("contract-title").value.trim();
+    const description = document.getElementById("contract-desc").value.trim();
+    const select = document.getElementById("contract-viewers");
+    const allowed_viewers = Array.from(select.selectedOptions).map(opt => parseInt(opt.value));
+
+    if (!projectId) {
+      showToast("Vui lòng chọn dự án", "error");
+      return;
+    }
+    if (!title) {
+      showToast("Vui lòng nhập tên hợp đồng", "error");
+      return;
+    }
+
+    const fileInput = document.getElementById("contract-file-input");
+    const doSave = async () => {
+      const data = {
+        title,
+        description,
+        allowed_viewers,
+        file_name: contractFile ? contractFile.name : "",
+        file_content: contractFile ? contractFile.content : ""
+      };
+
+      let res;
+      if (id) {
+        res = await API.put(`/projects/${projectId}/contracts/${id}`, data);
+      } else {
+        res = await API.post(`/projects/${projectId}/contracts`, data);
+      }
+
+      showToast(res.message, res.success ? "success" : "error");
+      if (res.success) {
+        closeModal("contract-modal");
+        await loadContracts();
+      }
+    };
+
+    if (fileInput.files && fileInput.files[0]) {
+      const file = fileInput.files[0];
+      const reader = new FileReader();
+      reader.onload = async function (e) {
+        contractFile = { name: file.name, content: e.target.result };
+        await doSave();
+      };
+      reader.readAsDataURL(file);
+    } else {
+      await doSave();
+    }
+  }
+
+  async function deleteContract(projectId, contractId) {
+    const contract = contracts.find(c => c.id === contractId);
+    if (!confirm(`Xóa hợp đồng "${contract?.title}"?`)) return;
+
+    const res = await API.delete(`/projects/${projectId}/contracts/${contractId}`);
+    showToast(res.message, res.success ? "success" : "error");
+    if (res.success) await loadContracts();
+  }
+
+  init();
+</script>
+</body>
+</html>

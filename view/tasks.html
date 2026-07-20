@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản lý Task - SmartEMS</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; }
+        .modal-content { background: white; margin: 5% auto; padding: 20px; width: 90%; max-width: 500px; border-radius: 12px; }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; margin-bottom: 5px; font-weight: 600; }
+        .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; }
+    </style>
+</head>
+<body>
+    <div class="page-wrap">
+        <nav class="sidebar" id="sidebar"></nav>
+        <main class="main">
+            <div class="dash-header">
+                <h1>📋 Quản lý Nhiệm vụ (Task)</h1>
+                <button onclick="showCreateModal()" class="btn btn-primary">+ Tạo Task Mới</button>
+            </div>
+
+            <div class="filters" style="margin-bottom: 20px;">
+                <select id="statusFilter" onchange="loadTasks()" style="padding:8px 12px;">
+                    <option value="">Tất cả nhiệm vụ</option>
+                    <option value="todo">Todo</option>
+                    <option value="inprogress">Đang làm</option>
+                    <option value="done">Hoàn thành</option>
+                </select>
+            </div>
+
+            <div class="table-wrap">
+                <table id="tasksTable">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Tiêu đề</th>
+                            <th>Người thực hiện</th>
+                            <th>Deadline</th>
+                            <th>Ưu tiên</th>
+                            <th>Trạng thái</th>
+                            <th>Hành động</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal Tạo Task -->
+    <div id="createTaskModal" class="modal">
+        <div class="modal-content">
+            <h2>Tạo Nhiệm Vụ Mới</h2>
+            <form id="taskForm" onsubmit="createNewTask(event)">
+                <div class="form-group">
+                    <label>Tiêu đề *</label>
+                    <input type="text" id="taskTitle" required>
+                </div>
+                <div class="form-group">
+                    <label>Mô tả</label>
+                    <textarea id="taskDesc" rows="3"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Người thực hiện *</label>
+                    <select id="taskAssignee" required></select>
+                </div>
+                <div class="form-group">
+                    <label>Deadline</label>
+                    <input type="date" id="taskDueDate">
+                </div>
+                <div class="form-group">
+                    <label>Ưu tiên</label>
+                    <select id="taskPriority">
+                        <option value="low">Thấp</option>
+                        <option value="medium" selected>Trung bình</option>
+                        <option value="high">Cao</option>
+                    </select>
+                </div>
+                <div style="display:flex; gap:10px; margin-top:20px;">
+                    <button type="button" onclick="closeModal('createTaskModal')" style="flex:1">Hủy</button>
+                    <button type="submit" class="btn btn-primary" style="flex:1">Tạo Task</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="toast"></div>
+    <script src="main.js"></script>
+    <script>
+        let currentUser = null;
+
+        async function loadTasks() {
+            const status = document.getElementById('statusFilter').value;
+            let url = '/tasks';
+            if (status) url += `?status=${status}`;
+            
+            const res = await API.get(url);
+            if (res.success) {
+                renderTasks(res.data);
+            } else {
+                showToast(res.message || "Lỗi tải danh sách task", "error");
+            }
+        }
+
+        function renderTasks(tasks) {
+            const tbody = document.querySelector('#tasksTable tbody');
+            if (tasks.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" class="empty">Chưa có nhiệm vụ nào</td></tr>`;
+                return;
+            }
+            
+            tbody.innerHTML = tasks.map(task => `
+                <tr>
+                    <td>${task.id}</td>
+                    <td><strong>${task.title}</strong></td>
+                    <td>${task.assignee_name}</td>
+                    <td>${task.due_date ? formatDate(task.due_date) : 'Không có'}</td>
+                    <td><span class="badge badge-${task.priority}">${task.priority}</span></td>
+                    <td><span class="badge badge-${task.status}">${task.status}</span></td>
+                    <td>
+                        <select onchange="updateTaskStatus(${task.id}, this.value)" style="padding:4px 8px; margin-right:5px;">
+                            <option value="todo" ${task.status === 'todo' ? 'selected' : ''}>Todo</option>
+                            <option value="inprogress" ${task.status === 'inprogress' ? 'selected' : ''}>Đang làm</option>
+                            <option value="done" ${task.status === 'done' ? 'selected' : ''}>Hoàn thành</option>
+                        </select>
+                        ${currentUser && (currentUser.role === 'admin') ? 
+                            `<button onclick="deleteTask(${task.id})" class="btn btn-sm" style="background:#e53935;color:white;">Xóa</button>` : ''}
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        async function updateTaskStatus(taskId, newStatus) {
+            const res = await API.put(`/tasks/${taskId}`, { status: newStatus });
+            if (res.success) {
+                showToast("Cập nhật trạng thái thành công!", "success");
+                loadTasks();
+            } else {
+                showToast(res.message || "Cập nhật thất bại", "error");
+            }
+        }
+
+        async function deleteTask(taskId) {
+            if (!confirm("Bạn có chắc muốn xóa task này không?")) return;
+            const res = await API.delete(`/tasks/${taskId}`);
+            if (res.success) {
+                showToast("Đã xóa task thành công", "success");
+                loadTasks();
+            } else {
+                showToast(res.message || "Không thể xóa", "error");
+            }
+        }
+
+        async function loadEmployeesForSelect() {
+            const res = await API.get('/auth/employees');
+            if (res.success) {
+                const select = document.getElementById('taskAssignee');
+                select.innerHTML = res.data.map(emp => 
+                    `<option value="${emp.id}">${emp.name}</option>`
+                ).join('');
+            }
+        }
+
+        function showCreateModal() {
+            document.getElementById('createTaskModal').style.display = 'block';
+            loadEmployeesForSelect();
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+
+        async function createNewTask(e) {
+            e.preventDefault();
+            const data = {
+                title: document.getElementById('taskTitle').value,
+                description: document.getElementById('taskDesc').value,
+                assignee_id: parseInt(document.getElementById('taskAssignee').value),
+                due_date: document.getElementById('taskDueDate').value,
+                priority: document.getElementById('taskPriority').value
+            };
+
+            const res = await API.post('/tasks', data);
+            if (res.success) {
+                showToast("Tạo task thành công!", "success");
+                closeModal('createTaskModal');
+                document.getElementById('taskForm').reset();
+                loadTasks();
+            } else {
+                showToast(res.message || "Tạo task thất bại", "error");
+            }
+        }
+
+        window.onload = () => {
+            API.get("/auth/me").then(res => {
+                if (res.success) {
+                    currentUser = res;
+                    renderSidebar('tasks', res);
+                    loadTasks();
+                } else {
+                    window.location.href = "index.html";
+                }
+            });
+        };
+    </script>
+</body>
+</html>
