@@ -1,0 +1,2033 @@
+<!DOCTYPE html>
+<!-- view/chatems.html — ChatEMS - Trợ lý AI chuyên nghiệp -->
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ChatEMS — SmartEMS</title>
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="icon" type="image/png" href="image/logo_E.png" />
+  <style>
+    /* ===== LAYOUT CHAT ===== */
+    .chat-layout {
+      display: flex;
+      gap: 0;
+      height: calc(100vh - 180px);
+      min-height: 500px;
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    /* ===== SIDEBAR LỊCH SỬ ===== */
+    .chat-history-sidebar {
+      width: 260px;
+      min-width: 200px;
+      background: #f7f8fa;
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+    }
+
+    .chat-history-header {
+      padding: 16px 16px 12px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .chat-history-header .btn-new-chat {
+      width: 100%;
+      padding: 10px 16px;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-family: var(--font);
+      font-size: .88rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background .15s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .chat-history-header .btn-new-chat:hover {
+      background: var(--accent-h);
+    }
+
+    .chat-history-list {
+      flex: 1;
+      overflow-y: auto;
+      padding: 8px 10px;
+    }
+
+    .chat-history-item {
+      display: flex;
+      align-items: center;
+      padding: 8px 10px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all .15s;
+      margin-bottom: 2px;
+      gap: 6px;
+      position: relative;
+    }
+
+    .chat-history-item:hover {
+      background: #eef0ff;
+    }
+
+    .chat-history-item.active {
+      background: #eef0ff;
+      border-left: 3px solid var(--accent);
+    }
+
+    .chat-history-item .chat-star {
+      font-size: .85rem;
+      cursor: pointer;
+      flex-shrink: 0;
+      color: #d1d5db;
+      transition: color .15s;
+      background: none;
+      border: none;
+      padding: 0 2px;
+    }
+
+    .chat-history-item .chat-star:hover {
+      color: #f59e0b;
+    }
+
+    .chat-history-item .chat-star.starred {
+      color: #f59e0b;
+    }
+
+    .chat-history-item .chat-info {
+      flex: 1;
+      min-width: 0;
+      cursor: pointer;
+    }
+
+    .chat-history-item .chat-title {
+      font-size: .85rem;
+      font-weight: 500;
+      color: var(--text);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .chat-history-item .chat-title-input {
+      font-size: .85rem;
+      font-weight: 500;
+      color: var(--text);
+      border: 1.5px solid var(--accent);
+      border-radius: 4px;
+      padding: 1px 6px;
+      width: 100%;
+      font-family: var(--font);
+      background: var(--white);
+      outline: none;
+    }
+
+    .chat-history-item .chat-title-input:focus {
+      border-color: var(--accent);
+    }
+
+    .chat-history-item .chat-preview {
+      font-size: .72rem;
+      color: var(--muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .chat-history-item .chat-time {
+      font-size: .62rem;
+      color: var(--muted);
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .chat-history-item .chat-actions {
+      display: flex;
+      gap: 2px;
+      flex-shrink: 0;
+      opacity: 0;
+      transition: opacity .15s;
+    }
+
+    .chat-history-item:hover .chat-actions {
+      opacity: 1;
+    }
+
+    .chat-history-item .chat-actions button {
+      background: none;
+      border: none;
+      color: var(--muted);
+      cursor: pointer;
+      font-size: .75rem;
+      padding: 2px 4px;
+      border-radius: 4px;
+      transition: all .15s;
+    }
+
+    .chat-history-item .chat-actions .btn-rename:hover {
+      background: #eef0ff;
+      color: var(--accent);
+    }
+
+    .chat-history-item .chat-actions .btn-delete:hover {
+      background: #fde8e8;
+      color: var(--red);
+    }
+
+    .chat-history-empty {
+      text-align: center;
+      padding: 40px 16px;
+      color: var(--muted);
+      font-size: .85rem;
+    }
+
+    .chat-history-empty .icon {
+      font-size: 2rem;
+      display: block;
+      margin-bottom: 8px;
+    }
+
+    /* ===== MAIN CHAT AREA ===== */
+    .chat-main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+      background: #ffffff;
+    }
+
+    .chat-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 24px;
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+      background: #ffffff;
+    }
+
+    .chat-header .chat-header-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .chat-header .chat-header-left .header-avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      object-fit: contain;
+      background: var(--bg);
+      border: 1px solid var(--border);
+    }
+
+    .chat-header .chat-header-left .header-info {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .chat-header .chat-header-left .header-name {
+      font-weight: 600;
+      font-size: .9rem;
+      color: var(--text);
+    }
+
+    .chat-header .chat-header-left .header-status {
+      font-size: .65rem;
+      color: var(--muted);
+      transition: all .3s ease;
+    }
+
+    .chat-header .chat-header-left .header-status .online {
+      color: var(--green);
+    }
+    .chat-header .chat-header-left .header-status .offline {
+      color: var(--red);
+    }
+    .chat-header .chat-header-left .header-status .warning {
+      color: var(--yellow);
+    }
+    .chat-header .chat-header-left .header-status .connecting {
+      color: var(--yellow);
+      animation: pulse 1.5s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+
+    .chat-header .chat-header-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .chat-header .chat-header-right .btn-settings {
+      background: none;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 6px 14px;
+      cursor: pointer;
+      font-size: .82rem;
+      font-weight: 500;
+      transition: all .15s;
+      color: var(--muted);
+      font-family: var(--font);
+      display: none;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .chat-header .chat-header-right .btn-settings:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: #eef0ff;
+    }
+
+    /* ===== MESSAGES ===== */
+    .chat-messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px 32px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      background: #fafbfc;
+    }
+
+    .chat-message {
+      display: flex;
+      gap: 10px;
+      max-width: 80%;
+      animation: fadeIn .3s ease;
+    }
+
+    .chat-message.user {
+      align-self: flex-end;
+      flex-direction: row-reverse;
+    }
+
+    .chat-message.assistant {
+      align-self: flex-start;
+    }
+
+    .chat-message .avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      overflow: hidden;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 2px;
+    }
+
+    .chat-message .avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .chat-message .avatar .avatar-placeholder {
+      font-weight: 700;
+      font-size: .75rem;
+      color: var(--muted);
+    }
+
+    .chat-message.user .avatar {
+      border-color: var(--accent);
+    }
+
+    .chat-message.assistant .avatar {
+      border-color: #bbf7d0;
+      background: #dcf5ea;
+    }
+
+    .chat-message .bubble {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 10px 16px;
+      font-size: .9rem;
+      line-height: 1.65;
+      word-wrap: break-word;
+      white-space: pre-wrap;
+      max-width: 100%;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+    }
+
+    .chat-message.user .bubble {
+      background: var(--accent);
+      color: #fff;
+      border-color: var(--accent);
+    }
+
+    .chat-message.assistant .bubble {
+      background: #ffffff;
+      border-color: #e4e7ec;
+    }
+
+    .chat-message.assistant .bubble strong {
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .chat-message.assistant .bubble ul,
+    .chat-message.assistant .bubble ol {
+      margin: 4px 0 4px 20px;
+      padding-left: 4px;
+    }
+
+    .chat-message.assistant .bubble li {
+      margin-bottom: 2px;
+    }
+
+    .chat-message.assistant .bubble p {
+      margin: 2px 0;
+    }
+
+    .chat-message .bubble .timestamp {
+      font-size: .6rem;
+      color: var(--muted);
+      margin-top: 6px;
+      display: block;
+      opacity: 0.5;
+    }
+
+    .chat-message.user .bubble .timestamp {
+      color: rgba(255,255,255,0.6);
+    }
+
+    .chat-message .file-attachment {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 3px 10px 3px 6px;
+      background: rgba(66,85,255,0.08);
+      border-radius: 6px;
+      font-size: .75rem;
+      margin-top: 4px;
+      color: var(--accent);
+    }
+
+    .chat-message.user .file-attachment {
+      background: rgba(255,255,255,0.12);
+      color: #fff;
+    }
+
+    .typing-indicator {
+      display: flex;
+      gap: 4px;
+      padding: 4px 0;
+    }
+
+    .typing-indicator span {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--muted);
+      display: inline-block;
+      animation: typing 1.4s infinite both;
+    }
+
+    .typing-indicator span:nth-child(2) {
+      animation-delay: .2s;
+    }
+    .typing-indicator span:nth-child(3) {
+      animation-delay: .4s;
+    }
+
+    @keyframes typing {
+      0%, 80%, 100% {
+        transform: scale(0.6);
+        opacity: .4;
+      }
+      40% {
+        transform: scale(1);
+        opacity: 1;
+      }
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(6px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* ===== INPUT AREA ===== */
+    .chat-input-area {
+      border-top: 1px solid var(--border);
+      padding: 10px 24px 14px;
+      display: flex;
+      gap: 8px;
+      align-items: flex-end;
+      flex-shrink: 0;
+      background: var(--white);
+    }
+
+    .chat-input-area .input-wrapper {
+      flex: 1;
+      position: relative;
+      min-width: 120px;
+    }
+
+    .chat-input-area textarea {
+      width: 100%;
+      padding: 10px 16px;
+      border: 1.5px solid var(--border);
+      border-radius: 12px;
+      font-family: var(--font);
+      font-size: .9rem;
+      resize: none;
+      outline: none;
+      background: #f7f8fa;
+      transition: border-color .15s, background .15s;
+      min-height: 42px;
+      max-height: 120px;
+      line-height: 1.5;
+    }
+
+    .chat-input-area textarea:focus {
+      border-color: var(--accent);
+      background: var(--white);
+    }
+
+    .chat-input-area .btn-upload {
+      background: none;
+      border: 1.5px solid var(--border);
+      border-radius: 12px;
+      padding: 7px 12px;
+      cursor: pointer;
+      font-size: 1rem;
+      transition: all .15s;
+      height: 42px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--muted);
+      flex-shrink: 0;
+    }
+
+    .chat-input-area .btn-upload:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .chat-input-area .btn-upload.has-file {
+      border-color: var(--green);
+      color: var(--green);
+    }
+
+    .chat-input-area .btn-send {
+      padding: 8px 22px;
+      border: none;
+      border-radius: 12px;
+      font-family: var(--font);
+      font-weight: 600;
+      cursor: pointer;
+      transition: all .15s;
+      background: var(--accent);
+      color: #fff;
+      height: 42px;
+      white-space: nowrap;
+      flex-shrink: 0;
+      font-size: .88rem;
+    }
+
+    .chat-input-area .btn-send:hover:not(:disabled) {
+      background: var(--accent-h);
+    }
+
+    .chat-input-area .btn-send:disabled {
+      opacity: .5;
+      cursor: not-allowed;
+    }
+
+    /* ===== WELCOME SCREEN ===== */
+    .welcome-screen {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      color: var(--muted);
+      text-align: center;
+      padding: 40px 20px;
+    }
+
+    .welcome-screen .logo-big {
+      width: 56px;
+      height: 56px;
+      margin-bottom: 12px;
+    }
+
+    .welcome-screen .logo-big img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+
+    .welcome-screen .title {
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 4px;
+    }
+
+    .welcome-screen .desc {
+      font-size: .88rem;
+      max-width: 450px;
+      line-height: 1.7;
+    }
+
+    .welcome-screen .suggestions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-top: 14px;
+    }
+
+    .welcome-screen .suggestions .chip {
+      padding: 6px 16px;
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      font-size: .78rem;
+      cursor: pointer;
+      transition: all .15s;
+      background: var(--white);
+      color: var(--text);
+    }
+
+    .welcome-screen .suggestions .chip:hover {
+      border-color: var(--accent);
+      background: #eef0ff;
+      color: var(--accent);
+    }
+
+    /* ===== MODAL SETTINGS ===== */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 500;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .25s;
+    }
+
+    .modal-overlay.open {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    .modal {
+      background: var(--white);
+      border-radius: 16px;
+      padding: 28px 32px 24px;
+      width: 100%;
+      max-width: 560px;
+      box-shadow: 0 12px 48px rgba(0,0,0,.18);
+      transform: scale(.96) translateY(10px);
+      transition: transform .25s, opacity .25s;
+      opacity: 0;
+    }
+
+    .modal-overlay.open .modal {
+      transform: scale(1) translateY(0);
+      opacity: 1;
+    }
+
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+
+    .modal-header h2 {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--text);
+      margin: 0;
+    }
+
+    .modal-close {
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 1.3rem;
+      color: var(--muted);
+      padding: 4px 8px;
+      border-radius: 6px;
+      transition: background .15s;
+    }
+
+    .modal-close:hover {
+      background: var(--bg);
+    }
+
+    .modal-body .form-group {
+      margin-bottom: 14px;
+    }
+
+    .modal-body .form-group label {
+      display: block;
+      font-weight: 600;
+      font-size: .88rem;
+      margin-bottom: 4px;
+      color: var(--text);
+    }
+
+    .modal-body .form-group input {
+      width: 100%;
+      padding: 10px 14px;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      font-family: var(--font);
+      font-size: .88rem;
+      color: var(--text);
+      background: var(--white);
+      transition: border-color .15s;
+      outline: none;
+    }
+
+    .modal-body .form-group input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(66,85,255,0.1);
+    }
+
+    .modal-body .form-group .hint {
+      font-size: .78rem;
+      color: var(--muted);
+      margin-top: 4px;
+      display: block;
+    }
+
+    .modal-body .form-group .hint.error {
+      color: var(--red);
+    }
+
+    .modal-body .form-group .hint.success {
+      color: var(--green);
+    }
+
+    .modal-body .help-box {
+      background: #f8f9fc;
+      border-radius: 8px;
+      padding: 14px 16px;
+      border: 1px solid var(--border);
+      margin-top: 4px;
+    }
+
+    .modal-body .help-box details summary {
+      cursor: pointer;
+      font-weight: 600;
+      color: var(--accent);
+      font-size: .88rem;
+    }
+
+    .modal-body .help-box details summary:hover {
+      color: var(--accent-h);
+    }
+
+    .modal-body .help-box details .help-content {
+      margin-top: 10px;
+      font-size: .85rem;
+      line-height: 1.8;
+      color: var(--muted);
+    }
+
+    .modal-body .help-box details .help-content code {
+      background: #eef0ff;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: .8rem;
+      color: var(--accent);
+      font-family: monospace;
+    }
+
+    .modal-body .help-box details .help-content a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+
+    .modal-body .help-box details .help-content a:hover {
+      text-decoration: underline;
+    }
+
+    .modal-footer {
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+      margin-top: 20px;
+      padding-top: 16px;
+      border-top: 1px solid var(--border);
+    }
+
+    .modal-footer .btn {
+      padding: 9px 24px;
+      border-radius: 8px;
+      font-family: var(--font);
+      font-size: .88rem;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      transition: all .15s;
+    }
+
+    .modal-footer .btn-ghost {
+      background: transparent;
+      color: var(--muted);
+      border: 1.5px solid var(--border);
+    }
+
+    .modal-footer .btn-ghost:hover {
+      background: var(--bg);
+    }
+
+    .modal-footer .btn-primary {
+      background: var(--accent);
+      color: #fff;
+    }
+
+    .modal-footer .btn-primary:hover {
+      background: var(--accent-h);
+      box-shadow: 0 2px 12px rgba(66,85,255,0.25);
+    }
+
+    .modal-footer .btn-primary:disabled {
+      opacity: .5;
+      cursor: not-allowed;
+    }
+
+    .modal-footer .btn-danger {
+      background: var(--red);
+      color: #fff;
+    }
+
+    .modal-footer .btn-danger:hover {
+      background: #c62828;
+    }
+
+    /* ===== API BANNER ===== */
+    .api-banner {
+      margin: 0 12px 12px 12px;
+      padding: 12px 20px;
+      border-radius: 8px;
+      display: none;
+      align-items: center;
+      gap: 12px;
+      font-size: .88rem;
+      background: #fef3c7;
+      border: 1px solid #f59e0b;
+      color: #92400e;
+      flex-shrink: 0;
+    }
+
+    .api-banner .banner-icon {
+      font-size: 1.2rem;
+      flex-shrink: 0;
+    }
+
+    .api-banner .banner-text {
+      flex: 1;
+    }
+
+    .api-banner .banner-link {
+      color: var(--accent);
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: underline;
+      flex-shrink: 0;
+    }
+
+    .api-banner .banner-link:hover {
+      color: var(--accent-h);
+    }
+
+    .api-banner.ready {
+      background: #dcf5ea;
+      border-color: #23b26d;
+      color: #1a7a4a;
+    }
+
+    .api-banner.error {
+      background: #fde8e8;
+      border-color: #e53935;
+      color: #b91c1c;
+    }
+
+    /* Scrollbar */
+    .chat-messages::-webkit-scrollbar,
+    .chat-history-list::-webkit-scrollbar,
+    #api-keys-list::-webkit-scrollbar {
+      width: 4px;
+    }
+
+    .chat-messages::-webkit-scrollbar-track,
+    .chat-history-list::-webkit-scrollbar-track,
+    #api-keys-list::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    .chat-messages::-webkit-scrollbar-thumb,
+    .chat-history-list::-webkit-scrollbar-thumb,
+    #api-keys-list::-webkit-scrollbar-thumb {
+      background: var(--border);
+      border-radius: 4px;
+    }
+
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 700px) {
+      .chat-layout {
+        flex-direction: column;
+        height: auto;
+        min-height: 550px;
+      }
+
+      .chat-history-sidebar {
+        width: 100%;
+        min-width: unset;
+        max-height: 160px;
+        border-right: none;
+        border-bottom: 1px solid var(--border);
+      }
+
+      .chat-history-list {
+        display: flex;
+        overflow-x: auto;
+        padding: 6px 10px;
+        gap: 6px;
+      }
+
+      .chat-history-item {
+        flex-shrink: 0;
+        min-width: 130px;
+        max-width: 180px;
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 6px 10px;
+      }
+
+      .chat-history-item .chat-actions {
+        opacity: 1;
+      }
+
+      .chat-message {
+        max-width: 95%;
+      }
+
+      .chat-messages {
+        padding: 14px 16px;
+      }
+
+      .chat-input-area {
+        padding: 8px 14px 12px;
+        gap: 6px;
+      }
+
+      .chat-input-area .input-wrapper {
+        flex: 1 1 100%;
+        order: 1;
+      }
+
+      .chat-input-area .btn-upload {
+        order: 2;
+      }
+
+      .chat-input-area .btn-send {
+        order: 3;
+        flex: 1;
+      }
+
+      .chat-header {
+        padding: 8px 16px;
+      }
+
+      .modal {
+        max-width: 95%;
+        padding: 20px 16px;
+      }
+
+      .chat-header .chat-header-right .btn-settings {
+        font-size: .72rem;
+        padding: 4px 10px;
+      }
+
+      .api-banner {
+        margin: 0 8px 8px 8px;
+        padding: 10px 14px;
+        font-size: .82rem;
+        flex-wrap: wrap;
+      }
+
+      .api-banner .banner-link {
+        margin-left: auto;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div class="page-wrap">
+  <nav class="sidebar" id="sidebar"></nav>
+
+  <main class="main">
+    <div class="page-header">
+      <h1>ChatEMS</h1>
+      <p>Trợ lý AI thông minh của hệ thống</p>
+    </div>
+
+    <div class="card" style="padding: 0; overflow: hidden;">
+      <div class="chat-layout" id="chat-layout">
+
+        <!-- ===== SIDEBAR LỊCH SỬ ===== -->
+        <div class="chat-history-sidebar" id="chat-history-sidebar">
+          <div class="chat-history-header">
+            <button class="btn-new-chat" onclick="createNewChat()">
+              <span>+</span> Tạo chat mới
+            </button>
+          </div>
+          <div class="chat-history-list" id="chat-history-list">
+            <!-- Danh sách sẽ được render bằng JS -->
+          </div>
+        </div>
+
+        <!-- ===== MAIN CHAT ===== -->
+        <div class="chat-main">
+          <!-- Header -->
+          <div class="chat-header" id="chat-header">
+            <div class="chat-header-left">
+              <img class="header-avatar" id="header-avatar" src="image/logo_E.png" alt="ChatEMS" />
+              <div class="header-info">
+                <span class="header-name">ChatEMS</span>
+                <span class="header-status" id="status-text">Đang kết nối...</span>
+              </div>
+            </div>
+            <div class="chat-header-right">
+              <button class="btn-settings" id="btn-settings" onclick="openSettingsModal()">
+                Cài đặt API
+              </button>
+            </div>
+          </div>
+
+          <!-- API Banner -->
+          <div class="api-banner" id="api-banner">
+            <span class="banner-icon">🔔</span>
+            <span class="banner-text" id="banner-text">
+              Hãy yêu cầu Admin cập nhật API Key để sử dụng AI nội bộ
+            </span>
+            <span class="banner-link" id="banner-link" onclick="openSettingsModal()">Cài đặt API</span>
+          </div>
+
+          <!-- Messages -->
+          <div class="chat-messages" id="chat-messages">
+            <div class="welcome-screen" id="welcome-screen">
+              <div class="logo-big">
+                <img src="image/logo_E.png" alt="ChatEMS" />
+              </div>
+              <div class="title" id="welcome-title">Xin chào!</div>
+              <div class="desc" id="welcome-desc">
+                Tôi là trợ lý AI của hệ thống SmartEMS.<br />
+                Tôi có thể giúp bạn tra cứu thông tin về <strong>điểm danh, lương, nghỉ phép</strong> và nhiều hơn nữa.
+              </div>
+              <div class="suggestions" id="suggestions-container"></div>
+            </div>
+          </div>
+
+          <!-- Input -->
+          <div class="chat-input-area">
+            <button class="btn-upload" id="btn-upload" onclick="document.getElementById('file-input').click()" title="Đính kèm file">
+              📎
+            </button>
+            <input type="file" id="file-input" style="display:none;" multiple />
+            <div class="input-wrapper">
+              <textarea id="chat-input" rows="1" placeholder="Nhập câu hỏi của bạn..." onkeydown="handleKeyDown(event)"></textarea>
+            </div>
+            <button class="btn-send" id="send-btn" onclick="sendMessage()">Gửi</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- ===== MODAL CÀI ĐẶT API ===== -->
+<div class="modal-overlay" id="settings-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <h2>Cài đặt API</h2>
+      <button class="modal-close" onclick="closeSettingsModal()">✕</button>
+    </div>
+    <div class="modal-body">
+
+      <!-- Trạng thái hiện tại -->
+      <div id="api-status-container" style="margin-bottom: 16px; padding: 10px 14px; background: #f8f9fc; border-radius: 8px; border: 1px solid var(--border);">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <span style="font-weight: 600; font-size: .88rem;">Trạng thái:</span>
+          <span id="api-status-badge" style="font-size: .82rem; font-weight: 500; padding: 2px 12px; border-radius: 12px;"></span>
+        </div>
+        <div style="font-size: .78rem; color: var(--muted); margin-top: 4px;" id="api-status-detail"></div>
+      </div>
+
+      <!-- Form thêm API Key mới -->
+      <div class="form-group">
+        <label for="api-key-input">Thêm API Key mới</label>
+        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+          <input type="password" id="api-key-input" placeholder="Nhập OpenRouter API Key..." style="flex: 1; min-width: 150px;" />
+          <input type="text" id="api-name-input" placeholder="Tên API (ví dụ: API Chính)" style="flex: 0.6; min-width: 120px;" />
+          <button class="btn btn-primary" id="btn-add-key" onclick="addApiKey()" style="white-space: nowrap; padding: 9px 18px;">Thêm</button>
+        </div>
+        <span class="hint" id="api-key-status"></span>
+      </div>
+
+      <!-- Danh sách API Keys đã lưu -->
+      <div style="margin-top: 12px; border-top: 1px solid var(--border); padding-top: 12px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+          <span style="font-weight: 600; font-size: .85rem;">API Keys đã lưu</span>
+          <span id="api-count" style="font-size: .72rem; color: var(--muted);"></span>
+        </div>
+        <div id="api-keys-list" style="max-height: 150px; overflow-y: auto;">
+          <!-- Sẽ được render bằng JS -->
+        </div>
+      </div>
+
+      <!-- Hướng dẫn -->
+      <div class="help-box" style="margin-top: 12px;">
+        <details>
+          <summary> Hướng dẫn lấy API Key</summary>
+          <div class="help-content">
+            <p>1. Truy cập <a href="https://openrouter.ai/keys" target="_blank">https://openrouter.ai/keys</a></p>
+            <p>2. Đăng nhập hoặc đăng ký tài khoản.</p>
+            <p>3. Nhấn nút <strong>Create Key</strong> để tạo khóa mới.</p>
+            <p>4. Sao chép khóa và dán vào ô bên trên.</p>
+            <p><strong>Lưu ý:</strong> Khóa thường bắt đầu bằng <code>sk-or-v1-</code></p>
+            <p style="margin-top:8px;color:#e53935;">API Key sẽ được lưu trong hệ thống, không bị lộ khi đẩy code lên GitHub.</p>
+          </div>
+        </details>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeSettingsModal()">Đóng</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+<script src="main.js"></script>
+<script>
+  // ============================================================
+  // CHATEMS - PHIÊN BẢN HOÀN CHỈNH
+  // ============================================================
+
+  let currentUser = null;
+  let currentChatId = null;
+  let chatHistoryList = [];
+  let currentMessages = [];
+  let isProcessing = false;
+  let aiConfigured = false;
+  let aiApiValid = false;
+  let userRole = 'employee';
+  let uploadedFiles = [];
+  let editingChatId = null;
+  let userAvatar = null;
+  let isAdmin = false;
+  let apiKeysList = [];
+  let currentApiKey = null;
+  let apiStatus = { has_active: false, has_keys: false, current_name: null };
+
+  // ============================================================
+  // KHỞI TẠO
+  // ============================================================
+  async function init() {
+    currentUser = await requireLogin();
+    if (!currentUser) return;
+
+    userRole = currentUser.role || 'employee';
+    isAdmin = userRole === 'admin';
+    renderSidebar('chatems', currentUser);
+
+    await loadUserAvatar();
+    updateHeaderAvatar();
+    updateSuggestions();
+
+    if (isAdmin) {
+      document.getElementById('btn-settings').style.display = 'flex';
+    }
+
+    await checkAIHealth();
+
+    const textarea = document.getElementById('chat-input');
+    textarea.addEventListener('input', function() {
+      this.style.height = 'auto';
+      this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+    });
+
+    document.getElementById('file-input').addEventListener('change', function(e) {
+      const files = Array.from(e.target.files);
+      if (files.length > 0) {
+        uploadedFiles = uploadedFiles.concat(files);
+        const btn = document.getElementById('btn-upload');
+        btn.classList.add('has-file');
+        btn.title = uploadedFiles.length + ' file đã đính kèm';
+        showToast('Đã đính kèm ' + uploadedFiles.length + ' file', 'success');
+        this.value = '';
+      }
+    });
+
+    loadChatHistoryList();
+    setTimeout(() => textarea.focus(), 300);
+  }
+
+  // ============================================================
+  // LẤY AVATAR USER
+  // ============================================================
+  async function loadUserAvatar() {
+    try {
+      const res = await API.get('/auth/profile');
+      if (res.success && res.data && res.data.avatar) {
+        userAvatar = res.data.avatar;
+      }
+    } catch (e) {
+      console.error('Không thể lấy avatar:', e);
+    }
+  }
+
+  function updateHeaderAvatar() {
+    document.getElementById('header-avatar').src = 'image/logo_E.png';
+  }
+
+  // ============================================================
+  // QUẢN LÝ LỊCH SỬ CHAT (RIÊNG THEO USER)
+  // ============================================================
+  function getStorageKey() {
+    const userId = currentUser?.employee_id || 'anonymous';
+    return `chatems_history_${userId}`;
+  }
+
+  function getStorageKeyList() {
+    const userId = currentUser?.employee_id || 'anonymous';
+    return `chatems_history_list_${userId}`;
+  }
+
+  function loadChatHistoryList() {
+    try {
+      const key = getStorageKeyList();
+      const saved = localStorage.getItem(key);
+      if (saved) {
+        chatHistoryList = JSON.parse(saved);
+      } else {
+        chatHistoryList = [
+          {
+            id: 'chat_' + Date.now(),
+            title: 'Chat mới',
+            messages: [],
+            starred: false,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          }
+        ];
+        saveChatHistoryList();
+      }
+    } catch (e) {
+      chatHistoryList = [
+        {
+          id: 'chat_' + Date.now(),
+          title: 'Chat mới',
+          messages: [],
+          starred: false,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        }
+      ];
+      saveChatHistoryList();
+    }
+
+    if (!currentChatId && chatHistoryList.length > 0) {
+      currentChatId = chatHistoryList[0].id;
+    }
+
+    renderChatHistoryList();
+    loadChatMessages();
+  }
+
+  function saveChatHistoryList() {
+    try {
+      const key = getStorageKeyList();
+      localStorage.setItem(key, JSON.stringify(chatHistoryList));
+    } catch (e) {}
+  }
+
+  function renderChatHistoryList() {
+    const container = document.getElementById('chat-history-list');
+
+    if (chatHistoryList.length === 0) {
+      container.innerHTML = `
+        <div class="chat-history-empty">
+          <span class="icon">💬</span>
+          <p>Chưa có cuộc trò chuyện nào</p>
+        </div>
+      `;
+      return;
+    }
+
+    const sorted = [...chatHistoryList].sort((a, b) => {
+      if (a.starred && !b.starred) return -1;
+      if (!a.starred && b.starred) return 1;
+      return new Date(b.updated_at) - new Date(a.updated_at);
+    });
+
+    container.innerHTML = sorted.map(chat => {
+      const isActive = chat.id === currentChatId;
+      const isEditing = editingChatId === chat.id;
+      const preview = chat.messages.length > 0
+        ? (chat.messages[chat.messages.length - 1].content || '').substring(0, 35) + '...'
+        : 'Chưa có tin nhắn';
+      const time = new Date(chat.updated_at).toLocaleDateString('vi-VN');
+      const starIcon = chat.starred ? '⭐' : '☆';
+
+      const titleHtml = isEditing
+        ? `<input class="chat-title-input" id="rename-input-${chat.id}" value="${chat.title}" onblur="saveRename('${chat.id}')" onkeydown="if(event.key==='Enter'){saveRename('${chat.id}')}" autofocus />`
+        : `<div class="chat-title">${chat.title}</div>`;
+
+      return `
+        <div class="chat-history-item ${isActive ? 'active' : ''}">
+          <button class="chat-star ${chat.starred ? 'starred' : ''}" onclick="event.stopPropagation();toggleStar('${chat.id}')" title="${chat.starred ? 'Bỏ sao' : 'Gắn sao'}">
+            ${starIcon}
+          </button>
+          <div class="chat-info" onclick="switchChat('${chat.id}')">
+            ${titleHtml}
+            <div class="chat-preview">${preview}</div>
+          </div>
+          <span class="chat-time">${time}</span>
+          <div class="chat-actions">
+            <button class="btn-rename" onclick="event.stopPropagation();startRename('${chat.id}')" title="Đổi tên">✏️</button>
+            <button class="btn-delete" onclick="event.stopPropagation();deleteChat('${chat.id}')" title="Xóa">✕</button>
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    if (editingChatId) {
+      const input = document.getElementById(`rename-input-${editingChatId}`);
+      if (input) {
+        setTimeout(() => { input.focus(); input.select(); }, 50);
+      }
+    }
+  }
+
+  // ============================================================
+  // QUẢN LÝ TIN NHẮN
+  // ============================================================
+  function loadChatMessages() {
+    const chat = chatHistoryList.find(c => c.id === currentChatId);
+    if (!chat) return;
+
+    currentMessages = chat.messages || [];
+
+    const container = document.getElementById('chat-messages');
+    const welcome = document.getElementById('welcome-screen');
+
+    const messages = container.querySelectorAll('.chat-message');
+    messages.forEach(el => el.remove());
+
+    if (currentMessages.length === 0) {
+      welcome.style.display = 'flex';
+      return;
+    }
+
+    welcome.style.display = 'none';
+
+    currentMessages.forEach(msg => {
+      addMessageToUI(msg.role, msg.content, msg.files);
+    });
+
+    container.scrollTop = container.scrollHeight;
+  }
+
+  function saveCurrentChat() {
+    const chat = chatHistoryList.find(c => c.id === currentChatId);
+    if (!chat) return;
+
+    chat.messages = currentMessages;
+    chat.updated_at = new Date().toISOString();
+
+    if (currentMessages.length > 0 && chat.title === 'Chat mới') {
+      const firstMsg = currentMessages.find(m => m.role === 'user');
+      if (firstMsg) {
+        chat.title = firstMsg.content.substring(0, 40) + (firstMsg.content.length > 40 ? '...' : '');
+      }
+    }
+
+    saveChatHistoryList();
+    renderChatHistoryList();
+  }
+
+  // ============================================================
+  // CHUYỂN CHAT / TẠO MỚI / XÓA / ĐỔI TÊN / SAO
+  // ============================================================
+  function switchChat(chatId) {
+    saveCurrentChat();
+    currentChatId = chatId;
+    editingChatId = null;
+    loadChatMessages();
+    renderChatHistoryList();
+    document.getElementById('chat-input').focus();
+  }
+
+  function createNewChat() {
+    saveCurrentChat();
+
+    const newChat = {
+      id: 'chat_' + Date.now(),
+      title: 'Chat mới',
+      messages: [],
+      starred: false,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    };
+
+    chatHistoryList.unshift(newChat);
+    currentChatId = newChat.id;
+    currentMessages = [];
+    editingChatId = null;
+
+    saveChatHistoryList();
+    renderChatHistoryList();
+    loadChatMessages();
+
+    document.getElementById('chat-input').focus();
+    showToast('Đã tạo cuộc trò chuyện mới', 'success');
+  }
+
+  function toggleStar(chatId) {
+    const chat = chatHistoryList.find(c => c.id === chatId);
+    if (!chat) return;
+    chat.starred = !chat.starred;
+    saveChatHistoryList();
+    renderChatHistoryList();
+  }
+
+  function startRename(chatId) {
+    editingChatId = chatId;
+    renderChatHistoryList();
+  }
+
+  function saveRename(chatId) {
+    const input = document.getElementById(`rename-input-${chatId}`);
+    if (!input) return;
+
+    const newTitle = input.value.trim();
+    if (!newTitle) {
+      showToast('Tên không được để trống', 'warning');
+      return;
+    }
+
+    const chat = chatHistoryList.find(c => c.id === chatId);
+    if (chat) {
+      chat.title = newTitle;
+      chat.updated_at = new Date().toISOString();
+      saveChatHistoryList();
+    }
+
+    editingChatId = null;
+    renderChatHistoryList();
+  }
+
+  function deleteChat(chatId) {
+    if (chatHistoryList.length <= 1) {
+      showToast('Không thể xóa cuộc trò chuyện cuối cùng', 'warning');
+      return;
+    }
+
+    if (!confirm('Bạn có chắc muốn xóa cuộc trò chuyện này?')) return;
+
+    chatHistoryList = chatHistoryList.filter(c => c.id !== chatId);
+
+    if (currentChatId === chatId) {
+      currentChatId = chatHistoryList[0].id;
+      currentMessages = chatHistoryList[0].messages || [];
+      loadChatMessages();
+    }
+
+    saveChatHistoryList();
+    renderChatHistoryList();
+  }
+
+  // ============================================================
+  // CẬP NHẬT SUGGESTIONS
+  // ============================================================
+  function updateSuggestions() {
+    const container = document.getElementById('suggestions-container');
+    const title = document.getElementById('welcome-title');
+    const desc = document.getElementById('welcome-desc');
+
+    if (userRole === 'admin') {
+      title.textContent = 'Xin chào Quản trị viên!';
+      desc.innerHTML = 'Tôi có thể cung cấp dữ liệu tổng quan về toàn hệ thống.';
+      container.innerHTML = `
+        <span class="chip" onclick="sendSuggestion('Thống kê điểm danh hôm nay')">Điểm danh</span>
+        <span class="chip" onclick="sendSuggestion('Tổng quỹ lương tháng này')">Tổng lương</span>
+        <span class="chip" onclick="sendSuggestion('Đơn nghỉ phép chờ duyệt')">Nghỉ phép</span>
+        <span class="chip" onclick="sendSuggestion('Tổng số nhân viên')">Nhân sự</span>
+      `;
+    } else {
+      title.textContent = 'Xin chào!';
+      desc.innerHTML = 'Tôi có thể giúp bạn tra cứu thông tin cá nhân của bạn.';
+      container.innerHTML = `
+        <span class="chip" onclick="sendSuggestion('Hôm nay tôi điểm danh chưa?')">Điểm danh</span>
+        <span class="chip" onclick="sendSuggestion('Lương tháng này của tôi?')">Lương</span>
+        <span class="chip" onclick="sendSuggestion('Đơn nghỉ phép của tôi')">Nghỉ phép</span>
+        <span class="chip" onclick="sendSuggestion('Thông báo của tôi')">Thông báo</span>
+      `;
+    }
+  }
+
+  // ============================================================
+  // KIỂM TRA AI HEALTH + CẬP NHẬT BANNER VÀ TRẠNG THÁI
+  // ============================================================
+  async function checkAIHealth() {
+    const statusEl = document.getElementById('status-text');
+    const banner = document.getElementById('api-banner');
+    const bannerText = document.getElementById('banner-text');
+    const bannerLink = document.getElementById('banner-link');
+    const sendBtn = document.getElementById('send-btn');
+
+    // Hiển thị trạng thái "Đang kết nối..." ngay lập tức
+    statusEl.innerHTML = '<span class="connecting">●</span> Đang kết nối...';
+    statusEl.className = 'header-status connecting';
+    sendBtn.disabled = true;
+
+    try {
+      const res = await API.get('/ai/health');
+      
+      if (res.success) {
+        aiConfigured = res.configured;
+        aiApiValid = res.api_valid || false;
+        apiStatus = res.api_status || { has_active: false, has_keys: false, current_name: null };
+
+        const apiName = apiStatus.current_name || '';
+
+        // ===== TRƯỜNG HỢP 1: CHƯA CÓ API KEY =====
+        if (!res.configured) {
+          banner.style.display = 'flex';
+          banner.className = 'api-banner';
+          bannerText.textContent = '⚠️ Hãy yêu cầu Admin cập nhật API Key để sử dụng AI nội bộ';
+          bannerLink.style.display = isAdmin ? 'inline' : 'none';
+          
+          statusEl.innerHTML = '<span class="offline">●</span> Chưa kết nối';
+          statusEl.className = 'header-status offline';
+          statusEl.style.color = 'var(--red)';
+          
+          sendBtn.disabled = true;
+          return;
+        }
+
+        // ===== TRƯỜNG HỢP 2: CÓ API NHƯNG KHÔNG HỢP LỆ =====
+        if (res.configured && !res.api_valid) {
+          banner.style.display = 'flex';
+          banner.className = 'api-banner error';
+          bannerText.textContent = '❌ API Key không hợp lệ. Vui lòng kiểm tra lại cài đặt.';
+          bannerLink.style.display = isAdmin ? 'inline' : 'none';
+          
+          statusEl.innerHTML = '<span class="offline">●</span> API key không hợp lệ';
+          statusEl.className = 'header-status offline';
+          statusEl.style.color = 'var(--red)';
+          
+          sendBtn.disabled = true;
+          return;
+        }
+
+        // ===== TRƯỜNG HỢP 3: API HỢP LỆ - ĐÃ KẾT NỐI =====
+        if (res.configured && res.api_valid) {
+          banner.style.display = 'none';
+          
+          const displayName = apiName ? ` (${apiName})` : '';
+          statusEl.innerHTML = `<span class="online">●</span> Đã kết nối`;
+          statusEl.className = 'header-status online';
+          statusEl.style.color = 'var(--green)';
+          
+          sendBtn.disabled = false;
+          
+          aiConfigured = true;
+          aiApiValid = true;
+          return;
+        }
+      }
+      
+      // ===== TRƯỜNG HỢP 4: LỖI KẾT NỐI SERVER =====
+      throw new Error('Không thể kết nối server');
+
+    } catch (e) {
+      banner.style.display = 'flex';
+      banner.className = 'api-banner error';
+      bannerText.textContent = '⚠️ Không thể kết nối đến server AI. Vui lòng thử lại sau.';
+      bannerLink.style.display = 'none';
+      
+      statusEl.innerHTML = '<span class="offline">●</span> Không thể kết nối server';
+      statusEl.className = 'header-status offline';
+      statusEl.style.color = 'var(--red)';
+      
+      sendBtn.disabled = true;
+      console.error('Check AI Health error:', e);
+    }
+  }
+
+  // ============================================================
+  // QUẢN LÝ NHIỀU API KEY - ADMIN (CÓ TÊN, ẨN KEY)
+  // ============================================================
+
+  async function loadApiKeys() {
+    try {
+      const res = await API.get('/ai/admin/config');
+      if (res.success) {
+        apiKeysList = res.keys || [];
+        currentApiKey = res.current_key || null;
+        renderApiKeysList();
+        updateApiStatus();
+      }
+    } catch (e) {
+      console.error('Lỗi tải danh sách API:', e);
+    }
+  }
+
+  function renderApiKeysList() {
+    const container = document.getElementById('api-keys-list');
+    const count = document.getElementById('api-count');
+
+    count.textContent = apiKeysList.length + ' key';
+
+    if (apiKeysList.length === 0) {
+      container.innerHTML = `<div style="color: var(--muted); font-size: .82rem; text-align: center; padding: 12px;">Chưa có API Key nào được lưu</div>`;
+      return;
+    }
+
+    container.innerHTML = apiKeysList.map((item) => {
+      const isActive = item.key === currentApiKey;
+      const displayKey = item.masked || '***';
+      const name = item.name || 'API khong ten';
+
+      return `
+        <div style="display: flex; align-items: center; justify-content: space-between; padding: 6px 10px; background: var(--white); border: 1px solid var(--border); border-radius: 6px; margin-bottom: 4px; ${isActive ? 'border-left: 3px solid var(--green);' : ''}">
+          <div style="display: flex; align-items: center; gap: 8px; flex: 1; min-width: 0;">
+            <span style="font-weight: 600; font-size: .82rem; color: var(--text);">${name}</span>
+            <code style="font-size: .7rem; color: var(--muted); background: var(--bg); padding: 1px 8px; border-radius: 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 150px;">${displayKey}</code>
+            ${isActive ? '<span style="font-size: .6rem; color: var(--green); font-weight: 600; background: #dcf5ea; padding: 1px 8px; border-radius: 8px;">Đang dùng</span>' : ''}
+          </div>
+          <div style="display: flex; gap: 4px; flex-shrink: 0;">
+            ${!isActive ? `<button onclick="useApiKey('${item.key}')" style="background: none; border: none; color: var(--accent); cursor: pointer; font-size: .7rem; padding: 2px 6px; border-radius: 4px; transition: all .15s;" onmouseover="this.style.background='#eef0ff'" onmouseout="this.style.background='none'">Dùng</button>` : ''}
+            <button onclick="deleteApiKey('${item.key}')" style="background: none; border: none; color: var(--red); cursor: pointer; font-size: .7rem; padding: 2px 6px; border-radius: 4px; transition: all .15s;" onmouseover="this.style.background='#fde8e8'" onmouseout="this.style.background='none'">Xóa</button>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  function updateApiStatus() {
+    const badge = document.getElementById('api-status-badge');
+    const detail = document.getElementById('api-status-detail');
+
+    if (apiKeysList.length === 0) {
+      badge.textContent = 'Chưa cấu hình';
+      badge.style.background = '#fde8e8';
+      badge.style.color = '#b91c1c';
+      detail.textContent = 'Vui lòng thêm API Key để sử dụng AI.';
+      return;
+    }
+
+    if (currentApiKey) {
+      const name = apiKeysList.find(k => k.key === currentApiKey)?.name || 'API khong ten';
+      badge.textContent = 'Đã kết nối';
+      badge.style.background = '#dcf5ea';
+      badge.style.color = '#1a7a4a';
+      detail.textContent = 'Đang sử dụng: ' + name;
+    } else {
+      badge.textContent = 'Chưa chọn';
+      badge.style.background = '#fef3c7';
+      badge.style.color = '#92400e';
+      detail.textContent = 'Đã có ' + apiKeysList.length + ' key, vui lòng chọn một key để sử dụng.';
+    }
+  }
+
+  async function addApiKey() {
+    const input = document.getElementById('api-key-input');
+    const nameInput = document.getElementById('api-name-input');
+    const apiKey = input.value.trim();
+    const name = nameInput.value.trim() || `API ${new Date().toLocaleTimeString()}`;
+    const statusEl = document.getElementById('api-key-status');
+
+    if (!apiKey) {
+      statusEl.textContent = 'Vui lòng nhập API Key';
+      statusEl.className = 'hint error';
+      return;
+    }
+
+    if (!apiKey.startsWith('sk-or-v1-')) {
+      statusEl.textContent = 'API Key không hợp lệ. Key phải bắt đầu bằng "sk-or-v1-"';
+      statusEl.className = 'hint error';
+      return;
+    }
+
+    statusEl.textContent = 'Đang kiểm tra...';
+    statusEl.className = 'hint';
+
+    const btn = document.getElementById('btn-add-key');
+    btn.disabled = true;
+    btn.textContent = 'Đang thêm...';
+
+    try {
+      const res = await API.post('/ai/admin/config', { api_key: apiKey, name: name });
+      if (res.success) {
+        statusEl.textContent = 'Đã thêm API Key thành công!';
+        statusEl.className = 'hint success';
+        input.value = '';
+        nameInput.value = '';
+        await loadApiKeys();
+        await checkAIHealth();
+        showToast(res.message, 'success');
+      } else {
+        statusEl.textContent = res.message || 'Thêm thất bại';
+        statusEl.className = 'hint error';
+      }
+    } catch (e) {
+      statusEl.textContent = 'Lỗi kết nối đến server';
+      statusEl.className = 'hint error';
+      console.error(e);
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Thêm';
+    }
+  }
+
+  async function useApiKey(key) {
+    try {
+      const res = await API.post('/ai/admin/config/use', { api_key: key });
+      if (res.success) {
+        currentApiKey = key;
+        await loadApiKeys();
+        await checkAIHealth();
+        showToast('Đã chuyển sang API Key mới', 'success');
+      } else {
+        showToast(res.message || 'Chuyển key thất bại', 'error');
+      }
+    } catch (e) {
+      showToast('Lỗi kết nối đến server', 'error');
+      console.error(e);
+    }
+  }
+
+  async function deleteApiKey(key) {
+    if (!confirm('Bạn có chắc muốn xóa API Key này?')) return;
+
+    try {
+      const res = await API.delete('/ai/admin/config', { api_key: key });
+      if (res.success) {
+        await loadApiKeys();
+        await checkAIHealth();
+        showToast('Đã xóa API Key', 'success');
+      } else {
+        showToast(res.message || 'Xóa thất bại', 'error');
+      }
+    } catch (e) {
+      showToast('Lỗi kết nối đến server', 'error');
+      console.error(e);
+    }
+  }
+
+  function openSettingsModal() {
+    if (!isAdmin) {
+      showToast('Chỉ Admin mới có quyền cài đặt API', 'warning');
+      return;
+    }
+    document.getElementById('settings-modal').classList.add('open');
+    document.getElementById('api-key-input').value = '';
+    document.getElementById('api-name-input').value = '';
+    document.getElementById('api-key-status').textContent = '';
+    loadApiKeys();
+  }
+
+  function closeSettingsModal() {
+    document.getElementById('settings-modal').classList.remove('open');
+  }
+
+  // ============================================================
+  // GỬI TIN NHẮN - SỬA LỖI 415 VÀ RATE LIMIT
+  // ============================================================
+  function handleKeyDown(event) {
+    if (event.key === 'Enter' && !event.shiftKey) {
+      event.preventDefault();
+      sendMessage();
+    }
+  }
+
+  function sendSuggestion(text) {
+    document.getElementById('chat-input').value = text;
+    sendMessage();
+  }
+
+  async function sendMessage() {
+    const input = document.getElementById('chat-input');
+    const message = input.value.trim();
+
+    if (!message && uploadedFiles.length === 0) {
+      showToast('Vui lòng nhập câu hỏi hoặc đính kèm file', 'warning');
+      return;
+    }
+
+    if (isProcessing) return;
+
+    // ===== KIỂM TRA TRẠNG THÁI AI =====
+    if (!aiConfigured) {
+      showToast('⚠️ AI chưa được cấu hình. Vui lòng yêu cầu Admin cập nhật API Key.', 'warning');
+      return;
+    }
+
+    if (!aiApiValid) {
+      showToast('❌ API key không hợp lệ. Vui lòng kiểm tra lại cài đặt.', 'error');
+      return;
+    }
+
+    const welcome = document.getElementById('welcome-screen');
+    if (welcome) welcome.style.display = 'none';
+
+    let fullMessage = message;
+    if (uploadedFiles.length > 0) {
+      const fileNames = uploadedFiles.map(f => f.name).join(', ');
+      fullMessage = message ? `${message}\n\n[Đính kèm: ${fileNames}]` : `[Đính kèm: ${fileNames}]`;
+    }
+
+    addMessage('user', fullMessage, uploadedFiles);
+
+    const filesData = [];
+    for (const file of uploadedFiles) {
+      const base64 = await fileToBase64(file);
+      filesData.push({
+        name: file.name,
+        content: base64,
+        size: file.size,
+        type: file.type
+      });
+    }
+
+    input.value = '';
+    input.style.height = 'auto';
+    uploadedFiles = [];
+    document.getElementById('btn-upload').classList.remove('has-file');
+    document.getElementById('btn-upload').title = 'Đính kèm file';
+
+    const typingId = addTypingIndicator();
+
+    isProcessing = true;
+    document.getElementById('send-btn').disabled = true;
+
+    try {
+      const context = currentMessages.map(msg => ({
+        user: msg.role === 'user' ? msg.content : '',
+        assistant: msg.role === 'assistant' ? msg.content : ''
+      }));
+
+      // ===== GỌI API - Content-Type đã được xử lý trong main.js =====
+      const res = await API.post('/ai/chat', {
+        message: message || 'Xem file đính kèm giúp tôi',
+        context: context,
+        files: filesData
+      });
+
+      removeTypingIndicator(typingId);
+
+      if (res.success) {
+        let reply = res.reply;
+        if (res.has_real_data) {
+          const typeMap = {
+            'attendance': 'Điểm danh',
+            'salary': 'Lương',
+            'leave': 'Nghỉ phép',
+            'notification': 'Thông báo',
+            'project': 'Dự án',
+            'employee': 'Nhân sự'
+          };
+          reply = `[${typeMap[res.data_type] || 'Dữ liệu'}]\n\n${reply}`;
+        }
+        addMessage('assistant', reply);
+      } else {
+        // ===== XỬ LÝ LỖI CHI TIẾT =====
+        let errorMsg = res.message || res.reply || 'Có lỗi xảy ra. Vui lòng thử lại sau.';
+        
+        // Nếu lỗi rate limit, hiển thị thông báo thân thiện
+        if (res.error === 'RATE_LIMIT' || errorMsg.includes('Qua nhieu yeu cau')) {
+          errorMsg = '⏳ Hệ thống đang xử lý quá nhiều yêu cầu. Vui lòng đợi 1 phút và thử lại.';
+        } else if (res.error === 'UNAUTHORIZED') {
+          errorMsg = '🔑 API Key không hợp lệ. Vui lòng kiểm tra lại cài đặt.';
+        } else if (res.error === 'TIMEOUT') {
+          errorMsg = '⏰ AI phản hồi quá chậm. Vui lòng thử lại sau.';
+        }
+        
+        addMessage('assistant', '❌ ' + errorMsg);
+      }
+    } catch (error) {
+      removeTypingIndicator(typingId);
+      addMessage('assistant', '❌ Xin lỗi, có lỗi kết nối. Vui lòng thử lại.');
+      console.error('Chat error:', error);
+    }
+
+    isProcessing = false;
+    document.getElementById('send-btn').disabled = false;
+    document.getElementById('chat-input').focus();
+
+    saveCurrentChat();
+  }
+
+  // ============================================================
+  // HÀM HỖ TRỢ
+  // ============================================================
+  function fileToBase64(file) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  }
+
+  // ============================================================
+  // UI HELPERS
+  // ============================================================
+  function getAvatarHTML(role) {
+    if (role === 'user') {
+      if (userAvatar) {
+        return `<img src="${userAvatar}" alt="User" />`;
+      }
+      return `<span class="avatar-placeholder">${currentUser?.name?.charAt(0) || 'U'}</span>`;
+    } else {
+      return `<img src="image/logo_E.png" alt="ChatEMS" />`;
+    }
+  }
+
+  function addMessage(role, content, files) {
+    const container = document.getElementById('chat-messages');
+    const messageDiv = document.createElement('div');
+    messageDiv.className = `chat-message ${role}`;
+
+    const timestamp = new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
+
+    let fileHtml = '';
+    if (files && files.length > 0) {
+      fileHtml = files.map(f => `
+        <div class="file-attachment">
+          <span class="file-icon">📄</span>
+          ${f.name} (${(f.size / 1024).toFixed(1)} KB)
+        </div>
+      `).join('');
+    }
+
+    messageDiv.innerHTML = `
+      <div class="avatar">${getAvatarHTML(role)}</div>
+      <div class="bubble">
+        ${content.replace(/\n/g, '<br>')}
+        ${fileHtml}
+        <span class="timestamp">${timestamp}</span>
+      </div>
+    `;
+
+    container.appendChild(messageDiv);
+    container.scrollTop = container.scrollHeight;
+
+    currentMessages.push({
+      role: role,
+      content: content,
+      files: files || [],
+      timestamp: new Date().toISOString()
+    });
+
+    saveCurrentChat();
+  }
+
+  function addMessageToUI(role, content, files) {
+    const container = document.getElementById('chat-messages');
+    const messageDiv = document.createElement('div');
+    messageDiv.className = `chat-message ${role}`;
+
+    const timestamp = new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
+
+    let fileHtml = '';
+    if (files && files.length > 0) {
+      fileHtml = files.map(f => `
+        <div class="file-attachment">
+          <span class="file-icon">📄</span>
+          ${f.name || 'File'} (${(f.size || 0) / 1024} KB)
+        </div>
+      `).join('');
+    }
+
+    messageDiv.innerHTML = `
+      <div class="avatar">${getAvatarHTML(role)}</div>
+      <div class="bubble">
+        ${content.replace(/\n/g, '<br>')}
+        ${fileHtml}
+        <span class="timestamp">${timestamp}</span>
+      </div>
+    `;
+
+    container.appendChild(messageDiv);
+    container.scrollTop = container.scrollHeight;
+  }
+
+  function addTypingIndicator() {
+    const container = document.getElementById('chat-messages');
+    const id = 'typing-' + Date.now();
+    const div = document.createElement('div');
+    div.className = 'chat-message assistant';
+    div.id = id;
+
+    div.innerHTML = `
+      <div class="avatar"><img src="image/logo_E.png" alt="ChatEMS" /></div>
+      <div class="bubble">
+        <div class="typing-indicator">
+          <span></span><span></span><span></span>
+        </div>
+        <span class="timestamp">Đang suy nghĩ...</span>
+      </div>
+    `;
+
+    container.appendChild(div);
+    container.scrollTop = container.scrollHeight;
+    return id;
+  }
+
+  function removeTypingIndicator(id) {
+    const el = document.getElementById(id);
+    if (el) el.remove();
+  }
+
+  // ============================================================
+  // START
+  // ============================================================
+  document.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>
