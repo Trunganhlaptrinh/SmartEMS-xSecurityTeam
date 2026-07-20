@@ -256,6 +256,11 @@ function renderSidebar(currentPage, user) {
       Dự án
     </a>
 
+    <a class="nav-item ${currentPage === 'contracts' ? 'active' : ''}" href="contracts.html">
+      <span>🔒</span>
+      Hợp đồng
+    </a>
+
     <!-- Task Management - GIỮ NGUYÊN -->
     <a class="nav-item ${currentPage === 'tasks' ? 'active' : ''}" href="tasks.html">
       <span>📋</span>

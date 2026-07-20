@@ -33,6 +33,7 @@ from controller.salary_controller import salary_bp
 from controller.shop_controller import shop_bp
 from controller.notification_controller import notification_bp
 from controller.project_controller import project_bp
+from controller.contract_controller import contract_bp, contract_list_bp
 from controller.otp_controller import otp_bp
 from controller.task_controller import task_bp
 from controller.dashboard_controller import dashboard_bp
@@ -48,6 +49,7 @@ from model.salary import Salary
 from model.shop import ShopItem, ShopTransaction
 from model.notification import Notification
 from model.project import Project, Commit, ProjectFile
+from model.contract import Contract
 from model.otp import OTP
 from model.task import Task
 
@@ -67,24 +69,32 @@ app = Flask(__name__)
 # =====================================
 class Config:
     """Cau hinh ung dung"""
-    
-    # Khoa bi mat - lay tu moi truong hoac dung mac dinh
+
+    # Khoa bi mat - uu tien lay tu bien moi truong SECRET_KEY (khi deploy that),
+    # neu chua set thi tam dung gia tri mac dinh + canh bao de khong quen doi.
     SECRET_KEY = os.environ.get("SECRET_KEY", "employee_mgmt_secret_2025")
-    
+
     # CORS
     CORS_ORIGINS = [
         "http://localhost:5000",
         "http://127.0.0.1:5000",
     ]
-    
+
     # Duong dan
     VIEW_DIR = os.path.join(os.path.dirname(__file__), "view")
     DATA_DIR = os.path.join(os.path.dirname(__file__), "data")
-    
+
     # Che do debug
     DEBUG = os.environ.get("FLASK_ENV") != "production"
 
 app.config.from_object(Config)
+app.secret_key = Config.SECRET_KEY
+
+if not os.environ.get("SECRET_KEY"):
+    print(
+        "[SECURITY] \u26a0\ufe0f  Chua dat bien moi truong SECRET_KEY, dang dung gia tri mac dinh "
+        "(KHONG an toan khi chay that ngoai internet). Nen set: export SECRET_KEY=\"...\""
+    )
 
 # =====================================
 # THIET LAP CORS
@@ -111,11 +121,11 @@ def index():
 @app.route("/<path:filename>")
 def serve_view(filename):
     """Phuc vu cac file tinh trong thu muc view"""
-    
+
     # Ngan chan tan cong duyet thu muc
     if '..' in filename or filename.startswith('/'):
         return jsonify({"error": "Invalid path"}), 400
-    
+
     # Chi cho phep cac loai file nhat dinh
     allowed_extensions = {
         '.html', '.css', '.js', '.png', '.jpg', '.jpeg',
@@ -124,7 +134,7 @@ def serve_view(filename):
     ext = os.path.splitext(filename)[1].lower()
     if ext and ext not in allowed_extensions:
         return jsonify({"error": "File type not allowed"}), 403
-    
+
     return send_from_directory(Config.VIEW_DIR, filename)
 
 # =====================================
@@ -152,6 +162,8 @@ app.register_blueprint(shop_bp, url_prefix="/api/shop")
 app.register_blueprint(notification_bp, url_prefix="/api/notifications")
 app.register_blueprint(project_bp, url_prefix="/api/projects")
 app.register_blueprint(otp_bp, url_prefix="/api/otp")
+app.register_blueprint(contract_bp, url_prefix="/api/projects")
+app.register_blueprint(contract_list_bp, url_prefix="/api/contracts")
 app.register_blueprint(task_bp, url_prefix="/api/tasks")
 app.register_blueprint(dashboard_bp, url_prefix="/api/dashboard")
 app.register_blueprint(ai_bp, url_prefix="/api/ai")
@@ -188,16 +200,20 @@ def sync_id_counters():
         ("projects", Project),
         ("commits", Commit),
         ("project_files", ProjectFile),
+        ("contracts", Contract),
         ("otp_codes", OTP),
         ("tasks", Task)
     ]
-    
+
     for file_name, model in models:
         max_id = FileHelper.get_max_id(file_name)
         model._id_counter = max_id + 1
-    
+
     logger.info("Da dong bo ID counters")
 
+# =====================================
+# CREATE DEFAULT ADMIN
+# =====================================
 def create_default_admin():
     """Tao tai khoan admin mac dinh neu chua co"""
     employees = FileHelper.read_all("employees")
@@ -229,19 +245,19 @@ def init_app():
     logger.info("=" * 60)
     logger.info("Khoi dong SmartEMS Application")
     logger.info("=" * 60)
-    
+
     # Tao thu muc data neu chua co
     os.makedirs(Config.DATA_DIR, exist_ok=True)
-    
+
     # Dong bo ID
     sync_id_counters()
-    
+
     # Tao admin mac dinh
     create_default_admin()
-    
+
     # Kiem tra cau hinh AI
     check_ai_configuration()
-    
+
     logger.info("=" * 60)
     logger.info("Ung dung da san sang")
     logger.info("Dia chi: http://localhost:5000")

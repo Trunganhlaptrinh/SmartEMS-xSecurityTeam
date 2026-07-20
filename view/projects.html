@@ -514,6 +514,17 @@
           <div class="empty-state" style="padding:20px;"><p>Chưa có commit nào</p></div>
         </div>
       </div>
+
+      <!-- Hợp đồng dự án: chỉ admin và người được admin chỉ định mới thấy mục này -->
+      <div style="border-top:1px solid var(--border);padding-top:12px;margin-top:8px;" id="contract-section">
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:8px;">
+          <h3 style="font-size:.95rem;margin:0;">🔒 Hợp đồng dự án</h3>
+          <button class="btn btn-primary" id="add-contract-btn" style="display:none;" onclick="openAddContractModal()">+ Thêm hợp đồng</button>
+        </div>
+        <div id="detail-contracts" class="contract-list" style="max-height:260px;overflow-y:auto;">
+          <div class="empty-state" style="padding:10px;"><p>Chưa có hợp đồng nào</p></div>
+        </div>
+      </div>
       
       <div style="margin-top:12px;border-top:1px solid var(--border);padding-top:12px;display:flex;gap:8px;flex-wrap:wrap;">
         <button class="btn btn-primary" id="detail-commit-btn" onclick="openCommitModal(currentProjectId)">+ Gửi commit</button>
@@ -596,6 +607,43 @@
   </div>
 </div>
 
+<!-- MODAL THÊM/SỬA HỢP ĐỒNG (Admin) -->
+<div class="modal-overlay" id="contract-modal">
+  <div class="modal modal-project">
+    <div class="modal-header">
+      <h2 id="contract-modal-title">Thêm hợp đồng</h2>
+      <button class="modal-close" onclick="closeModal('contract-modal')">✕</button>
+    </div>
+    <input type="hidden" id="edit-contract-id" value="" />
+    <input type="hidden" id="contract-project-id" value="" />
+
+    <div class="form-group">
+      <label>Tên hợp đồng *</label>
+      <input type="text" id="contract-title" placeholder="Nhập tên hợp đồng..." />
+    </div>
+    <div class="form-group">
+      <label>Mô tả / điều khoản</label>
+      <textarea id="contract-desc" placeholder="Nội dung, điều khoản hợp đồng..."></textarea>
+    </div>
+    <div class="form-group">
+      <label>File hợp đồng đính kèm</label>
+      <input type="file" id="contract-file-input" />
+      <span id="contract-file-current" style="font-size:.72rem;color:var(--muted);"></span>
+    </div>
+    <div class="form-group">
+      <label>Người được xem hợp đồng này (chỉ định) *</label>
+      <select id="contract-viewers" multiple style="height:100px;">
+      </select>
+      <span style="font-size:.72rem;color:var(--muted);">Giữ Ctrl/Cmd để chọn nhiều. Ngoài admin, chỉ những người được chọn ở đây mới xem được hợp đồng.</span>
+    </div>
+
+    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:8px;">
+      <button class="btn btn-ghost" onclick="closeModal('contract-modal')">Hủy</button>
+      <button class="btn btn-primary" onclick="saveContract()">Lưu</button>
+    </div>
+  </div>
+</div>
+
 <div id="toast"></div>
 <script src="main.js"></script>
 <script>
@@ -605,6 +653,8 @@
   let allEmployees = [];
   let currentProjectId = null;
   let commitFiles = [];
+  let currentContracts = [];
+  let contractFile = null; // { name, content(base64) } file mới chọn khi thêm/sửa hợp đồng
 
   async function init() {
     currentUser = await requireLogin();
@@ -651,6 +701,18 @@
       option.textContent = `${emp.name} (${emp.department || 'Chưa có phòng ban'})`;
       select.appendChild(option);
     });
+
+    // select người được chỉ định xem hợp đồng (dùng chung danh sách nhân viên)
+    const viewerSelect = document.getElementById("contract-viewers");
+    if (viewerSelect) {
+      viewerSelect.innerHTML = '';
+      allEmployees.forEach(emp => {
+        const option = document.createElement("option");
+        option.value = emp.id;
+        option.textContent = `${emp.name} (${emp.department || 'Chưa có phòng ban'})`;
+        viewerSelect.appendChild(option);
+      });
+    }
   }
 
   async function loadProjects() {
@@ -749,9 +811,12 @@
     const canCommit = isAdmin || isMember || isOwner;
     document.getElementById("detail-commit-btn").style.display = canCommit ? 'inline-flex' : 'none';
 
+    document.getElementById("add-contract-btn").style.display = isAdmin ? 'inline-flex' : 'none';
+
     await Promise.all([
       loadCommits(projectId),
-      loadFiles(projectId)
+      loadFiles(projectId),
+      loadContracts(projectId)
     ]);
     openModal("detail-modal");
   }
@@ -1015,6 +1080,200 @@
         loadFiles(currentProjectId)
       ]);
     }
+  }
+
+  // ===== HỢP ĐỒNG DỰ ÁN =====
+  // Chỉ admin và người được admin chỉ định (allowed_viewers) mới thấy được hợp đồng.
+  // Nếu server trả 403/không có quyền, ẩn hẳn mục này thay vì báo lỗi.
+  async function loadContracts(projectId) {
+    const res = await API.get(`/projects/${projectId}/contracts`);
+    const container = document.getElementById("detail-contracts");
+    const section = document.getElementById("contract-section");
+
+    if (!res.success) {
+      // người dùng không có quyền xem mục hợp đồng -> ẩn cả khối, không cần hiện lỗi
+      currentContracts = [];
+      section.style.display = isAdmin ? 'block' : 'none';
+      container.innerHTML = `<div class="empty-state" style="padding:10px;"><p>${res.message || 'Không tải được'}</p></div>`;
+      return;
+    }
+
+    section.style.display = 'block';
+    currentContracts = res.data || [];
+
+    if (currentContracts.length === 0) {
+      container.innerHTML = `<div class="empty-state" style="padding:10px;"><p>Chưa có hợp đồng nào</p></div>`;
+      return;
+    }
+
+    const empMap = {};
+    allEmployees.forEach(e => empMap[e.id] = e.name);
+
+    container.innerHTML = currentContracts.map(contract => {
+      const viewerNames = (contract.allowed_viewers || [])
+        .map(id => empMap[id] || `ID ${id}`)
+        .join(', ') || 'Chưa chỉ định ai';
+
+      let actions = `<span class="download-link" onclick="downloadContract(${contract.id})" title="Tải file hợp đồng">📥 Tải file</span>`;
+      if (isAdmin) {
+        actions += `
+          <span class="edit-btn" onclick="openEditContractModal(${contract.id})">Sửa</span>
+          <span class="del-btn" onclick="deleteContract(${contract.id})">Xóa</span>
+        `;
+      }
+
+      return `
+        <div class="contract-item">
+          <div class="contract-head">
+            <span class="contract-title">${contract.title}</span>
+          </div>
+          <div class="contract-desc">${contract.description || 'Không có mô tả'}</div>
+          <div class="contract-meta">
+            <span>Tạo bởi: ${contract.created_by_name}</span>
+            <span>${contract.created_at || ''}</span>
+            ${isAdmin ? `<span>Người được xem: ${viewerNames}</span>` : ''}
+          </div>
+          <div class="contract-actions" style="margin-top:6px;">${actions}</div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  // ===== TẢI FILE HỢP ĐỒNG =====
+  async function downloadContract(contractId) {
+    try {
+      const res = await fetch(`/api/projects/${currentProjectId}/contracts/${contractId}/download`, {
+        credentials: 'include'
+      });
+
+      if (!res.ok) {
+        const error = await res.json();
+        showToast(error.message || 'Lỗi tải hợp đồng', 'error');
+        return;
+      }
+
+      const blob = await res.blob();
+      const contentDisposition = res.headers.get('content-disposition');
+      let filename = 'hop_dong';
+      if (contentDisposition) {
+        const match = contentDisposition.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/);
+        if (match && match[1]) {
+          filename = match[1].replace(/['"]/g, '');
+        }
+      }
+
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error('Download contract error:', err);
+      showToast('Lỗi tải hợp đồng: ' + err.message, 'error');
+    }
+  }
+
+  // ===== ADMIN: THÊM/SỬA HỢP ĐỒNG =====
+  function openAddContractModal() {
+    document.getElementById("contract-modal-title").textContent = "Thêm hợp đồng";
+    document.getElementById("edit-contract-id").value = "";
+    document.getElementById("contract-project-id").value = currentProjectId;
+    document.getElementById("contract-title").value = "";
+    document.getElementById("contract-desc").value = "";
+    document.getElementById("contract-file-input").value = "";
+    document.getElementById("contract-file-current").textContent = "";
+    document.getElementById("contract-viewers").selectedIndex = -1;
+    contractFile = null;
+    openModal("contract-modal");
+  }
+
+  function openEditContractModal(contractId) {
+    const contract = currentContracts.find(c => c.id === contractId);
+    if (!contract) {
+      showToast("Không tìm thấy hợp đồng", "error");
+      return;
+    }
+
+    document.getElementById("contract-modal-title").textContent = "Sửa hợp đồng";
+    document.getElementById("edit-contract-id").value = contract.id;
+    document.getElementById("contract-project-id").value = currentProjectId;
+    document.getElementById("contract-title").value = contract.title;
+    document.getElementById("contract-desc").value = contract.description || "";
+    document.getElementById("contract-file-input").value = "";
+    document.getElementById("contract-file-current").textContent = contract.file_name
+      ? `File hiện tại: ${contract.file_name} (chọn file mới nếu muốn thay thế)`
+      : "Chưa có file đính kèm";
+    contractFile = null;
+
+    const select = document.getElementById("contract-viewers");
+    for (let i = 0; i < select.options.length; i++) {
+      select.options[i].selected = contract.allowed_viewers &&
+        contract.allowed_viewers.includes(parseInt(select.options[i].value));
+    }
+    openModal("contract-modal");
+  }
+
+  async function saveContract() {
+    const id = document.getElementById("edit-contract-id").value;
+    const projectId = document.getElementById("contract-project-id").value;
+    const title = document.getElementById("contract-title").value.trim();
+    const description = document.getElementById("contract-desc").value.trim();
+    const select = document.getElementById("contract-viewers");
+    const allowed_viewers = Array.from(select.selectedOptions).map(opt => parseInt(opt.value));
+
+    if (!title) {
+      showToast("Vui lòng nhập tên hợp đồng", "error");
+      return;
+    }
+
+    const fileInput = document.getElementById("contract-file-input");
+    const doSave = async () => {
+      const data = {
+        title,
+        description,
+        allowed_viewers,
+        file_name: contractFile ? contractFile.name : "",
+        file_content: contractFile ? contractFile.content : ""
+      };
+
+      let res;
+      if (id) {
+        res = await API.put(`/projects/${projectId}/contracts/${id}`, data);
+      } else {
+        res = await API.post(`/projects/${projectId}/contracts`, data);
+      }
+
+      showToast(res.message, res.success ? "success" : "error");
+      if (res.success) {
+        closeModal("contract-modal");
+        await loadContracts(projectId);
+      }
+    };
+
+    // nếu người dùng chọn file mới -> đọc base64 trước khi gửi
+    if (fileInput.files && fileInput.files[0]) {
+      const file = fileInput.files[0];
+      const reader = new FileReader();
+      reader.onload = async function (e) {
+        contractFile = { name: file.name, content: e.target.result };
+        await doSave();
+      };
+      reader.readAsDataURL(file);
+    } else {
+      await doSave();
+    }
+  }
+
+  async function deleteContract(contractId) {
+    const contract = currentContracts.find(c => c.id === contractId);
+    if (!confirm(`Xóa hợp đồng "${contract?.title}"?`)) return;
+
+    const res = await API.delete(`/projects/${currentProjectId}/contracts/${contractId}`);
+    showToast(res.message, res.success ? "success" : "error");
+    if (res.success) await loadContracts(currentProjectId);
   }
 
   // ===== ADMIN: QUẢN LÝ DỰ ÁN =====

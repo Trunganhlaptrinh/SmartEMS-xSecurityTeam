@@ -12,5 +12,47 @@
     "due_date": "2026-07-25",
     "created_at": "2026-07-19 10:55:44",
     "updated_at": "2026-07-20 12:23:23"
+  },
+  {
+    "id": 3,
+    "title": "Thiết kế phân hệ Security Dashboard và tích hợp Wazuh",
+    "description": "Xây dựng giao diện Security Dashboard và thực hiện tích hợp hệ thống Wazuh theo yêu cầu của hợp đồng.",
+    "assignee_id": 6,
+    "assignee_name": "Trung Anh",
+    "creator_id": 1,
+    "creator_name": "Admin TrungAnh",
+    "status": "todo",
+    "priority": "medium",
+    "due_date": "2026-07-25",
+    "created_at": "2026-07-20 14:31:22",
+    "updated_at": "2026-07-20 14:31:22"
+  },
+  {
+    "id": 4,
+    "title": "Xây dựng module Quản lý đơn hàng và Quản lý kho",
+    "description": "Phát triển các tính năng cốt lõi cho module Quản lý đơn hàng và Quản lý kho trong hệ thống logistics.",
+    "assignee_id": 11,
+    "assignee_name": "Admin Test",
+    "creator_id": 1,
+    "creator_name": "Admin TrungAnh",
+    "status": "todo",
+    "priority": "high",
+    "due_date": "2026-07-28",
+    "created_at": "2026-07-20 14:31:53",
+    "updated_at": "2026-07-20 14:31:53"
+  },
+  {
+    "id": 5,
+    "title": "Phát triển phân hệ Payroll Management và tính lương tự động",
+    "description": "Hoàn thiện phân hệ quản lý lương (Payroll Management) phục vụ công tác vận hành nhân sự cho doanh nghiệp.",
+    "assignee_id": 16,
+    "assignee_name": "hieu",
+    "creator_id": 1,
+    "creator_name": "Admin TrungAnh",
+    "status": "todo",
+    "priority": "low",
+    "due_date": "2026-07-31",
+    "created_at": "2026-07-20 14:32:21",
+    "updated_at": "2026-07-20 14:32:21"
   }
 ]
