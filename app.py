@@ -26,6 +26,31 @@ from util.auth_helper import AuthHelper
 app = Flask(__name__)
 app.secret_key = "employee_mgmt_secret_2025"
 
+# === CẤU HÌNH LOGGING CHO WAZUH ===
+import logging
+from logging.handlers import RotatingFileHandler
+
+LOG_DIR = os.path.join(os.path.dirname(__file__), "logs")
+os.makedirs(LOG_DIR, exist_ok=True)
+
+class ClientIPFilter(logging.Filter):
+    def filter(self, record):
+        from flask import has_request_context, request
+        if has_request_context():
+            record.client_ip = request.headers.get('X-Forwarded-For', request.remote_addr)
+        else:
+            record.client_ip = '127.0.0.1'
+        return True
+
+log_format = logging.Formatter('%(asctime)s [%(levelname)s] CLIENT_IP:%(client_ip)s - %(message)s')
+file_handler = RotatingFileHandler(os.path.join(LOG_DIR, "app.log"), maxBytes=10*1024*1024, backupCount=5)
+file_handler.setFormatter(log_format)
+file_handler.setLevel(logging.INFO)
+file_handler.addFilter(ClientIPFilter())
+
+app.logger.addHandler(file_handler)
+app.logger.setLevel(logging.INFO)
+
 VIEW_DIR = os.path.join(os.path.dirname(__file__), "view")
 
 CORS(app, supports_credentials=True)

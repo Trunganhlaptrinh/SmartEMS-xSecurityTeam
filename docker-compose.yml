@@ -1,0 +1,14 @@
+version: '3.8'
+
+services:
+  smartems:
+    build: .
+    container_name: smartems-app
+    ports:
+      - "5000:5000"
+    volumes:
+      # Ánh xạ thư mục chứa database JSON để tránh mất dữ liệu khi restart container
+      - ./data:/app/data
+      # Ánh xạ thư mục chứa logs ra ngoài máy host Ubuntu để Wazuh Agent đọc log
+      - ./logs:/app/logs
+    restart: always

@@ -2,7 +2,7 @@
 # controller: xử lý logic đăng nhập, đăng xuất, quản lý nhân viên
 # tương tự StudentManagement.java — nhưng trả về JSON thay vì in ra console
 
-from flask import Blueprint, request, jsonify, session
+from flask import Blueprint, request, jsonify, session, current_app
 from model.employee   import Employee
 from util.file_helper import FileHelper
 from util.auth_helper import AuthHelper
@@ -37,6 +37,7 @@ def login():
 
     # kiểm tra tồn tại và mật khẩu
     if not found or not AuthHelper.check_password(password, found["password_hash"]):
+        current_app.logger.warning(f"Failed login attempt for username: {username}")
         return jsonify({"success": False, "message": "Sai username hoặc mật khẩu"}), 401
 
     # lưu thông tin vào session (giữ đăng nhập)
