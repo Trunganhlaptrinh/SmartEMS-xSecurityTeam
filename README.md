@@ -122,3 +122,19 @@ Nhấn `Ctrl + C` trong terminal.
 
 
 Trải nghiệm vui vẻ :D
+
+## Review
+
+### Điểm danh nè
+<img width="1637" height="904" alt="Image" src="https://github.com/user-attachments/assets/db64d368-d6c5-40d3-9652-8ac5f03d8aef" />
+
+
+### lương thưởng
+<img width="1920" height="963" alt="Image" src="https://github.com/user-attachments/assets/59074b5c-5b07-4c41-beeb-d7a4c4a36100" />
+
+### Quản lí dự án
+<img width="1640" height="911" alt="Image" src="https://github.com/user-attachments/assets/f104816c-61ce-4936-b0c6-8be7fea12fa9" />
+
+
+### AI riêng cho nội bộ 
+<img width="1465" height="907" alt="Image" src="https://github.com/user-attachments/assets/b2b95234-5758-4011-aff9-37fbdaa7ab75" />
