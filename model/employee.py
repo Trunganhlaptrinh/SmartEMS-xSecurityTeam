@@ -1,23 +1,26 @@
 # model/employee.py
-# model: lưu trữ thông tin nhân viên
+# model: lưu trữ thông tin nhân viên (thuộc tính, constructor, getter/setter)
 
 class Employee:
+    # Biến class dùng để tự tăng ID
     _id_counter = 1
 
     def __init__(self, username: str, password_hash: str, name: str, role: str, department: str, base_salary: float):
         self.id = Employee._id_counter
         Employee._id_counter += 1
 
-        self.username = username
-        self.password_hash = password_hash
-        self.name = name
-        self.role = role
-        self.department = department
-        self.base_salary = base_salary
-        # Thêm trường mới cho khóa tài khoản
-        self.login_attempts = 0          # Số lần đăng nhập sai
-        self.is_locked = False           # Trạng thái khóa tài khoản
+        self.username = username          # tài khoản đăng nhập
+        self.password_hash = password_hash # mật khẩu đã hash
+        self.name = name                  # tên hiển thị
+        self.role = role                  # "admin" hoặc "employee"
+        self.department = department      # phòng ban
+        self.base_salary = base_salary    # lương cơ bản
 
+        # Trường phục vụ tính năng khóa tài khoản khi đăng nhập sai
+        self.login_attempts = 0           # Số lần đăng nhập sai
+        self.is_locked = False            # Trạng thái khóa tài khoản
+
+    # Chuyển object -> dict để lưu vào JSON
     def to_dict(self) -> dict:
         return {
             "id": self.id,
@@ -31,6 +34,7 @@ class Employee:
             "is_locked": self.is_locked
         }
 
+    # Chuyển dict -> object khi đọc từ JSON
     @staticmethod
     def from_dict(data: dict) -> "Employee":
         emp = Employee.__new__(Employee)
@@ -45,6 +49,7 @@ class Employee:
         emp.is_locked = data.get("is_locked", False)
         return emp
 
+    # --- Getter / Setter ---
     def get_id(self): return self.id
     def get_username(self): return self.username
     def get_name(self): return self.name
@@ -57,7 +62,7 @@ class Employee:
     def set_base_salary(self, salary): self.base_salary = salary
     def set_password_hash(self, ph): self.password_hash = ph
     
-    # Thêm phương thức mới
+    # --- Phương thức hỗ trợ khóa/mở khóa tài khoản ---
     def reset_login_attempts(self):
         """Reset số lần đăng nhập sai về 0"""
         self.login_attempts = 0

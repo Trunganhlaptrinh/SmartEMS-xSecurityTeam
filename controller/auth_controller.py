@@ -1,13 +1,14 @@
 # controller/auth_controller.py
 # controller: xử lý logic đăng nhập, đăng xuất, quản lý nhân viên
 
-from flask import Blueprint, request, jsonify, session
+import random
+from flask import Blueprint, request, jsonify, session, current_app
 from model.employee import Employee
+from model.otp import OTP
 from util.file_helper import FileHelper
 from util.auth_helper import AuthHelper
 from util.validation import Validation
 from util.email_helper import EmailHelper
-import re
 
 auth_bp = Blueprint("auth", __name__)
 
@@ -39,6 +40,7 @@ def login():
             break
 
     if not found:
+        current_app.logger.warning(f"Failed login attempt for non-existent username: {username}")
         return jsonify({"success": False, "message": "Sai tên đăng nhập hoặc mật khẩu"}), 401
 
     # ============================================================
@@ -53,10 +55,8 @@ def login():
     # ============================================================
     # KIỂM TRA MẬT KHẨU
     # ============================================================
-        # ============================================================
-    # KIỂM TRA MẬT KHẨU
-    # ============================================================
     if not AuthHelper.check_password(password, found["password_hash"]):
+        current_app.logger.warning(f"Failed login attempt (wrong password) for username: {username}")
         # Tăng số lần đăng nhập sai
         login_attempts = found.get("login_attempts", 0) + 1
         employees[found_index]["login_attempts"] = login_attempts
@@ -74,11 +74,13 @@ def login():
         remaining = MAX_LOGIN_ATTEMPTS - login_attempts
         if remaining < 0:
             remaining = 0
-        # Thông báo riêng cho admin
+        
+        # Thông báo số lần còn lại
         if found["role"] == "admin":
             message = f"Sai tên đăng nhập hoặc mật khẩu. Còn {remaining} lần thử."
         else:
             message = f"Sai tên đăng nhập hoặc mật khẩu. Còn {remaining} lần thử trước khi tài khoản bị khóa."
+            
         return jsonify({
             "success": False, 
             "message": message
@@ -112,7 +114,6 @@ def login():
 
     # User Gmail -> Gửi OTP
     if "@gmail.com" in username.lower():
-        # Kiểm tra có bot đang hoạt động không
         if not EmailHelper.has_active_bot():
             return jsonify({
                 "success": False,
@@ -121,8 +122,6 @@ def login():
         
         session["pending_employee_id"] = found["id"]
         session["pending_employee_index"] = found_index
-        
-        from model.otp import OTP
         
         email = username
         
@@ -134,19 +133,13 @@ def login():
         otp = OTP(employee_id=found["id"], email=email)
         FileHelper.append_item("otp_codes", otp.to_dict())
         
-        print(f"Gửi OTP đến {email} cho {found['name']}")
         email_sent = EmailHelper.send_otp_email(email, otp.code, found["name"])
         
         if not email_sent:
             return jsonify({
-                "success": True,
-                "message": f"Không thể gửi email. Mã OTP: {otp.code} (chỉ debug)",
-                "require_otp": True,
-                "employee_id": found["id"],
-                "email": email,
-                "expires_in": 300,
-                "debug_code": otp.code
-            })
+                "success": False,
+                "message": "Không thể gửi mã OTP qua email. Vui lòng thử lại sau hoặc liên hệ Admin."
+            }), 500
         
         return jsonify({
             "success": True,
@@ -209,10 +202,7 @@ def get_employees():
         return jsonify({"success": False, "message": "Không có quyền"}), 403
 
     employees = FileHelper.read_all("employees")
-    safe = []
-    for e in employees:
-        safe_e = {k: v for k, v in e.items() if k != "password_hash"}
-        safe.append(safe_e)
+    safe = [{k: v for k, v in e.items() if k != "password_hash"} for e in employees]
     return jsonify({"success": True, "data": safe})
 
 
@@ -530,14 +520,12 @@ def get_email_bots():
         return jsonify({"success": False, "message": "Không có quyền"}), 403
 
     bots = EmailHelper.get_bots()
-    safe_bots = []
-    for bot in bots:
-        safe_bots.append({
-            "sender": bot.get("sender", ""),
-            "name": bot.get("name", ""),
-            "is_active": bot.get("is_active", True),
-            "created_at": bot.get("created_at", "")
-        })
+    safe_bots = [{
+        "sender": bot.get("sender", ""),
+        "name": bot.get("name", ""),
+        "is_active": bot.get("is_active", True),
+        "created_at": bot.get("created_at", "")
+    } for bot in bots]
     
     return jsonify({
         "success": True,
@@ -572,8 +560,7 @@ def add_email_bot():
     
     if success:
         return jsonify({"success": True, "message": f"Đã thêm email bot: {sender}"})
-    else:
-        return jsonify({"success": False, "message": "Lỗi lưu cấu hình"}), 500
+    return jsonify({"success": False, "message": "Lỗi lưu cấu hình"}), 500
 
 
 @auth_bp.route("/email-bots/<path:sender>", methods=["PUT"])
@@ -587,13 +574,7 @@ def update_email_bot(sender):
     is_active = data.get("is_active", None)
 
     bots = EmailHelper.get_bots()
-    bot_exists = False
-    for bot in bots:
-        if bot["sender"] == sender:
-            bot_exists = True
-            break
-    
-    if not bot_exists:
+    if not any(bot["sender"] == sender for bot in bots):
         return jsonify({"success": False, "message": "Không tìm thấy email bot"}), 404
 
     if password is not None and not password:
@@ -603,8 +584,7 @@ def update_email_bot(sender):
     
     if success:
         return jsonify({"success": True, "message": f"Đã cập nhật email bot: {sender}"})
-    else:
-        return jsonify({"success": False, "message": "Lỗi lưu cấu hình"}), 500
+    return jsonify({"success": False, "message": "Lỗi lưu cấu hình"}), 500
 
 
 @auth_bp.route("/email-bots/<path:sender>", methods=["DELETE"])
@@ -613,21 +593,14 @@ def delete_email_bot(sender):
         return jsonify({"success": False, "message": "Không có quyền"}), 403
 
     bots = EmailHelper.get_bots()
-    bot_exists = False
-    for bot in bots:
-        if bot["sender"] == sender:
-            bot_exists = True
-            break
-    
-    if not bot_exists:
+    if not any(bot["sender"] == sender for bot in bots):
         return jsonify({"success": False, "message": "Không tìm thấy email bot"}), 404
 
     success = EmailHelper.delete_bot(sender)
     
     if success:
         return jsonify({"success": True, "message": f"Đã xóa email bot: {sender}"})
-    else:
-        return jsonify({"success": False, "message": "Lỗi xóa cấu hình"}), 500
+    return jsonify({"success": False, "message": "Lỗi xóa cấu hình"}), 500
 
 
 @auth_bp.route("/email-bots/test", methods=["POST"])
@@ -638,16 +611,12 @@ def test_email_bot():
     data = request.get_json()
     test_email = data.get("test_email", "").strip()
     
-    if not test_email:
-        return jsonify({"success": False, "message": "Vui lòng nhập email test"}), 400
-    if "@" not in test_email:
+    if not test_email or "@" not in test_email:
         return jsonify({"success": False, "message": "Email không hợp lệ"}), 400
 
-    import random
     test_code = str(random.randint(100000, 999999))
     success = EmailHelper.send_otp_email(test_email, test_code, "Admin Test")
     
     if success:
         return jsonify({"success": True, "message": f"Đã gửi email test đến {test_email}"})
-    else:
-        return jsonify({"success": False, "message": "Gửi email test thất bại. Vui lòng kiểm tra cấu hình bot."}), 500
+    return jsonify({"success": False, "message": "Gửi email test thất bại. Vui lòng kiểm tra cấu hình bot."}), 500

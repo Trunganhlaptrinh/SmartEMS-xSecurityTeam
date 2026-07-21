@@ -64,27 +64,41 @@ from util.auth_helper import AuthHelper
 # =====================================
 app = Flask(__name__)
 
-# =====================================
-# CAU HINH UNG DUNG
-# =====================================
+# 1. Cấu hình Logging cho Wazuh (giữ lại từ nhánh HEAD của bạn)
+import logging
+from logging.handlers import RotatingFileHandler
+
+LOG_DIR = os.path.join(os.path.dirname(__file__), "logs")
+os.makedirs(LOG_DIR, exist_ok=True)
+
+class ClientIPFilter(logging.Filter):
+    def filter(self, record):
+        from flask import has_request_context, request
+        if has_request_context():
+            record.client_ip = request.headers.get('X-Forwarded-For', request.remote_addr)
+        else:
+            record.client_ip = '127.0.0.1'
+        return True
+
+log_format = logging.Formatter('%(asctime)s [%(levelname)s] CLIENT_IP:%(client_ip)s - %(message)s')
+file_handler = RotatingFileHandler(os.path.join(LOG_DIR, "app.log"), maxBytes=10*1024*1024, backupCount=5)
+file_handler.setFormatter(log_format)
+file_handler.setLevel(logging.INFO)
+file_handler.addFilter(ClientIPFilter())
+
+app.logger.addHandler(file_handler)
+app.logger.setLevel(logging.INFO)
+
+# 2. Cấu hình Config (giữ lại từ nhánh main)
 class Config:
     """Cau hinh ung dung"""
-
-    # Khoa bi mat - uu tien lay tu bien moi truong SECRET_KEY (khi deploy that),
-    # neu chua set thi tam dung gia tri mac dinh + canh bao de khong quen doi.
     SECRET_KEY = os.environ.get("SECRET_KEY", "employee_mgmt_secret_2025")
-
-    # CORS
     CORS_ORIGINS = [
         "http://localhost:5000",
         "http://127.0.0.1:5000",
     ]
-
-    # Duong dan
     VIEW_DIR = os.path.join(os.path.dirname(__file__), "view")
     DATA_DIR = os.path.join(os.path.dirname(__file__), "data")
-
-    # Che do debug
     DEBUG = os.environ.get("FLASK_ENV") != "production"
 
 app.config.from_object(Config)
